@@ -5,10 +5,12 @@ import {
 } from "../schemas/subscription.schema.ts";
 import type { FastifyInstance } from "fastify";
 import { subscriptionService } from "../services/subscription.service.ts";
+import { paginationSchema } from "../../common/pagination.schema.ts";
 
 export async function subcriptionRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
-    const subscriptions = await subscriptionService.findAll();
+    const paginationInput = paginationSchema.parse(request.query);
+    const subscriptions = await subscriptionService.findAll(paginationInput);
     return reply.status(200).send(subscriptions);
   });
 

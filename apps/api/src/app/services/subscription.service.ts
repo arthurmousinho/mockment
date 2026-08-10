@@ -13,6 +13,11 @@ import { virtualClockService } from "./virtual-clock.service.ts";
 import { addDays, addMonths, addWeeks, addYears } from "date-fns";
 import { paymentService } from "./payment.service.ts";
 import { checkoutService } from "./checkout.service.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+} from "../../common/utils.ts";
 
 function calculateNextBillingDate(
   currentDate: Date,
@@ -66,9 +71,21 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
   };
 }
 
-async function findAll() {
-  return await prismaSingleton.subscription.findMany({
-    orderBy: { createdAt: "desc" },
+async function findAll(paginationInput: PaginationInput) {
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [subscriptions, total] = await Promise.all([
+    prismaSingleton.subscription.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.subscription.count(),
+  ]);
+  return buildPaginatedResponse({
+    data: subscriptions,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
   });
 }
 
