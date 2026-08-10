@@ -6,6 +6,11 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../../common/http-error.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+} from "../../common/utils.ts";
 
 function generateKeyPair() {
   const rawKey = `sk_live_${crypto.randomBytes(32).toString("hex")}`;
@@ -30,12 +35,23 @@ async function create(input: CreateApiKeyInput) {
   };
 }
 
-async function findAll() {
-  const apiKeys = await prismaSingleton.apiKey.findMany({
-    omit: { keyHash: true },
-    orderBy: { createdAt: "desc" },
+async function findAll(paginationInput: PaginationInput) {
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [apiKeys, total] = await Promise.all([
+    prismaSingleton.apiKey.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      omit: { keyHash: true },
+    }),
+    prismaSingleton.apiKey.count(),
+  ]);
+  return buildPaginatedResponse({
+    data: apiKeys,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
   });
-  return apiKeys;
 }
 
 async function findById(id: string) {

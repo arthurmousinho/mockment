@@ -1,10 +1,12 @@
+import { paginationSchema } from "../../common/pagination.schema.ts";
 import { createApiKeySchema } from "../schemas/api-key.schema.ts";
 import { apiKeyService } from "../services/api-key.service.ts";
 import type { FastifyInstance } from "fastify";
 
 export async function apiKeyRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
-    const apiKeys = await apiKeyService.findAll();
+    const paginationInput = paginationSchema.parse(request.query);
+    const apiKeys = await apiKeyService.findAll(paginationInput);
     return reply.status(200).send(apiKeys);
   });
 
