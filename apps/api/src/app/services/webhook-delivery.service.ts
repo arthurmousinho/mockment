@@ -6,13 +6,30 @@ import type {
   WebhookEndpoint,
 } from "../../../generated/prisma/client.ts";
 import { webhookEndpointService } from "./webhook-endpoint.service.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+} from "../../common/utils.ts";
 
-async function findAll() {
-  return await prismaSingleton.webhookDelivery.findMany({
-    include: {
-      endpoint: { select: { url: true } },
-    },
-    orderBy: { deliveredAt: "desc" },
+async function findAll(paginationInput: PaginationInput) {
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [deliveries, total] = await Promise.all([
+    prismaSingleton.webhookDelivery.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      include: {
+        endpoint: { select: { url: true } },
+      },
+    }),
+    prismaSingleton.webhookDelivery.count(),
+  ]);
+  return buildPaginatedResponse({
+    data: deliveries,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
   });
 }
 
