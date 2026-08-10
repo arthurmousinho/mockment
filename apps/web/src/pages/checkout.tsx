@@ -1,5 +1,9 @@
 import { useParams } from "react-router-dom";
-import { GetCheckoutDetailsRequest } from "@/http/checkout-http";
+import {
+  CompleteCheckoutRequest,
+  GetCheckoutDetailsRequest,
+  type CheckoutCompletionStatus,
+} from "@/http/checkout-http";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -9,7 +13,6 @@ import {
   CreditCardIcon,
   QrCodeIcon,
   BarcodeIcon,
-  SpinnerGapIcon,
   CheckCircleIcon,
   XCircleIcon,
   ProhibitIcon,
@@ -19,14 +22,6 @@ import { DetailRow } from "@/components/ui/detail-row";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { Logo } from "@/components/logo";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
-import { canChangePaymentStatus } from "@/lib/utils";
-import {
-  ApprovePaymentRequest,
-  CancelPaymentRequest,
-  DeclinePaymentRequest,
-  ProcessPaymentRequest,
-  type PaymentStatus,
-} from "@/http/payments-http";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 
@@ -39,14 +34,8 @@ const paymentMethodTabs = [
 export function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isPending, isError, refetch } = GetCheckoutDetailsRequest(id!);
-  const { mutate: proccessRequest, isPending: isProcessing } =
-    ProcessPaymentRequest();
-  const { mutate: approveRequest, isPending: isApproving } =
-    ApprovePaymentRequest();
-  const { mutate: declineRequest, isPending: isDeclining } =
-    DeclinePaymentRequest();
-  const { mutate: cancelRequest, isPending: isCanceling } =
-    CancelPaymentRequest();
+  const { mutate: completeReqeust, isPending: isCompleting } =
+    CompleteCheckoutRequest(id ?? "");
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -62,34 +51,20 @@ export function CheckoutPage() {
     );
   }
 
-  function handleChangeStatus(id: string, status: PaymentStatus) {
-    const requests: Record<PaymentStatus, () => void> = {
-      CREATED: () => {},
-      PROCESSING: () => proccessRequest(id, { onSuccess: () => refetch() }),
-      DECLINED: () => declineRequest(id, { onSuccess: () => refetch() }),
-      APPROVED: () =>
-        approveRequest(id, {
-          onSuccess: () => {
-            if (data?.successUrl) {
-              window.location.href = data.successUrl;
-              return;
-            }
-            refetch();
-          },
-        }),
-      CANCELED: () =>
-        cancelRequest(id, {
-          onSuccess: () => {
-            if (data?.cancelUrl) {
-              window.location.href = data.cancelUrl;
-              return;
-            }
-            refetch();
-          },
-        }),
-    };
-
-    requests[status]();
+  function handleCompleteCheckout(status: CheckoutCompletionStatus) {
+    completeReqeust(status, {
+      onSuccess: () => {
+        if (status === "APPROVED" && data?.successUrl) {
+          window.location.href = data.successUrl;
+          return;
+        }
+        if (status === "CANCELED" && data?.cancelUrl) {
+          window.location.href = data.cancelUrl;
+          return;
+        }
+        refetch();
+      },
+    });
   }
 
   return (
@@ -222,35 +197,16 @@ export function CheckoutPage() {
                 <p className="text-sm font-medium">Simulation panel</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                Use the buttons below to simulate this payment's status
-                changing. No real action is performed.
+                Use the buttons below to simulate this checkout's completition.
               </p>
             </CardHeader>
             <CardContent className="flex flex-col gap-2 justify-between h-full">
               <Button
                 size="lg"
                 variant="secondary"
-                className="uppercase text-blue-500 flex-1"
-                disabled={
-                  !canChangePaymentStatus(data.payment.status, "PROCESSING") ||
-                  isProcessing
-                }
-                onClick={() =>
-                  handleChangeStatus(data.payment.id, "PROCESSING")
-                }
-              >
-                <SpinnerGapIcon size={16} />
-                Process
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
                 className="uppercase text-primary flex-1"
-                disabled={
-                  !canChangePaymentStatus(data.payment.status, "APPROVED") ||
-                  isApproving
-                }
-                onClick={() => handleChangeStatus(data.payment.id, "APPROVED")}
+                disabled={isCompleting}
+                onClick={() => handleCompleteCheckout("APPROVED")}
               >
                 <CheckCircleIcon size={16} />
                 Approve
@@ -259,11 +215,8 @@ export function CheckoutPage() {
                 size="lg"
                 variant="secondary"
                 className="uppercase text-destructive flex-1"
-                disabled={
-                  !canChangePaymentStatus(data.payment.status, "DECLINED") ||
-                  isDeclining
-                }
-                onClick={() => handleChangeStatus(data.payment.id, "DECLINED")}
+                disabled={isCompleting}
+                onClick={() => handleCompleteCheckout("DECLINED")}
               >
                 <XCircleIcon size={16} />
                 Decline
@@ -272,11 +225,8 @@ export function CheckoutPage() {
                 size="lg"
                 variant="secondary"
                 className="uppercase text-destructive flex-1"
-                disabled={
-                  !canChangePaymentStatus(data.payment.status, "CANCELED") ||
-                  isCanceling
-                }
-                onClick={() => handleChangeStatus(data.payment.id, "CANCELED")}
+                disabled={isCompleting}
+                onClick={() => handleCompleteCheckout("CANCELED")}
               >
                 <ProhibitIcon />
                 Cancel
@@ -291,9 +241,7 @@ export function CheckoutPage() {
             </CardHeader>
             <CardContent className="flex flex-row items-center">
               <div className="w-full space-y-2">
-                <DetailRow label="Subscription ID">
-                  {data.subscriptionId}
-                </DetailRow>
+                <DetailRow label="ID">{data.subscriptionId}</DetailRow>
                 <DetailRow label="Description">
                   {data.subscription.description}
                 </DetailRow>
