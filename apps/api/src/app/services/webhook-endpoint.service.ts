@@ -8,6 +8,11 @@ import { apiKeyService } from "./api-key.service.ts";
 import { NotFoundError } from "../../common/http-error.ts";
 import type { PaymentEventType } from "../../../generated/prisma/enums.ts";
 import type { WebhookEndpoint } from "../../../generated/prisma/client.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+} from "../../common/utils.ts";
 
 function generateSecret() {
   return `whsec_${randomBytes(32).toString("hex")}`;
@@ -25,10 +30,22 @@ async function create(apiKey: string, input: CreateWebhookEndpointInput) {
   });
 }
 
-async function findAll() {
-  return await prismaSingleton.webhookEndpoint.findMany({
-    omit: { secret: true },
-    orderBy: { createdAt: "desc" },
+async function findAll(paginationInput: PaginationInput) {
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [endpoint, total] = await Promise.all([
+    prismaSingleton.webhookEndpoint.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      omit: { secret: true },
+    }),
+    prismaSingleton.webhookEndpoint.count(),
+  ]);
+  return buildPaginatedResponse({
+    data: endpoint,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
   });
 }
 

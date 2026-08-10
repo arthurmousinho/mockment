@@ -5,10 +5,12 @@ import {
   updateWebhookEndpointSchema,
 } from "../schemas/webhook.schema.ts";
 import { webhookEndpointService } from "../services/webhook-endpoint.service.ts";
+import { paginationSchema } from "../../common/pagination.schema.ts";
 
 export async function webhookEndpointRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
-    const endpoints = await webhookEndpointService.findAll();
+    const paginationInput = paginationSchema.parse(request.query);
+    const endpoints = await webhookEndpointService.findAll(paginationInput);
     return reply.status(200).send(endpoints);
   });
 
