@@ -198,7 +198,7 @@ export function PaymentsPage() {
           {data?.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
                 No Payments found.
