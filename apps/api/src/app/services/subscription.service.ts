@@ -33,10 +33,6 @@ function calculateNextBillingDate(
 async function create(apiKey: string, input: CreateSubscriptionInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
 
-  // TODO: This logic must be moved to an `activateSubscription` function
-  // const now = await virtualClockService.now();
-  // const billingDate = calculateNextBillingDate(now, input.interval);
-
   const pendingSubscription = await prismaSingleton.subscription.create({
     data: {
       apiKeyId: validatedApiKey.id,
@@ -95,7 +91,7 @@ function validateStatusTransition(
   const validTransitions: Record<SubscriptionStatus, SubscriptionStatus[]> = {
     ACTIVE: ["PAUSED", "CANCELED"],
     PAUSED: ["ACTIVE", "CANCELED"],
-    PENDING: ["ACTIVE", "CANCELED"],
+    PENDING: ["CANCELED"], // PEDING -> ACTIVE only through activate function
     CANCELED: [],
   };
   const allowed = validTransitions[currentStatus];
@@ -112,6 +108,29 @@ async function changeStatus(id: string, newStatus: SubscriptionStatus) {
   return await prismaSingleton.subscription.update({
     where: { id: subscription.id },
     data: { status: newStatus },
+  });
+}
+
+async function activate(id: string) {
+  const subscription = await findById(id);
+
+  if (subscription.status !== "PENDING") {
+    throw new BadRequestError(
+      `Only PENDING subscriptions can be activated. Current status: ${subscription.status}.`,
+    );
+  }
+
+  const now = await virtualClockService.now();
+  const nextBillingAt = calculateNextBillingDate(now, subscription.interval);
+
+  return await prismaSingleton.subscription.update({
+    where: {
+      id: subscription.id,
+    },
+    data: {
+      status: "ACTIVE",
+      nextBillingAt,
+    },
   });
 }
 
@@ -175,5 +194,6 @@ export const subscriptionService = {
   findAll,
   changeStatus,
   update,
+  activate,
   processDueSubscriptions,
 };
