@@ -6,6 +6,11 @@ import {
   ConflictError,
   NotFoundError,
 } from "../../common/http-error.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+} from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type { CreatePaymentInput } from "../schemas/payment.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
@@ -79,11 +84,22 @@ async function create(apiKey: string, input: CreatePaymentInput) {
   return paymentPayload;
 }
 
-async function findAll() {
-  const payments = await prismaSingleton.payment.findMany({
-    orderBy: { createdAt: "desc" },
+async function findAll(paginationInput: PaginationInput) {
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [payments, total] = await Promise.all([
+    prismaSingleton.payment.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.payment.count(),
+  ]);
+  return buildPaginatedResponse({
+    data: payments,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
   });
-  return payments;
 }
 
 async function findById(id: string) {

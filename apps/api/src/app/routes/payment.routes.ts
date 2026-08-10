@@ -1,11 +1,13 @@
 import { UnauthorizedError } from "../../common/http-error.ts";
+import { paginationSchema } from "../../common/pagination.schema.ts";
 import { createPaymentSchema } from "../schemas/payment.schema.ts";
 import { paymentService } from "../services/payment.service.ts";
 import type { FastifyInstance } from "fastify";
 
 export async function paymentRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
-    const payments = await paymentService.findAll();
+    const paginationInput = paginationSchema.parse(request.query);
+    const payments = await paymentService.findAll(paginationInput);
     return reply.status(200).send(payments);
   });
 
