@@ -27,6 +27,8 @@ import {
   ProcessPaymentRequest,
   type PaymentStatus,
 } from "@/http/payments-http";
+import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
+import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 
 const paymentMethodTabs = [
   { label: "Card", icon: CreditCardIcon },
@@ -282,6 +284,46 @@ export function CheckoutPage() {
             </CardContent>
           </Card>
         </div>
+        {data.subscription && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscription</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-row items-center">
+              <div className="w-full space-y-2">
+                <DetailRow label="Subscription ID">
+                  {data.subscriptionId}
+                </DetailRow>
+                <DetailRow label="Description">
+                  {data.subscription.description}
+                </DetailRow>
+                <DetailRow label="Interval">
+                  <SubscriptionIntervalBadge
+                    interval={data.subscription.interval}
+                  />
+                </DetailRow>
+                <DetailRow label="Interval Count">
+                  {data.subscription.intervalCount}
+                </DetailRow>
+              </div>
+              <Separator orientation="vertical" className="mx-4" />
+              <div className="w-full space-y-2">
+                <DetailRow label="Status">
+                  <SubscriptionStatusBadge status={data.subscription.status} />
+                </DetailRow>
+                <DetailRow label="Created At">
+                  {formatDateTime(data.subscription.createdAt)}
+                </DetailRow>
+                <DetailRow label="Updated At">
+                  {formatDateTime(data.subscription.updatedAt)}
+                </DetailRow>
+                <DetailRow label="Next Billing At">
+                  {formatDateTime(data.subscription.nextBillingAt)}
+                </DetailRow>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader>
             <CardTitle>More Details</CardTitle>

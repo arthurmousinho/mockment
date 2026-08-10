@@ -1,6 +1,8 @@
 import type { PaymentCurrency } from "@/http/payments-http";
 
-export function formatDateTime(date: Date | string | number): string {
+export function formatDateTime(date: Date | string | number | null): string {
+  if (date === null) return "";
+
   return new Intl.DateTimeFormat("en-US", {
     month: "2-digit",
     day: "2-digit",

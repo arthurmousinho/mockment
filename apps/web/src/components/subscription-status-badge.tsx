@@ -24,6 +24,12 @@ export const SUBSCRIPTION_STATUS_CONFIG: Record<
     className:
       "bg-green-100 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-900",
   },
+  PENDING: {
+    label: "Pending",
+    icon: ClockIcon,
+    className:
+      "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-900",
+  },
   PAUSED: {
     label: "Paused",
     icon: ClockIcon,
@@ -34,7 +40,7 @@ export const SUBSCRIPTION_STATUS_CONFIG: Record<
     label: "Canceled",
     icon: ProhibitIcon,
     className:
-      "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-800",
+      "bg-red-100 text-red-600 border-red-200 dark:bg-red-900 dark:text-red-400 dark:border-red-800",
   },
 } as const;
 

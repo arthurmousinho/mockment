@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import type { PaymentCurrency, PaymentMethod } from "./payments-http";
 
 export type SubscriptionInterval = "DAY" | "WEEK" | "MONTH" | "YEAR";
-export type SubscriptionStatus = "ACTIVE" | "CANCELED" | "PAUSED";
+export type SubscriptionStatus = "ACTIVE" | "CANCELED" | "PAUSED" | "PENDING";
 
 export type Subscription = {
   id: string;
@@ -16,7 +16,7 @@ export type Subscription = {
   interval: SubscriptionInterval;
   intervalCount: number;
   status: SubscriptionStatus;
-  nextBillingAt: string;
+  nextBillingAt: string | null;
   createdAt: string;
   updatedAt: string;
   apiKeyId: string;

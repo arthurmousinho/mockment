@@ -29,6 +29,7 @@ export function canChangeSubscriptionStatus(
   const validTransitions: Record<SubscriptionStatus, SubscriptionStatus[]> = {
     ACTIVE: ["PAUSED", "CANCELED"],
     PAUSED: ["ACTIVE", "CANCELED"],
+    PENDING: ["CANCELED"], // PEDING -> ACTIVE only through activation
     CANCELED: [],
   };
   const allowed = validTransitions[currentStatus];

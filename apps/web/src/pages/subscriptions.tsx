@@ -1,4 +1,3 @@
-import { PaymentEventsSheet } from "@/components/payment-events-sheet";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { SubscriptionFormDialog } from "@/components/subscription-form-dialog";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
