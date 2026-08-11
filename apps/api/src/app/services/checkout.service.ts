@@ -1,4 +1,9 @@
 import { ConflictError, NotFoundError } from "../../common/http-error.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+} from "../../common/utils.ts";
 import { env } from "../../config/env.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
@@ -41,8 +46,22 @@ async function getGeneratedLinkByPaymentId(paymentId: string) {
   return checkout ? buildCheckoutLink(checkout.id) : null;
 }
 
-async function findAll() {
-  return await prismaSingleton.checkout.findMany();
+async function findAll(paginationInput: PaginationInput) {
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [endpoint, total] = await Promise.all([
+    prismaSingleton.checkout.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.checkout.count(),
+  ]);
+  return buildPaginatedResponse({
+    data: endpoint,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
+  });
 }
 
 async function getDetails(id: string) {
