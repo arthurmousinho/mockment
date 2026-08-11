@@ -4,21 +4,46 @@
 
 First of all, thank you for considering contributing to Mockment! 💚
 
-Mockment is an open-source project whose goal is to provide a local-first payment gateway for developers to build, test, and debug payment integrations without relying on external providers or unstable sandbox environments.
+Mockment is an open-source **learning and experimentation project** designed to help developers understand payment gateway concepts by providing a local environment where they can build, test, and debug payment integrations without relying on external providers or unstable sandbox environments.
+
+The goal of Mockment is **not to be a production-ready payment gateway or a highly usable alternative to real payment providers**. Instead, the project focuses on making payment concepts, workflows, and integrations easier to understand through practical experimentation.
 
 Every contribution is appreciated, whether it is fixing a bug, improving the documentation, implementing a feature, or simply suggesting an idea.
 
 ## Project Philosophy
 
-Mockment is designed around a few core principles:
+Mockment is designed primarily as a **learning tool**, with a few core principles:
 
-- **Local-first** — Everything should run entirely on the developer's machine.
-- **Developer Experience** — APIs should be simple, predictable, and pleasant to use.
-- **Realistic Behavior** — Simulate real payment gateway workflows without unnecessary complexity.
-- **Deterministic** — The same input should always produce the same output whenever possible.
-- **Open Source** — The project is built for the community and welcomes contributions.
+- **Learning-first** — The project should make payment gateway concepts easier to understand and experiment with.
+- **Local-first** — Everything should run entirely on the developer's machine whenever possible.
+- **Developer Experience** — APIs and workflows should be simple, predictable, and easy to understand.
+- **Realistic Enough** — Payment workflows should resemble real-world systems enough to be useful for learning, without trying to reproduce every complexity of a production payment provider.
+- **Deterministic** — The same input should produce the same output whenever possible, making experiments easier to reproduce and understand.
+- **Simplicity** — Prefer understandable implementations over production-grade complexity when the two conflict.
+- **Open Source** — The project is built for learning and experimentation and welcomes contributions from the community.
 
-When contributing, please keep these principles in mind.
+### What Mockment Is Not
+
+Mockment is **not intended to be used as a real payment gateway in production**.
+
+It does not aim to replace providers such as Stripe, Adyen, Mercado Pago, or other payment platforms. Production payment systems involve security, compliance, reliability, fraud prevention, scalability, and many other concerns that are intentionally outside the scope of this project.
+
+The purpose of Mockment is to provide a safe and understandable environment for developers to explore concepts such as:
+
+- Payment creation and processing
+- Payment states and transitions
+- Webhooks
+- Idempotency
+- Payment methods
+- Subscriptions
+- API design
+- Event-driven workflows
+- Error handling
+- Integration testing
+
+When contributing, please keep the educational purpose of the project in mind.
+
+A feature does not necessarily need to make Mockment more powerful or production-ready. **If it makes an important concept easier to understand, experiment with, or demonstrate, it can be valuable to the project.**
 
 ## Getting Started
 
@@ -44,7 +69,8 @@ There are many ways to contribute:
 - Improve developer experience
 - Refactor existing code
 - Add automated tests
-- Suggest new features
+- Suggest new learning-oriented features
+- Improve examples and demonstrations
 
 Even small improvements make a difference.
 
@@ -133,6 +159,7 @@ Whenever possible:
 - Test your feature locally.
 - Ensure existing behavior has not been broken.
 - Add tests for new functionality whenever it makes sense.
+- Prefer tests that demonstrate payment concepts and expected workflows.
 
 ## Documentation
 
@@ -146,6 +173,8 @@ If your Pull Request introduces:
 - or changes existing behavior,
 
 please update the relevant documentation.
+
+Since Mockment is a learning-oriented project, documentation should also explain **why something works the way it does**, not only how to use it.
 
 ## Reporting Bugs
 
@@ -163,15 +192,26 @@ The more information you provide, the easier it is to reproduce and fix the issu
 
 ## Feature Requests
 
-One of Mockment's goals is to simulate the behavior of real-world payment gateways while remaining lightweight and easy to understand.
+One of Mockment's goals is to help developers understand how payment systems work through practical experimentation.
 
-If you have ideas that improve the developer experience without making the project unnecessarily complex, we'd love to hear them.
+When proposing a feature, consider whether it:
 
-Open an Issue describing:
+- helps explain an important payment concept;
+- provides a useful learning experience;
+- makes a workflow easier to understand;
+- provides a realistic but simplified example;
+- improves the developer experience.
 
-- the problem you're trying to solve;
+A feature does not need to make Mockment more production-ready to be valuable.
+
+In fact, **avoiding unnecessary production complexity is often a feature rather than a limitation**.
+
+If you have an idea, open an Issue describing:
+
+- the problem or concept you're trying to explore;
 - your proposed solution;
-- possible alternatives.
+- possible alternatives;
+- why the feature would be useful for learning.
 
 Discussion is encouraged before implementation.
 
@@ -185,6 +225,6 @@ We're happy to help.
 
 Open source only exists because people choose to contribute.
 
-Whether you're fixing a typo, reporting a bug, improving documentation, or implementing a major feature, your contribution helps make Mockment better for developers everywhere.
+Whether you're fixing a typo, reporting a bug, improving documentation, or implementing a new learning experience, your contribution helps make Mockment a better resource for developers who want to understand payment systems.
 
 Thank you for being part of the project. 🚀
