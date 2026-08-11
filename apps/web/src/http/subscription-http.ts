@@ -1,8 +1,9 @@
 import { api, apiErrorHandler } from "@/lib/ky";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
 import type { PaymentCurrency, PaymentMethod } from "./payments-http";
+import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type SubscriptionInterval = "DAY" | "WEEK" | "MONTH" | "YEAR";
 export type SubscriptionStatus = "ACTIVE" | "CANCELED" | "PAUSED" | "PENDING";
@@ -77,13 +78,16 @@ export function UpdateSubscriptionRequest() {
   });
 }
 
-export function FindAllSubscriptionsRequest() {
+export function FindAllSubscriptionsRequest(paginationData: PaginatedRequest) {
   return useQuery({
-    queryKey: ["subscriptions"],
+    queryKey: ["subscriptions", paginationData],
     queryFn: async () => {
-      const request = await api.get("subscriptions");
-      return await request.json<Subscription[]>();
+      const request = await api.get("subscriptions", {
+        searchParams: paginationData,
+      });
+      return await request.json<PaginatedAPIResponse<Subscription>>();
     },
+    placeholderData: keepPreviousData,
   });
 }
 

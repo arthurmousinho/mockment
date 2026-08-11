@@ -1,3 +1,4 @@
+import { Paginator } from "@/components/paginator";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { SubscriptionFormDialog } from "@/components/subscription-form-dialog";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
@@ -13,6 +14,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -35,9 +37,22 @@ import {
   EyeIcon,
   PlusIcon,
 } from "@phosphor-icons/react";
+import { useState } from "react";
 
 export function SubscriptionsPage() {
-  const { data, isPending, isError, refetch } = FindAllSubscriptionsRequest();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllSubscriptionsRequest({
+    page,
+    limit,
+  });
+
   const { mutate: pauseRequest, isPending: isPausing } =
     PauseSubscriptionRequest();
   const { mutate: resumeRequest, isPending: isResuming } =
@@ -65,6 +80,7 @@ export function SubscriptionsPage() {
       ACTIVE: () => resumeRequest(id),
       CANCELED: () => cancelRequest(id),
       PAUSED: () => pauseRequest(id),
+      PENDING: () => {},
     };
 
     requests[status]();
@@ -110,7 +126,7 @@ export function SubscriptionsPage() {
         </TableHeader>
 
         <TableBody>
-          {data?.map((item) => (
+          {response.data?.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.id}</TableCell>
               <TableCell className="text-right">
@@ -178,7 +194,7 @@ export function SubscriptionsPage() {
             </TableRow>
           ))}
 
-          {data?.length === 0 && (
+          {response.data?.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -189,6 +205,17 @@ export function SubscriptionsPage() {
             </TableRow>
           )}
         </TableBody>
+        <TableFooter className="w-full bg-transparent">
+          <TableRow>
+            <TableCell colSpan={7} className="w-full py-2">
+              <Paginator
+                pagination={response.pagination}
+                onPageChange={setPage}
+                onLimitChange={setLimit}
+              />
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
