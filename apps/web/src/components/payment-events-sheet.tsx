@@ -22,18 +22,24 @@ import { CaretDownIcon } from "@phosphor-icons/react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { PaymentEventType } from "./payment-event-type";
+import { Paginator } from "./paginator";
 
 type PaymentEventsSheetProps = {
   children: ReactNode;
 };
 
 export function PaymentEventsSheet({ children }: PaymentEventsSheetProps) {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [open, setOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const { data, isPending, isError, refetch } = FindAllPaymentEventsRequest({
-    enabled: open,
-  });
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllPaymentEventsRequest({ page, limit }, { enabled: open });
 
   function toggleExpanded(id: string) {
     setExpandedId((current) => (current === id ? null : id));
@@ -79,7 +85,7 @@ export function PaymentEventsSheet({ children }: PaymentEventsSheetProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {data?.map((event) => {
+                  {response?.data.map((event) => {
                     const isExpanded = expandedId === event.id;
 
                     return (
@@ -147,7 +153,7 @@ export function PaymentEventsSheet({ children }: PaymentEventsSheetProps) {
                     );
                   })}
 
-                  {data?.length === 0 && (
+                  {response?.data.length === 0 && (
                     <TableRow>
                       <TableCell
                         colSpan={4}
@@ -160,6 +166,15 @@ export function PaymentEventsSheet({ children }: PaymentEventsSheetProps) {
                 </TableBody>
               </Table>
             </ScrollArea>
+          )}
+          {response && (
+            <footer className="px-4">
+              <Paginator
+                pagination={response.pagination}
+                onPageChange={setPage}
+                onLimitChange={setLimit}
+              />
+            </footer>
           )}
         </div>
       </SheetContent>
