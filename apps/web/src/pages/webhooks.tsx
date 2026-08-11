@@ -1,3 +1,4 @@
+import { Paginator } from "@/components/paginator";
 import { PaymentEventType } from "@/components/payment-event-type";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -43,10 +45,19 @@ import {
 import { useState } from "react";
 
 export function WebhooksPage() {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [rotatedSecret, setRotatedSecret] = useState<string | null>(null);
 
-  const { data, isPending, isError, refetch } =
-    FindAllWebhookEndpointsRequest();
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllWebhookEndpointsRequest({
+    page,
+    limit,
+  });
   const { mutate: rotateRequest, isPending: isRotating } =
     RotateWebhookEndpointRequest();
   const { mutate: deleteRequest, isPending: isDeleting } =
@@ -125,7 +136,7 @@ export function WebhooksPage() {
         </TableHeader>
 
         <TableBody>
-          {data?.map((item) => (
+          {response.data?.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.id}</TableCell>
               <TableCell className="text-right">{item.url}</TableCell>
@@ -199,7 +210,7 @@ export function WebhooksPage() {
             </TableRow>
           ))}
 
-          {data?.length === 0 && (
+          {response.data?.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={6}
@@ -210,6 +221,17 @@ export function WebhooksPage() {
             </TableRow>
           )}
         </TableBody>
+        <TableFooter className="w-full bg-transparent">
+          <TableRow>
+            <TableCell colSpan={6} className="w-full py-2">
+              <Paginator
+                pagination={response.pagination}
+                onPageChange={setPage}
+                onLimitChange={setLimit}
+              />
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
 
       <Dialog

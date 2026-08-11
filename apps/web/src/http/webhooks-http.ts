@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { PaymentEventType } from "./payment-events-http";
 import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
+import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type WebhookEndpoint = {
   id: string;
@@ -13,12 +14,16 @@ export type WebhookEndpoint = {
   updatedAt: string;
 };
 
-export function FindAllWebhookEndpointsRequest() {
+export function FindAllWebhookEndpointsRequest(
+  paginationData: PaginatedRequest,
+) {
   return useQuery({
-    queryKey: ["webhooks", "endpoints"],
+    queryKey: ["webhooks", "endpoints", paginationData],
     queryFn: async () => {
-      const request = await api.get("webhooks/endpoints");
-      return await request.json<WebhookEndpoint[]>();
+      const request = await api.get("webhooks/endpoints", {
+        searchParams: paginationData,
+      });
+      return await request.json<PaginatedAPIResponse<WebhookEndpoint>>();
     },
   });
 }
