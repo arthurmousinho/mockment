@@ -4,7 +4,7 @@
 
 > A local-first fake payment gateway for developing and testing payment integrations.
 
-Mockment is a project created as a way to learn and explore the concepts, business rules, and engineering challenges involved in payment systems.
+Mockment is a personal learning project created as a way to explore the concepts, business rules, and engineering challenges involved in payment systems.
 
 The project **simulates** the behavior of a payment gateway, allowing developers to build and test payment integrations without relying on external providers, internet connectivity, or sandbox environments.
 
