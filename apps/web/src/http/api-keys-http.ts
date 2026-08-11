@@ -1,6 +1,7 @@
 import { api, apiErrorHandler } from "@/lib/ky";
 import { queryClient } from "@/lib/query-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export type ApiKey = {
@@ -11,13 +12,16 @@ export type ApiKey = {
   updatedAt: string;
 };
 
-export function FindAllApiKeysRequest() {
+export function FindAllApiKeysRequest(paginationData: PaginatedRequest) {
   return useQuery({
-    queryKey: ["api-keys"],
+    queryKey: ["api-keys", paginationData],
     queryFn: async () => {
-      const request = await api.get("api-keys");
-      return await request.json<ApiKey[]>();
+      const request = await api.get("api-keys", {
+        searchParams: paginationData,
+      });
+      return await request.json<PaginatedAPIResponse<ApiKey>>();
     },
+    placeholderData: keepPreviousData,
   });
 }
 

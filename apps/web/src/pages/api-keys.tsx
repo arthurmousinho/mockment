@@ -12,6 +12,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -33,11 +34,19 @@ import {
 } from "@phosphor-icons/react";
 import { useState } from "react";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
+import { Paginator } from "@/components/paginator";
 
 export function ApiKeysPage() {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [rotatedKey, setRotatedKey] = useState<string | null>(null);
 
-  const { data, isPending, isError, refetch } = FindAllApiKeysRequest();
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllApiKeysRequest({ page, limit });
   const { mutate: deleteRequest, isPending: isDeleting } =
     DeleteApiKeyRequest();
   const { mutate: revokeRequest, isPending: isRevoking } =
@@ -117,7 +126,7 @@ export function ApiKeysPage() {
         </TableHeader>
 
         <TableBody>
-          {data?.map((item) => (
+          {response?.data.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
               <TableCell className="text-right">
@@ -167,7 +176,7 @@ export function ApiKeysPage() {
             </TableRow>
           ))}
 
-          {data?.length === 0 && (
+          {response?.data.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={5}
@@ -178,6 +187,17 @@ export function ApiKeysPage() {
             </TableRow>
           )}
         </TableBody>
+        <TableFooter className="w-full bg-transparent">
+          <TableRow>
+            <TableCell colSpan={5} className="w-full py-2">
+              <Paginator
+                pagination={response.pagination}
+                onPageChange={setPage}
+                onLimitChange={setLimit}
+              />
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
 
       <Dialog
