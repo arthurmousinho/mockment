@@ -4,9 +4,13 @@
 
 > A local-first fake payment gateway for developing and testing payment integrations.
 
-Mockment is an open-source REST API that **simulates** the behavior of a payment gateway, allowing developers to build and test payment integrations without relying on external providers, internet connectivity, or sandbox environments.
+Mockment is a project created as a way to learn and explore the concepts, business rules, and engineering challenges involved in payment systems.
 
-Inspired by tools like Mailcatcher, Mockment provides a predictable and fully local environment for simulating payment flows, webhooks, and transaction lifecycles.
+The project **simulates** the behavior of a payment gateway, allowing developers to build and test payment integrations without relying on external providers, internet connectivity, or sandbox environments.
+
+Inspired by tools like Mailcatcher, Mockment aims to provide a predictable and fully local environment for simulating payment flows, webhooks, subscriptions, and other scenarios commonly found in payment systems.
+
+The project is intentionally focused on simplicity, both in its features and architecture, while exploring how real-world payment concepts can be modeled and reproduced in a local development environment.
 
 <p align="left">
   <a href="#motivation">
