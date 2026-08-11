@@ -1,8 +1,9 @@
 import { api, apiErrorHandler } from "@/lib/ky";
 import { queryClient } from "@/lib/query-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { PaymentEventType } from "./payment-events-http";
+import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type PaymentCurrency = "BRL" | "USD" | "EUR";
 export type PaymentMethod = "CARD" | "PIX" | "BANK_SLIP";
@@ -23,13 +24,16 @@ export type Payment = {
   updatedAt: string;
 };
 
-export function FindAllPaymentsRequest() {
+export function FindAllPaymentsRequest(paginationData: PaginatedRequest) {
   return useQuery({
-    queryKey: ["payments"],
+    queryKey: ["payments", paginationData],
     queryFn: async () => {
-      const request = await api.get("payments");
-      return await request.json<Payment[]>();
+      const request = await api.get("payments", {
+        searchParams: paginationData,
+      });
+      return await request.json<PaginatedAPIResponse<Payment>>();
     },
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -1,3 +1,4 @@
+import { Paginator } from "@/components/paginator";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { PaymentDetailsDialog } from "@/components/payment-details-dialog";
 import { PaymentEventsSheet } from "@/components/payment-events-sheet";
@@ -14,6 +15,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -38,9 +40,19 @@ import {
   EyeIcon,
   ReceiptIcon,
 } from "@phosphor-icons/react";
+import { useState } from "react";
 
 export function PaymentsPage() {
-  const { data, isPending, isError, refetch } = FindAllPaymentsRequest();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllPaymentsRequest({ page, limit });
+
   const { mutate: proccessRequest, isPending: isProcessing } =
     ProcessPaymentRequest();
   const { mutate: approveRequest, isPending: isApproving } =
@@ -115,7 +127,7 @@ export function PaymentsPage() {
         </TableHeader>
 
         <TableBody>
-          {data?.map((item) => (
+          {response.data.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.id}</TableCell>
               <TableCell className="text-right">
@@ -195,7 +207,7 @@ export function PaymentsPage() {
             </TableRow>
           ))}
 
-          {data?.length === 0 && (
+          {response.data?.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -206,6 +218,17 @@ export function PaymentsPage() {
             </TableRow>
           )}
         </TableBody>
+        <TableFooter className="w-full bg-transparent">
+          <TableRow>
+            <TableCell colSpan={7} className="w-full py-2">
+              <Paginator
+                pagination={response.pagination}
+                onPageChange={setPage}
+                onLimitChange={setLimit}
+              />
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
