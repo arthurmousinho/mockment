@@ -10,6 +10,32 @@ The goal of Mockment is **not to be a production-ready payment gateway or a high
 
 Every contribution is appreciated, whether it is fixing a bug, improving the documentation, implementing a feature, or simply suggesting an idea.
 
+## Project Continuity and Maintenance
+
+Mockment is a personal learning project, and its maintenance is not guaranteed indefinitely.
+
+The project may be paused, become inactive, or eventually be archived if the maintainers no longer have the time, interest, or need to continue working on it.
+
+This is not necessarily a sign that the project has failed. Since Mockment is primarily intended for learning and experimentation, reaching a natural stopping point is a valid outcome.
+
+If active maintenance is no longer possible, the repository may be:
+
+- left in its current state;
+- marked as inactive;
+- archived;
+- transferred to other maintainers;
+- or eventually discontinued.
+
+Contributors are welcome to continue the project through forks.
+
+### No Maintenance Guarantee
+
+Using or contributing to Mockment should not create an expectation of long-term maintenance, guaranteed support, or continued feature development.
+
+The project exists to explore and teach concepts. **It does not exist as a commitment to provide a permanently maintained service.**
+
+If the project becomes inactive, its source code and documentation can remain available as a learning resource.
+
 ## Project Philosophy
 
 Mockment is designed primarily as a **learning tool**, with a few core principles:
