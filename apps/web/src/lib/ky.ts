@@ -1,15 +1,10 @@
 import ky, { HTTPError } from "ky";
 import { toast } from "sonner";
+import type { APIError } from "@/types/http.type";
 
 export const api = ky.create({
   prefix: import.meta.env.VITE_API_URL,
 });
-
-type APIError = {
-  error: string;
-  code: number;
-  message: string[];
-};
 
 export async function apiErrorHandler(error: unknown) {
   if (error instanceof HTTPError) {
