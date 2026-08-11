@@ -23,6 +23,7 @@ import { CaretDownIcon } from "@phosphor-icons/react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { StatusCodeBadge } from "./status-code-badge";
+import { Paginator } from "./paginator";
 
 type WebhookDeliveriesSheetProps = {
   children: ReactNode;
@@ -31,12 +32,17 @@ type WebhookDeliveriesSheetProps = {
 export function WebhookDeliveriesSheet({
   children,
 }: WebhookDeliveriesSheetProps) {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [open, setOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const { data, isPending, isError, refetch } = FindAllWebhookDeliveriesRequest(
-    { enabled: open },
-  );
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllWebhookDeliveriesRequest({ page, limit }, { enabled: open });
 
   function toggleExpanded(id: string) {
     setExpandedId((current) => (current === id ? null : id));
@@ -83,7 +89,7 @@ export function WebhookDeliveriesSheet({
                 </TableHeader>
 
                 <TableBody>
-                  {data?.map((delivery) => {
+                  {response.data?.map((delivery) => {
                     const isExpanded = expandedId === delivery.id;
 
                     return (
@@ -180,7 +186,7 @@ export function WebhookDeliveriesSheet({
                     );
                   })}
 
-                  {data?.length === 0 && (
+                  {response.data?.length === 0 && (
                     <TableRow>
                       <TableCell
                         colSpan={5}
@@ -193,6 +199,15 @@ export function WebhookDeliveriesSheet({
                 </TableBody>
               </Table>
             </ScrollArea>
+          )}
+          {response && (
+            <footer className="px-4">
+              <Paginator
+                pagination={response.pagination}
+                onPageChange={setPage}
+                onLimitChange={setLimit}
+              />
+            </footer>
           )}
         </div>
       </SheetContent>

@@ -1,5 +1,5 @@
 import { api, apiErrorHandler } from "@/lib/ky";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import type { PaymentEventType } from "./payment-events-http";
 import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ export function FindAllWebhookEndpointsRequest(
       });
       return await request.json<PaginatedAPIResponse<WebhookEndpoint>>();
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -125,20 +126,28 @@ export type WebhookDelivery = {
   createdAt: string;
 };
 
-export type FindAllWebhookDeliveriesResponseData = WebhookDelivery & {
+export type WebhookDeliveriesResponseData = WebhookDelivery & {
   endpoint: { url: string };
 };
 
-export function FindAllWebhookDeliveriesRequest(options?: {
-  enabled?: boolean;
-}) {
+export function FindAllWebhookDeliveriesRequest(
+  paginationData: PaginatedRequest,
+  options?: {
+    enabled?: boolean;
+  },
+) {
   return useQuery({
-    queryKey: ["webhooks", "deliveries"],
+    queryKey: ["webhooks", "deliveries", paginationData],
     queryFn: async () => {
-      const response = await api.get(`webhooks/deliveries`);
-      return await response.json<FindAllWebhookDeliveriesResponseData[]>();
+      const response = await api.get(`webhooks/deliveries`, {
+        searchParams: paginationData,
+      });
+      return await response.json<
+        PaginatedAPIResponse<WebhookDeliveriesResponseData>
+      >();
     },
     enabled: options?.enabled,
+    placeholderData: keepPreviousData,
   });
 }
 
