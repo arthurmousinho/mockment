@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowCounterClockwiseIcon,
   CircleNotchIcon,
@@ -26,6 +26,7 @@ import {
 import { formatDateTime } from "@/lib/formatters";
 
 const DRIFT_THRESHOLD_MS = 60 * 1000;
+const TICK_INTERVAL_MS = 1000;
 
 const QUICK_ADVANCES: { label: string; data: Record<string, number> }[] = [
   { label: "+1 Hour", data: { hours: 1 } },
@@ -74,6 +75,29 @@ export function VirtualClockButton() {
     isPending: isResettingVirtualDateTime,
   } = ResetCurrentVirtualDateTimeRequest();
 
+  const offsetRef = useRef(0);
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    if (!virtualClock?.currentDateTime) return;
+
+    offsetRef.current =
+      new Date(virtualClock.currentDateTime).getTime() - Date.now();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNow(new Date());
+  }, [virtualClock?.currentDateTime]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), TICK_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  const liveVirtualDateTime = useMemo(
+    // eslint-disable-next-line react-hooks/refs
+    () => new Date(now.getTime() + offsetRef.current),
+    [now],
+  );
+
   useEffect(() => {
     if (open && virtualClock?.currentDateTime) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -81,15 +105,8 @@ export function VirtualClockButton() {
     }
   }, [open, virtualClock?.currentDateTime]);
 
-  const isTimeAltered = useMemo(() => {
-    if (!virtualClock?.currentDateTime) return false;
-
-    const diff = Math.abs(
-      new Date(virtualClock.currentDateTime).getTime() - new Date().getTime(),
-    );
-
-    return diff > DRIFT_THRESHOLD_MS;
-  }, [virtualClock?.currentDateTime]);
+  // eslint-disable-next-line react-hooks/refs
+  const isTimeAltered = offsetRef.current > DRIFT_THRESHOLD_MS;
 
   function handleApplyDateTime() {
     if (!pendingDateTime) return;
@@ -140,7 +157,7 @@ export function VirtualClockButton() {
                 {isLoadingVirtualClock
                   ? "Loading..."
                   : virtualClock?.currentDateTime
-                    ? formatDateTime(virtualClock.currentDateTime)
+                    ? formatDateTime(liveVirtualDateTime.toISOString())
                     : "—"}
               </span>
             </Button>
@@ -162,7 +179,7 @@ export function VirtualClockButton() {
               {isLoadingVirtualClock
                 ? "Loading..."
                 : virtualClock?.currentDateTime
-                  ? formatDateTime(virtualClock.currentDateTime)
+                  ? formatDateTime(liveVirtualDateTime.toISOString())
                   : "—"}
             </p>
             <Separator className="my-4" />
