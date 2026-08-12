@@ -4,13 +4,17 @@
 
 > A local-first fake payment gateway for developing and testing payment integrations.
 
-Mockment is a personal learning project created as a way to explore the concepts, business rules, and engineering challenges involved in payment systems.
+Mockment is a personal learning and experimentation project created to explore the concepts, business rules, and engineering challenges involved in payment systems.
 
-The project **simulates** the behavior of a payment gateway, allowing developers to build and test payment integrations without relying on external providers, internet connectivity, or sandbox environments.
+The project simulates the behavior of a payment gateway, providing a local environment where payment flows, webhooks, subscriptions, and other payment scenarios can be explored and tested without relying on external providers, internet connectivity, or sandbox environments.
 
-Inspired by tools like Mailcatcher, Mockment aims to provide a predictable and fully local environment for simulating payment flows, webhooks, subscriptions, and other scenarios commonly found in payment systems.
+Inspired by tools like Mailcatcher, Mockment aims to provide a predictable and fully local environment for experimenting with payment integrations.
+
+The primary purpose of Mockment is to learn about the payment domain by building a simplified payment gateway from scratch. It is not intended to be a production-ready payment provider or a replacement for real payment gateways.
 
 The project is intentionally focused on simplicity, both in its features and architecture, while exploring how real-world payment concepts can be modeled and reproduced in a local development environment.
+
+At its current stage, Mockment is primarily a proof of concept. The architecture, APIs, and features may change significantly as the project evolves and as new concepts from the payment domain are explored.
 
 <p align="left">
   <a href="#motivation">
@@ -47,9 +51,13 @@ Mockment solves these problems by providing a local payment gateway that behaves
 
 ## Project Status
 
-> **⚠️ Mockment is under development.**
+> **⚠️ Mockment is currently a learning project and proof of concept..**
 
-The project is functional but still evolving. Core features are being implemented incrementally, and breaking changes may occur until the first stable release.
+The project is actively being developed as a way to study and experiment with payment gateway concepts.
+
+The current implementation is not intended to be a stable release or a production-ready tool. Features, APIs, database models, and architectural decisions may change as new ideas are explored.
+
+The project is currently focused on understanding and implementing concepts such as:
 
 | Feature            | Status |
 | ------------------ | :----: |
@@ -64,6 +72,12 @@ The project is functional but still evolving. Core features are being implemente
 | CI/CD              |   📋   |
 
 ✅ **Implemented** | 🚧 **In Progress** | 📋 **Planned**
+
+At this point, the project is not actively accepting direct code contributions. The main goal is to first explore the payment domain, validate the core concepts, and build the proof of concept.
+
+Feedback, ideas, real-world payment scenarios, and discussions are very welcome. If you have experience with payment systems and know of scenarios that are difficult to reproduce during development, sharing them can be especially valuable for the project.
+
+The contribution model may change in the future as the project reaches a more mature stage.
 
 ## Architecture
 
@@ -155,6 +169,8 @@ After everything is running, the services will be available at:
 ## Quick Start
 
 Once Mockment is running, you're ready to start simulating payment flows.
+
+> Note: Mockment is currently a learning project and proof of concept. The API and behavior may change as the project evolves.
 
 The first step is creating a mock API key. Every request to the Mockment API must be authenticated using an API key, just like a real payment provider.
 
