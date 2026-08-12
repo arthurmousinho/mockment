@@ -4,12 +4,15 @@
   "type": "module",
   "dependencies": {
     "@fastify/cors": "^11.3.0",
+    "@fastify/swagger": "^9.8.1",
+    "@fastify/swagger-ui": "^6.1.1",
     "@prisma/adapter-mariadb": "^7.9.0",
     "@prisma/client": "^7.9.0",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "fastify": "^5.10.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zod-to-json-schema": "^3.25.2"
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",

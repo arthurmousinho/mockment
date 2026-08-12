@@ -1,4 +1,7 @@
 import cors from "@fastify/cors";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+
 import { ZodError } from "zod";
 import { createApp } from "./app.ts";
 import { apiKeyRoutes } from "./app/routes/api-key.routes.ts";
@@ -12,8 +15,12 @@ import { checkoutRoutes } from "./app/routes/checkout.routes.ts";
 import { subcriptionRoutes } from "./app/routes/subscription.routes.ts";
 import { virtualClockRoutes } from "./app/routes/virtual-clock.routes.ts";
 import { virtualClockService } from "./app/services/virtual-clock.service.ts";
+import { registerSwagger } from "./config/swagger.ts";
 
 export const appSingleton = createApp();
+
+// Swagger documentation
+await registerSwagger(appSingleton);
 
 // CORS
 appSingleton.register(cors, {
