@@ -33,6 +33,10 @@ export async function registerSwagger(app: FastifyInstance) {
           description: "Subscription operations",
         },
         {
+          name: "Webhook Endpoints",
+          description: "Webhook endpoint operations",
+        },
+        {
           name: "Webhook Deliveries",
           description: "Webhook delivery operations",
         },
