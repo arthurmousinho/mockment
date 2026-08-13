@@ -36,6 +36,10 @@ export async function registerSwagger(app: FastifyInstance) {
           name: "API Keys",
           description: "API key management",
         },
+        {
+          name: "Checkout",
+          description: "Checkout operations",
+        },
       ],
     },
   });
