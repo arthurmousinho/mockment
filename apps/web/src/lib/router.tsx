@@ -4,7 +4,7 @@ import { ApiKeysPage } from "@/pages/api-keys";
 import { PaymentsPage } from "@/pages/payments";
 import { WebhooksPage } from "@/pages/webhooks";
 import { CheckoutPage } from "@/pages/checkout";
-import { ApiDoc } from "@/pages/api-doc";
+import { ScalarApiDocPage } from "@/pages/scalar-api-doc";
 import { CheckoutDefaultSuccessPage } from "@/pages/checkout-default-success";
 import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
@@ -19,9 +19,9 @@ export const router = createBrowserRouter([
       { path: "subscriptions", element: <SubscriptionsPage /> },
       { path: "webhooks", element: <WebhooksPage /> },
       { path: "api-keys", element: <ApiKeysPage /> },
-      { path: "api-doc", element: <ApiDoc /> },
     ],
   },
+  { path: "scalar-api-doc", element: <ScalarApiDocPage /> },
   { path: "checkout/:id", element: <CheckoutPage /> },
   { path: "success-checkout", element: <CheckoutDefaultSuccessPage /> },
   { path: "cancel-checkout", element: <CheckoutDefaultCancelPage /> },

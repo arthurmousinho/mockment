@@ -18,6 +18,7 @@ import {
   MoonIcon,
   DesktopIcon,
   StarIcon,
+  ArrowUpRightIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -29,7 +30,19 @@ const navigationLinks = [
   { label: "Subscriptions", href: "/subscriptions", icon: StarIcon },
   { label: "Webhooks", href: "/webhooks", icon: WebhooksLogoIcon },
   { label: "API Keys", href: "/api-keys", icon: KeyIcon },
-  { label: "API Doc", href: "/api-doc", icon: BookOpenIcon },
+] as const;
+
+const apiDocLinks = [
+  {
+    label: "Scalar",
+    href: "/scalar-api-doc",
+    external: true,
+  },
+  {
+    label: "Swagger UI",
+    href: `${import.meta.env.VITE_API_URL}/docs`,
+    external: true,
+  },
 ] as const;
 
 export function Header() {
@@ -38,6 +51,7 @@ export function Header() {
   return (
     <Card className="flex flex-row items-center justify-between w-full px-6 py-4 bg-slate-100 dark:bg-muted rounded">
       <Logo />
+
       <nav className="flex items-center space-x-2">
         {navigationLinks.map((link, index) => {
           const Icon = link.icon;
@@ -52,6 +66,34 @@ export function Header() {
             </Link>
           );
         })}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary">
+              <BookOpenIcon size={18} />
+              API Doc
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {apiDocLinks.map((doc) =>
+              doc.external ? (
+                <DropdownMenuItem key={doc.label} asChild>
+                  <a href={doc.href} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRightIcon size={16} />
+                    {doc.label}
+                  </a>
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem key={doc.label} asChild>
+                  <Link to={doc.href}>
+                    <ArrowUpRightIcon size={16} />
+                    {doc.label}
+                  </Link>
+                </DropdownMenuItem>
+              ),
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
