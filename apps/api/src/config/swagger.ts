@@ -33,8 +33,8 @@ export async function registerSwagger(app: FastifyInstance) {
           description: "Subscription operations",
         },
         {
-          name: "Webhooks",
-          description: "Webhook operations",
+          name: "Webhook Deliveries",
+          description: "Webhook delivery operations",
         },
         {
           name: "API Keys",
