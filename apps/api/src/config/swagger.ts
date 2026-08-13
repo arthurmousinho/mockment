@@ -25,6 +25,10 @@ export async function registerSwagger(app: FastifyInstance) {
           description: "Payment operations",
         },
         {
+          name: "Payment Events",
+          description: "Payment event operations",
+        },
+        {
           name: "Subscriptions",
           description: "Subscription operations",
         },
