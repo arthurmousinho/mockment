@@ -14,7 +14,7 @@ export type AdvanceVirtualClockInput = z.infer<
 >;
 
 export const setVirtualClockSchema = z.object({
-  currentDateTime: z.coerce.date({
+  currentDateTime: z.iso.datetime({
     message: "O valor deve ser uma data válida.",
   }),
 });

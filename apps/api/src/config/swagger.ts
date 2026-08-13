@@ -44,6 +44,10 @@ export async function registerSwagger(app: FastifyInstance) {
           name: "Checkout",
           description: "Checkout operations",
         },
+        {
+          name: "Virtual Clock",
+          description: "Virtual clock operations",
+        },
       ],
     },
   });
