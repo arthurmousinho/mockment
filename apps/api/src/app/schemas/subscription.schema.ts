@@ -6,6 +6,21 @@ import {
   SubscriptionStatus,
 } from "../../../generated/prisma/enums.ts";
 
+export const subscriptionSchema = z.object({
+  id: z.uuid(),
+  description: z.string().nullable(),
+  amountInCents: z.number().positive().int(),
+  currency: z.enum(PaymentCurrency),
+  method: z.enum(PaymentMethod),
+  interval: z.enum(BillingInterval),
+  createdAt: z.iso.date(),
+  updatedAt: z.iso.date(),
+  intervalCount: z.number().positive().int(),
+  status: z.enum(SubscriptionStatus),
+  nextBillingAt: z.iso.date().nullable(),
+  apiKeyId: z.uuid(),
+});
+
 export const createSubscriptionSchema = z.object({
   amountInCents: z.coerce
     .number({ error: "O valor deve ser um número." })
@@ -22,6 +37,14 @@ export const createSubscriptionSchema = z.object({
 });
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
+
+export const createSubscriptionResponseSchema = subscriptionSchema.safeExtend({
+  checkoutLink: z.url(),
+});
+
+export type CreateSubscriptionOutput = z.infer<
+  typeof createSubscriptionResponseSchema
+>;
 
 export const updateSubscriptionSchema = z.object({
   amountInCents: z.coerce
