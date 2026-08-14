@@ -1,5 +1,6 @@
 import z from "zod";
 import type { PaymentEventType } from "../../../generated/prisma/enums.ts";
+import { paymentSchema } from "./payment.schema.ts";
 
 export const findAllPaymentEventsSchema = z.object({
   id: z.uuid(),
@@ -11,6 +12,6 @@ export const findAllPaymentEventsSchema = z.object({
     "PAYMENT_DECLINED",
     "PAYMENT_CANCELED",
   ] as PaymentEventType[]),
-  payload: z.any(),
+  payload: paymentSchema,
   createdAt: z.iso.date(),
 });

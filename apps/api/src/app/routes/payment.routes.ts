@@ -18,6 +18,7 @@ export async function paymentRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const payment = await paymentService.getDetails(id);
+      console.log(payment);
       return reply.status(200).send(payment);
     },
   );

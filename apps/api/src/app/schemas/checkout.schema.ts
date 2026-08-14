@@ -1,5 +1,6 @@
 import z from "zod";
 import { subscriptionDocs } from "../docs/subscription.docs.ts";
+import { paymentSchema } from "./payment.schema.ts";
 
 export type GenerateCheckoutLinkInput = {
   apiKeyId: string;
@@ -39,6 +40,6 @@ export const detailedCheckoutSchema = z.object({
   cancelUrl: z.url(),
   paymentId: z.uuid(),
   subscriptionId: z.uuid().nullable(),
-  payment: z.any(),
+  payment: paymentSchema,
   subscription: z.any().nullable(),
 });
