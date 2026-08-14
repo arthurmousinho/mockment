@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { paginationSchema } from "./pagination.schema.ts";
+import { paginationResponseSchema } from "./pagination.schema.ts";
+import { HttpErrorTypes } from "./http-error.ts";
 
 export function openApiSchema<T extends z.ZodType>(schema: T) {
   return z.toJSONSchema(schema, {
@@ -34,3 +35,26 @@ export const paginationParamsSchema = {
     },
   },
 } as const;
+
+export function paginatedResponseSchema<T extends z.ZodType>(schema: T) {
+  return openApiSchema(
+    z.object({
+      data: z.array(schema),
+      pagination: paginationResponseSchema,
+    }),
+  );
+}
+
+export function httpErrorSchema(input: {
+  error: string;
+  code: number;
+  message: string;
+}) {
+  return openApiSchema(
+    z.object({
+      error: z.enum(HttpErrorTypes).default(input.error),
+      code: z.number().default(input.code),
+      message: z.string().default(input.message),
+    }),
+  );
+}

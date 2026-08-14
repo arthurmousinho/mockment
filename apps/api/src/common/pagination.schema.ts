@@ -15,3 +15,14 @@ export const paginationSchema = z.object({
 });
 
 export type PaginationInput = z.infer<typeof paginationSchema>;
+
+export const paginationResponseSchema = z.object({
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  total: z.number().int().positive(),
+  totalPages: z.number().int().positive(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean(),
+});
+
+export type PaginationOutput = z.infer<typeof paginationResponseSchema>;

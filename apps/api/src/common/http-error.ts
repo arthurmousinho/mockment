@@ -1,3 +1,11 @@
+export const HttpErrorTypes = {
+  NOT_FOUND: "NOT_FOUND",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  BAD_REQUEST: "BAD_REQUEST",
+  CONFLICT: "CONFLICT",
+  INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
+};
+
 export class HttpError extends Error {
   constructor(
     public statusCode: number,

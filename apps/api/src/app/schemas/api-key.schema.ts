@@ -9,3 +9,27 @@ export const createApiKeySchema = z.object({
 });
 
 export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;
+
+export const findAllApiKeysSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  revokedAt: z.iso.date().nullable(),
+  createdAt: z.iso.date(),
+  updatedAt: z.iso.date(),
+});
+
+export type FindAllApiKeysOutput = z.infer<typeof findAllApiKeysSchema>;
+
+export const createApiKeyResponseSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  rawKey: z.string(),
+});
+
+export type CreateApiKeyOutput = z.infer<typeof createApiKeyResponseSchema>;
+
+export const rotateApiKeyResponseSchema = z.object({
+  rawKey: z.string(),
+});
+
+export type RotateApiKeyOutput = z.infer<typeof rotateApiKeyResponseSchema>;

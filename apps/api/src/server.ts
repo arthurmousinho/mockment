@@ -50,7 +50,7 @@ appSingleton.setErrorHandler((error, request, reply) => {
 
   return reply.status(500).send({
     statusCode: 500,
-    error: "Internal Server Error",
+    error: "INTERNAL_SERVER_ERROR",
     message: "Unexpected error",
   });
 });
