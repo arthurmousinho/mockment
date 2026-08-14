@@ -1,4 +1,5 @@
 import z from "zod";
+import { subscriptionDocs } from "../docs/subscription.docs.ts";
 
 export type GenerateCheckoutLinkInput = {
   apiKeyId: string;
@@ -18,4 +19,26 @@ const CHECKOUT_COMPLETION_STATUS: readonly CheckoutCompletionStatus[] = [
 
 export const completeCheckoutSchema = z.object({
   status: z.enum(CHECKOUT_COMPLETION_STATUS, { message: "Invalid status" }),
+});
+
+export const findAllCheckoutsSchema = z.object({
+  id: z.uuid(),
+  apiKeyId: z.uuid(),
+  createdAt: z.iso.date(),
+  successUrl: z.url(),
+  cancelUrl: z.url(),
+  paymentId: z.uuid(),
+  subscriptionId: z.uuid().nullable(),
+});
+
+export const detailedCheckoutSchema = z.object({
+  id: z.uuid(),
+  apiKeyId: z.uuid(),
+  createdAt: z.iso.date(),
+  successUrl: z.url(),
+  cancelUrl: z.url(),
+  paymentId: z.uuid(),
+  subscriptionId: z.uuid().nullable(),
+  payment: z.any(),
+  subscription: z.any().nullable(),
 });
