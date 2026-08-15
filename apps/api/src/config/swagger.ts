@@ -10,7 +10,7 @@ export async function registerSwagger(app: FastifyInstance) {
       info: {
         title: "Mockment API",
         description:
-          "Local-first fake payment gateway for developing and testing payment integrations.",
+          "Mockment is a local-first mock payment gateway for developers building and testing payment integrations. It simulates payment processing, recurring subscriptions, checkout flows, payment events, and webhook deliveries, providing a predictable environment for development and integration testing without external payment providers.",
         version: "1.0.0",
       },
       servers: [
