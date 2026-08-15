@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { PaymentEventType } from "../../../generated/prisma/enums.ts";
+import {
+  PaymentEventType,
+  WebhookDeliveryStatus,
+} from "../../../generated/prisma/enums.ts";
 
 const paymentEventsSchema = z
   .array(z.enum(PaymentEventType), {
@@ -37,3 +40,20 @@ export const updateWebhookEndpointSchema = z.object({
 export type UpdateWebhookEndpointInput = z.infer<
   typeof updateWebhookEndpointSchema
 >;
+
+export const webhookDeliverySchema = z.object({
+  id: z.uuid(),
+  status: z.enum(WebhookDeliveryStatus),
+  statusCode: z.number().int().positive(),
+  error: z.string().nullable(),
+  endpointId: z.uuid(),
+  paymentEventId: z.uuid(),
+  deliveredAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
+});
+
+export const findAllWebhookDeliveriesSchema = webhookDeliverySchema.safeExtend({
+  endpoint: z.object({
+    url: z.url(),
+  }),
+});
