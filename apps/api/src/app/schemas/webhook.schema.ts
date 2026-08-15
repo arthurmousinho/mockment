@@ -57,3 +57,25 @@ export const findAllWebhookDeliveriesSchema = webhookDeliverySchema.safeExtend({
     url: z.url(),
   }),
 });
+
+export const webhookEndpointSchema = z.object({
+  id: z.uuid(),
+  url: z.url(),
+  apiKeyId: z.uuid(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+
+export const findAllWebhookEndpointsSchema = webhookEndpointSchema.safeExtend({
+  events: z.array(z.enum(PaymentEventType)),
+});
+
+export const createWebhookEndpointResponseSchema =
+  webhookEndpointSchema.safeExtend({
+    events: z.array(z.enum(PaymentEventType)),
+    secret: z.string(),
+  });
+
+export const rotateWebhookEndpointSecretResponseSchema = z.object({
+  secret: z.string(),
+});

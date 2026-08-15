@@ -1,6 +1,5 @@
 import {
   httpErrorSchema,
-  idParamsSchema,
   paginatedResponseSchema,
   paginationParamsSchema,
 } from "../../common/openapi.ts";
