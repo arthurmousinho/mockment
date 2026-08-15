@@ -13,10 +13,21 @@ export type AdvanceVirtualClockInput = z.infer<
   typeof advanceVirtualClockSchema
 >;
 
-export const setVirtualClockSchema = z.object({
+export const currentVirtualDateTimeSchema = z.object({
   currentDateTime: z.iso.datetime({
     message: "O valor deve ser uma data válida.",
   }),
 });
 
-export type SetVirtualClockInput = z.infer<typeof setVirtualClockSchema>;
+export type CurrentVirtualDateTimeInput = z.infer<
+  typeof currentVirtualDateTimeSchema
+>;
+
+export const setVirtualClockResponseSchema = z.object({
+  id: z.string().default("default"),
+  currentDateTime: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+  processedSubscriptions: z.number().int().positive(),
+  paymentsCreated: z.number().int().positive(),
+});

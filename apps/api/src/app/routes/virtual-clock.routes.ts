@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { virtualClockService } from "../services/virtual-clock.service.ts";
 import {
   advanceVirtualClockSchema,
-  setVirtualClockSchema,
+  currentVirtualDateTimeSchema,
 } from "../schemas/virtual-clock.schema.ts";
 import { virtualClockDocs } from "../docs/virtual-clock.docs.ts";
 
@@ -32,7 +32,7 @@ export async function virtualClockRoutes(app: FastifyInstance) {
   );
 
   app.put("/", { schema: virtualClockDocs.set }, async (request, reply) => {
-    const input = setVirtualClockSchema.parse(request.body);
+    const input = currentVirtualDateTimeSchema.parse(request.body);
     const setResult = await virtualClockService.set(input);
     return reply.status(200).send(setResult);
   });

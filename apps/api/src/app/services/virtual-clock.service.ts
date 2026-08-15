@@ -9,7 +9,7 @@ import {
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   AdvanceVirtualClockInput,
-  SetVirtualClockInput,
+  CurrentVirtualDateTimeInput,
 } from "../schemas/virtual-clock.schema.ts";
 import { subscriptionService } from "./subscription.service.ts";
 
@@ -33,7 +33,7 @@ async function now(): Promise<Date> {
   return clock.currentDateTime;
 }
 
-async function set(input: SetVirtualClockInput) {
+async function set(input: CurrentVirtualDateTimeInput) {
   const clock = await prismaSingleton.virtualClock.update({
     where: { id: CLOCK_ID },
     data: { currentDateTime: input.currentDateTime },
