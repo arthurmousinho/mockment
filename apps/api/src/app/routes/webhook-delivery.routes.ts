@@ -9,8 +9,8 @@ export async function webhookDeliveryRoutes(app: FastifyInstance) {
     { schema: webhookDeliveryDocs.findAll },
     async (request, reply) => {
       const paginationInput = paginationSchema.parse(request.query);
-      const deliveries = await webhookDeliveryService.findAll(paginationInput);
-      return reply.status(200).send(deliveries);
+      const response = await webhookDeliveryService.findAll(paginationInput);
+      return reply.status(200).send(response);
     },
   );
 
@@ -19,9 +19,12 @@ export async function webhookDeliveryRoutes(app: FastifyInstance) {
     { schema: webhookDeliveryDocs.findAllByEndpointId },
     async (request, reply) => {
       const { endpointId } = request.params as { endpointId: string };
-      const deliveries =
-        await webhookDeliveryService.findAllByEndpointId(endpointId);
-      return reply.status(200).send(deliveries);
+      const paginationInput = paginationSchema.parse(request.query);
+      const response = await webhookDeliveryService.findAllByEndpointId(
+        endpointId,
+        paginationInput,
+      );
+      return reply.status(200).send(response);
     },
   );
 }

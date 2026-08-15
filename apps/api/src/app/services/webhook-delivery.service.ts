@@ -33,10 +33,28 @@ async function findAll(paginationInput: PaginationInput) {
   });
 }
 
-async function findAllByEndpointId(endpointId: string) {
-  return await prismaSingleton.webhookDelivery.findMany({
-    where: { endpointId },
-    orderBy: { deliveredAt: "desc" },
+async function findAllByEndpointId(
+  endpointId: string,
+  paginationInput: PaginationInput,
+) {
+  await webhookEndpointService.findById(endpointId);
+  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const [deliveries, total] = await Promise.all([
+    prismaSingleton.webhookDelivery.findMany({
+      where: { endpointId },
+      orderBy: { deliveredAt: "desc" },
+      skip,
+      take,
+    }),
+    prismaSingleton.webhookDelivery.count({
+      where: { endpointId },
+    }),
+  ]);
+  return buildPaginatedResponse({
+    data: deliveries,
+    page: paginationInput.page,
+    limit: paginationInput.limit,
+    total,
   });
 }
 
