@@ -22,35 +22,43 @@ export async function registerSwagger(app: FastifyInstance) {
       tags: [
         {
           name: "Payments",
-          description: "Payment operations",
+          description:
+            "Core payment operations. Represents the financial transactions created by merchants, including their amount, currency, payment method, status, and lifecycle.",
         },
         {
           name: "Payment Events",
-          description: "Payment event operations",
+          description:
+            "Events generated throughout a payment's lifecycle. Allows integrations to track state changes such as payment creation, processing, approval, decline, and cancellation.",
         },
         {
           name: "Subscriptions",
-          description: "Subscription operations",
+          description:
+            "Recurring billing operations. Represents recurring payment agreements that automatically generate new payments according to a configured billing interval and subscription lifecycle.",
         },
         {
           name: "Webhook Endpoints",
-          description: "Webhook endpoint operations",
+          description:
+            "Merchant webhook configurations. Defines the HTTP endpoints where the payment gateway sends asynchronous notifications about payment and subscription events.",
         },
         {
           name: "Webhook Deliveries",
-          description: "Webhook delivery operations",
+          description:
+            "Webhook delivery attempts. Tracks notifications sent by the gateway to merchant endpoints, including their delivery status and retry-related information.",
         },
         {
           name: "API Keys",
-          description: "API key management",
+          description:
+            "Merchant authentication credentials. API keys identify and authenticate applications when communicating with the payment gateway and accessing protected API resources.",
         },
         {
           name: "Checkout",
-          description: "Checkout operations",
+          description:
+            "Payment checkout flow. Represents the process of initiating and completing a payment, connecting the customer's payment interaction with the underlying payment and subscription lifecycle.",
         },
         {
           name: "Virtual Clock",
-          description: "Virtual clock operations",
+          description:
+            "Development-time virtual time control. Allows payment and subscription lifecycles to be simulated by advancing time without waiting for real-world dates or scheduled intervals.",
         },
       ],
     },
