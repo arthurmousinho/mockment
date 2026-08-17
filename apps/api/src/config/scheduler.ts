@@ -4,4 +4,5 @@ import { registerSubscriptionJob } from "../app/jobs/process-subscriptions.job.t
 
 export async function registerScheduler(app: FastifyInstance) {
   await app.register(fastifySchedule);
+  registerSubscriptionJob(app);
 }
