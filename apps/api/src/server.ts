@@ -16,6 +16,7 @@ import { subcriptionRoutes } from "./app/routes/subscription.routes.ts";
 import { virtualClockRoutes } from "./app/routes/virtual-clock.routes.ts";
 import { virtualClockService } from "./app/services/virtual-clock.service.ts";
 import { registerSwagger } from "./config/swagger.ts";
+import { registerScheduler } from "./config/scheduler.ts";
 
 export const appSingleton = createApp();
 
@@ -75,10 +76,11 @@ appSingleton.register(checkoutRoutes, { prefix: "/checkouts" });
 appSingleton.register(subcriptionRoutes, { prefix: "/subscriptions" });
 appSingleton.register(virtualClockRoutes, { prefix: "/virtual-clock" });
 
-// Bootstrap
-await virtualClockService.initialize();
+// Scheduler
+await registerScheduler(appSingleton);
 
 try {
+  await virtualClockService.initialize();
   await appSingleton.listen({
     host: "0.0.0.0",
     port: env.PORT,
