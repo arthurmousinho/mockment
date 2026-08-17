@@ -26,6 +26,16 @@ async function initialize() {
   });
 }
 
+async function tickOneMinute() {
+  const currentNow = await now();
+  const nextTick = addMinutes(currentNow, 1);
+
+  return await prismaSingleton.virtualClock.update({
+    where: { id: CLOCK_ID },
+    data: { currentDateTime: nextTick },
+  });
+}
+
 async function now(): Promise<Date> {
   const clock = await prismaSingleton.virtualClock.findUniqueOrThrow({
     where: { id: CLOCK_ID },
@@ -84,6 +94,7 @@ async function reset(): Promise<Date> {
 
 export const virtualClockService = {
   initialize,
+  tickOneMinute,
   now,
   set,
   advance,
