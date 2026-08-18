@@ -15,6 +15,16 @@ export async function subcriptionRoutes(app: FastifyInstance) {
     return reply.status(200).send(subscriptions);
   });
 
+  app.get(
+    "/:id",
+    { schema: subscriptionDocs.getDetails },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const subscription = await subscriptionService.getDetails(id);
+      return reply.status(200).send(subscription);
+    },
+  );
+
   app.post("/", { schema: subscriptionDocs.create }, async (request, reply) => {
     const authorization = request.headers.authorization;
     if (!authorization?.startsWith("Bearer ")) {

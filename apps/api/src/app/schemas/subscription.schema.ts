@@ -1,6 +1,7 @@
 import z from "zod";
 import {
   BillingInterval,
+  EventType,
   PaymentCurrency,
   PaymentMethod,
   SubscriptionStatus,
@@ -67,3 +68,13 @@ export const updateSubscriptionSchema = z.object({
 });
 
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>;
+
+export const detailedSubscriptionSchema = subscriptionSchema.safeExtend({
+  events: z.array(
+    z.object({
+      id: z.uuid(),
+      type: z.enum(EventType),
+      createdAt: z.iso.date(),
+    }),
+  ),
+});

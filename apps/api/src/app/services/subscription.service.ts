@@ -105,6 +105,30 @@ async function findById(id: string) {
   return subscription;
 }
 
+async function getDetails(id: string) {
+  const subscription = await prismaSingleton.subscription.findUnique({
+    where: { id },
+    include: {
+      events: {
+        select: {
+          id: true,
+          type: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+  });
+
+  if (!subscription) {
+    throw new NotFoundError(`Subscription with ID ${id} was not found.`);
+  }
+
+  return subscription;
+}
+
 function validateStatusTransition(
   currentStatus: SubscriptionStatus,
   newStatus: SubscriptionStatus,
@@ -225,4 +249,5 @@ export const subscriptionService = {
   update,
   activate,
   processDueSubscriptions,
+  getDetails,
 };

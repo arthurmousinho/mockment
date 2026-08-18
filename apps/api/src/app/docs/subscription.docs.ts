@@ -8,6 +8,7 @@ import {
 import {
   createSubscriptionResponseSchema,
   createSubscriptionSchema,
+  detailedSubscriptionSchema,
   subscriptionSchema,
   updateSubscriptionSchema,
 } from "../schemas/subscription.schema.ts";
@@ -24,6 +25,35 @@ export const subscriptionDocs = {
         content: {
           "application/json": {
             schema: paginatedResponseSchema(subscriptionSchema),
+          },
+        },
+      },
+    },
+  },
+  getDetails: {
+    summary: "Get subscription details",
+    description: "Returns the details of a subscription.",
+    tags: ["Subscriptions"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the subscription is retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(detailedSubscriptionSchema),
+          },
+        },
+      },
+      404: {
+        description:
+          "When the subscription with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Subscription with ID {id} was not found.",
+            }),
           },
         },
       },
