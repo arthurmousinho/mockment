@@ -2,8 +2,8 @@ import { api, apiErrorHandler } from "@/lib/ky";
 import { queryClient } from "@/lib/query-client";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { PaymentEventType } from "./payment-events-http";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
+import type { EventType } from "./events-http";
 
 export type PaymentCurrency = "BRL" | "USD" | "EUR";
 export type PaymentMethod = "CARD" | "PIX" | "BANK_SLIP";
@@ -40,7 +40,7 @@ export function FindAllPaymentsRequest(paginationData: PaginatedRequest) {
 export type DetailedPayment = Payment & {
   events: {
     id: string;
-    type: PaymentEventType;
+    type: EventType;
     createdAt: string;
   }[];
 };

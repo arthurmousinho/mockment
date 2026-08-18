@@ -28,10 +28,10 @@ import {
   UpdateWebhookEndpointRequest,
 } from "@/http/webhooks-http";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
-import type { PaymentEventType as PaymentEventTypeAlias } from "@/http/payment-events-http";
-import { PaymentEventType } from "./payment-event-type";
+import { EventTypeBadge } from "./event-type-badge";
+import type { EventType } from "@/http/events-http";
 
-const PAYMENT_EVENT_TYPES: PaymentEventTypeAlias[] = [
+const PAYMENT_EVENT_TYPES: EventType[] = [
   "PAYMENT_CREATED",
   "PAYMENT_PROCESSING",
   "PAYMENT_APPROVED",
@@ -62,7 +62,7 @@ type WebhookEndpointFormData = z.infer<ReturnType<typeof buildSchema>>;
 type WebhookEndpointToEdit = {
   id: string;
   url: string;
-  events: PaymentEventTypeAlias[];
+  events: EventType[];
 };
 
 type WebhookEndpointFormDialogProps = {
@@ -226,7 +226,7 @@ export function WebhookEndpointFormDialog({
                                       }}
                                     />
                                   </FormControl>
-                                  <PaymentEventType type={type} />
+                                  <EventTypeBadge type={type} />
                                 </FormItem>
                               );
                             }}

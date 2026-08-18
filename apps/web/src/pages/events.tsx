@@ -1,6 +1,6 @@
+import { EventDetailsDialog } from "@/components/event-details-dialog";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
-import { PaymentDetailsDialog } from "@/components/payment-details-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -91,14 +91,14 @@ export function EventsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <PaymentDetailsDialog id={item.id}>
+                    <EventDetailsDialog event={item}>
                       <DropdownMenuItem
                         onSelect={(event) => event.preventDefault()}
                       >
                         <EyeIcon size={32} />
                         Details
                       </DropdownMenuItem>
-                    </PaymentDetailsDialog>
+                    </EventDetailsDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

@@ -1,5 +1,5 @@
+import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
-import { PaymentEventType } from "@/components/payment-event-type";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -158,7 +158,7 @@ export function WebhooksPage() {
                     {item.events && item.events.length > 0 ? (
                       <ul className="flex flex-col gap-1">
                         {item.events.map((event) => (
-                          <PaymentEventType key={event} type={event} />
+                          <EventTypeBadge key={event} type={event} />
                         ))}
                       </ul>
                     ) : (

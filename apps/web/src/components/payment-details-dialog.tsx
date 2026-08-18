@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
-import { PaymentEventType } from "@/components/payment-event-type";
+import { EventTypeBadge } from "@/components/event-type-badge";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { CopyableField } from "./ui/copyable-field";
 import { DetailRow } from "./ui/detail-row";
@@ -148,7 +148,7 @@ export function PaymentDetailsDialog({
                       )}
                       <span className="z-10 size-2.75 shrink-0 rounded-full border-2 border-background bg-muted-foreground" />
                       <div className="flex flex-row gap-1 items-center text-muted-foreground">
-                        <PaymentEventType type={event.type} />
+                        <EventTypeBadge type={event.type} />
                         <span className="text-xs text-muted-foreground">
                           • {formatDateTime(event.createdAt)}
                         </span>
