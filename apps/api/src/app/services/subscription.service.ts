@@ -17,6 +17,7 @@ import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
 } from "../../common/utils.ts";
+import { eventService } from "./event.service.ts";
 
 function calculateNextBillingDate(
   currentDate: Date,
@@ -61,6 +62,12 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
     },
     pendingSubscription.id,
   );
+
+  await eventService.emit({
+    subscriptionId: pendingSubscription.id,
+    type: "SUBSCRIPTION_CREATED",
+    payload: pendingSubscription,
+  });
 
   return {
     ...pendingSubscription,
@@ -137,7 +144,7 @@ async function activate(id: string) {
   const now = await virtualClockService.now();
   const nextBillingAt = calculateNextBillingDate(now, subscription.interval);
 
-  return await prismaSingleton.subscription.update({
+  const activatedSubscription = await prismaSingleton.subscription.update({
     where: {
       id: subscription.id,
     },
@@ -146,6 +153,14 @@ async function activate(id: string) {
       nextBillingAt,
     },
   });
+
+  await eventService.emit({
+    subscriptionId: activatedSubscription.id,
+    type: "SUBSCRIPTION_ACTIVATED",
+    payload: activatedSubscription,
+  });
+
+  return activatedSubscription;
 }
 
 async function update(id: string, input: UpdateSubscriptionInput) {
