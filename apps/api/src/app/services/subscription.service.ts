@@ -12,7 +12,6 @@ import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
 import { virtualClockService } from "./virtual-clock.service.ts";
 import { addDays, addMonths, addWeeks, addYears } from "date-fns";
 import { paymentService } from "./payment.service.ts";
-import { checkoutService } from "./checkout.service.ts";
 import type { PaginationInput } from "../../common/pagination.schema.ts";
 import {
   buildPaginatedResponse,
@@ -52,22 +51,20 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
     },
   });
 
-  const initPayment = await paymentService.create(apiKey, {
-    amountInCents: input.amountInCents,
-    currency: input.currency,
-    method: input.method,
-    description: input.description,
-  });
-
-  const checkoutLink = await checkoutService.generateLink({
-    apiKeyId: validatedApiKey.id,
-    paymentId: initPayment.id,
-    subscriptionId: pendingSubscription.id,
-  });
+  const initPayment = await paymentService.create(
+    apiKey,
+    {
+      amountInCents: input.amountInCents,
+      currency: input.currency,
+      method: input.method,
+      description: input.description,
+    },
+    pendingSubscription.id,
+  );
 
   return {
     ...pendingSubscription,
-    checkoutLink,
+    checkoutLink: initPayment.checkoutLink,
   };
 }
 

@@ -17,7 +17,11 @@ import { apiKeyService } from "./api-key.service.ts";
 import { checkoutService } from "./checkout.service.ts";
 import { eventService } from "./event.service.ts";
 
-async function create(apiKey: string, input: CreatePaymentInput) {
+async function create(
+  apiKey: string,
+  input: CreatePaymentInput,
+  subscriptionId?: string,
+) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
 
   if (input.idempotencyKey) {
@@ -71,6 +75,7 @@ async function create(apiKey: string, input: CreatePaymentInput) {
   const checkoutLink = await checkoutService.generateLink({
     apiKeyId: validatedApiKey.id,
     paymentId: payment.id,
+    ...(subscriptionId && { subscriptionId }),
   });
 
   const paymentPayload = { ...payment, checkoutLink };
