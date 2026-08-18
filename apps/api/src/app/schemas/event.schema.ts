@@ -16,5 +16,5 @@ export const findAllEventsSchema = z.object({
   paymentId: z.uuid().nullable(),
   subscriptionId: z.uuid().nullable(),
   payload: z.any().nullable(),
-  createdAt: z.iso.date(),
+  createdAt: z.iso.datetime(),
 });

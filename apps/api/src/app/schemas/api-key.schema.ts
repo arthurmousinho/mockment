@@ -13,9 +13,9 @@ export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;
 export const findAllApiKeysSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  revokedAt: z.iso.date().nullable(),
-  createdAt: z.iso.date(),
-  updatedAt: z.iso.date(),
+  revokedAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export type FindAllApiKeysOutput = z.infer<typeof findAllApiKeysSchema>;

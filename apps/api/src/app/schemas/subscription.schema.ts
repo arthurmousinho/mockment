@@ -14,11 +14,11 @@ export const subscriptionSchema = z.object({
   currency: z.enum(PaymentCurrency),
   method: z.enum(PaymentMethod),
   interval: z.enum(BillingInterval),
-  createdAt: z.iso.date(),
-  updatedAt: z.iso.date(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
   intervalCount: z.number().positive().int(),
   status: z.enum(SubscriptionStatus),
-  nextBillingAt: z.iso.date().nullable(),
+  nextBillingAt: z.iso.datetime().nullable(),
   apiKeyId: z.uuid(),
 });
 
@@ -74,7 +74,7 @@ export const detailedSubscriptionSchema = subscriptionSchema.safeExtend({
     z.object({
       id: z.uuid(),
       type: z.enum(EventType),
-      createdAt: z.iso.date(),
+      createdAt: z.iso.datetime(),
     }),
   ),
 });

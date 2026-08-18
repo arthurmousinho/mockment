@@ -15,8 +15,8 @@ export const paymentSchema = z.object({
   description: z.string().nullable(),
   externalId: z.string().nullable(),
   idempotencyKey: z.string().nullable(),
-  createdAt: z.iso.date(),
-  updatedAt: z.iso.date(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const createPaymentSchema = z.object({
@@ -60,7 +60,7 @@ export const detailedPaymentSchema = paymentSchema.safeExtend({
     z.object({
       id: z.uuid(),
       type: z.enum(EventType),
-      createdAt: z.iso.date(),
+      createdAt: z.iso.datetime(),
     }),
   ),
 });
