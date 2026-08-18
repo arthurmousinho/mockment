@@ -3,14 +3,21 @@ import type { PaymentCurrency } from "@/http/payments-http";
 export function formatDateTime(date: Date | string | number | null): string {
   if (date === null) return "";
 
-  return new Intl.DateTimeFormat("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
+  const d = new Date(date);
+
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(d);
+
+  const timePart = new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: true,
-  }).format(new Date(date));
+    hour12: false,
+  }).format(d);
+
+  return `${datePart} ${d.getFullYear()} · ${timePart}`;
 }
 
 const CURRENCY_LOCALE_MAP: Record<PaymentCurrency, string> = {
