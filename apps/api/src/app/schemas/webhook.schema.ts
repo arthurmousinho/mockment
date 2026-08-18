@@ -1,11 +1,11 @@
 import { z } from "zod";
 import {
-  PaymentEventType,
+  EventType,
   WebhookDeliveryStatus,
 } from "../../../generated/prisma/enums.ts";
 
 const paymentEventsSchema = z
-  .array(z.enum(PaymentEventType), {
+  .array(z.enum(EventType), {
     message: "Os eventos devem ser uma lista válida.",
   })
   .min(1, "Selecione pelo menos um evento.")
@@ -67,12 +67,12 @@ export const webhookEndpointSchema = z.object({
 });
 
 export const findAllWebhookEndpointsSchema = webhookEndpointSchema.safeExtend({
-  events: z.array(z.enum(PaymentEventType)),
+  events: z.array(z.enum(EventType)),
 });
 
 export const createWebhookEndpointResponseSchema =
   webhookEndpointSchema.safeExtend({
-    events: z.array(z.enum(PaymentEventType)),
+    events: z.array(z.enum(EventType)),
     secret: z.string(),
   });
 

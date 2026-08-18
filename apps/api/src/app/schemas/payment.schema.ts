@@ -1,11 +1,10 @@
 import { z } from "zod";
 import {
+  EventType,
   PaymentCurrency,
-  PaymentEventType,
   PaymentMethod,
   PaymentStatus,
 } from "../../../generated/prisma/enums.ts";
-import { create } from "domain";
 
 export const paymentSchema = z.object({
   id: z.uuid(),
@@ -60,7 +59,7 @@ export const detailedPaymentSchema = paymentSchema.safeExtend({
   events: z.array(
     z.object({
       id: z.uuid(),
-      type: z.enum(PaymentEventType),
+      type: z.enum(EventType),
       createdAt: z.iso.date(),
     }),
   ),

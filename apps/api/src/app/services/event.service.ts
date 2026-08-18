@@ -4,6 +4,7 @@ import {
   buildPrismaPaginationParams,
 } from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
+import { webhookDeliveryService } from "./webhook-delivery.service.ts";
 import type { EmitEventInput } from "../schemas/event.schema.ts";
 
 async function emit(input: EmitEventInput) {
@@ -15,7 +16,7 @@ async function emit(input: EmitEventInput) {
       payload: input.payload,
     },
   });
-  //await webhookDeliveryService.dispatch(event);
+  await webhookDeliveryService.dispatch(event);
   return event;
 }
 

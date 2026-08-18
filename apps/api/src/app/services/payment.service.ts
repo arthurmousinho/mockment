@@ -15,7 +15,7 @@ import { prismaSingleton } from "../../config/prisma.ts";
 import type { CreatePaymentInput } from "../schemas/payment.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { checkoutService } from "./checkout.service.ts";
-import { paymentEventService } from "./payment-event.service.ts";
+import { eventService } from "./event.service.ts";
 
 async function create(apiKey: string, input: CreatePaymentInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
@@ -75,7 +75,7 @@ async function create(apiKey: string, input: CreatePaymentInput) {
 
   const paymentPayload = { ...payment, checkoutLink };
 
-  await paymentEventService.save({
+  await eventService.emit({
     paymentId: payment.id,
     type: "PAYMENT_CREATED",
     payload: paymentPayload,
@@ -166,7 +166,7 @@ async function changeStatus(id: string, newStatus: PaymentStatus) {
     data: { status: newStatus },
   });
 
-  await paymentEventService.save({
+  await eventService.emit({
     paymentId: payment.id,
     type: `PAYMENT_${newStatus}`,
     payload: payment,
@@ -187,7 +187,7 @@ async function createRecurringPayment(subscription: Subscription) {
     },
   });
 
-  await paymentEventService.save({
+  await eventService.emit({
     paymentId: payment.id,
     type: "PAYMENT_CREATED",
     payload: payment,

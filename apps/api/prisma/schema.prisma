@@ -27,14 +27,6 @@ enum PaymentMethod {
   BANK_SLIP
 }
 
-enum PaymentEventType {
-  PAYMENT_CREATED
-  PAYMENT_PROCESSING
-  PAYMENT_APPROVED
-  PAYMENT_DECLINED
-  PAYMENT_CANCELED
-}
-
 enum EventType {
   PAYMENT_CREATED
   PAYMENT_PROCESSING
@@ -106,31 +98,13 @@ model Payment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  apiKey        ApiKey         @relation(fields: [apiKeyId], references: [id])
-  paymentEvents PaymentEvent[]
-  checkouts     Checkout[]
-  events        Event[]
+  apiKey    ApiKey     @relation(fields: [apiKeyId], references: [id])
+  events    Event[]
+  checkouts Checkout[]
 
   @@unique([apiKeyId, externalId])
   @@unique([apiKeyId, idempotencyKey])
   @@map("payments")
-}
-
-model PaymentEvent {
-  id String @id @default(uuid())
-
-  paymentId String           @map("payment_id")
-  type      PaymentEventType
-  payload   Json?
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  payment           Payment           @relation(fields: [paymentId], references: [id])
-  webhookDeliveries WebhookDelivery[]
-
-  @@index([paymentId])
-  @@index([type])
-  @@map("payment_events")
 }
 
 model Event {
@@ -144,9 +118,8 @@ model Event {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  payment      Payment?      @relation(fields: [paymentId], references: [id])
-  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
-
+  payment           Payment?          @relation(fields: [paymentId], references: [id])
+  subscription      Subscription?     @relation(fields: [subscriptionId], references: [id])
   webhookDeliveries WebhookDelivery[]
 
   @@index([type])
@@ -180,19 +153,17 @@ model WebhookDelivery {
   statusCode Int?                  @map("status_code")
   error      String?
 
-  endpointId     String @map("endpoint_id")
-  paymentEventId String @map("payment_event_id")
+  endpointId String @map("endpoint_id")
+  eventId    String @map("event_id")
 
   deliveredAt DateTime? @map("delivered_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  endpoint     WebhookEndpoint @relation(fields: [endpointId], references: [id])
-  paymentEvent PaymentEvent    @relation(fields: [paymentEventId], references: [id])
-  event        Event?          @relation(fields: [eventId], references: [id])
-  eventId      String?
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id])
+  event    Event           @relation(fields: [eventId], references: [id])
 
   @@index([endpointId])
-  @@index([paymentEventId])
+  @@index([eventId])
   @@index([status])
   @@map("webhook_deliveries")
 }

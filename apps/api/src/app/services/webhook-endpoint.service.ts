@@ -6,8 +6,10 @@ import type {
 import { prismaSingleton } from "../../config/prisma.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { NotFoundError } from "../../common/http-error.ts";
-import type { PaymentEventType } from "../../../generated/prisma/enums.ts";
-import type { WebhookEndpoint } from "../../../generated/prisma/client.ts";
+import type {
+  EventType,
+  WebhookEndpoint,
+} from "../../../generated/prisma/client.ts";
 import type { PaginationInput } from "../../common/pagination.schema.ts";
 import {
   buildPaginatedResponse,
@@ -94,7 +96,7 @@ async function rotateSecret(endpointId: string) {
   return { secret };
 }
 
-async function findAllSubscribedToEvent(event: PaymentEventType) {
+async function findAllSubscribedToEvent(event: EventType) {
   return await prismaSingleton.$queryRaw<WebhookEndpoint[]>`
     SELECT *
     FROM webhook_endpoints

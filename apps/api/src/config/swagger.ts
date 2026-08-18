@@ -26,9 +26,9 @@ export async function registerSwagger(app: FastifyInstance) {
             "Core payment operations. Represents the financial transactions created by merchants, including their amount, currency, payment method, status, and lifecycle.",
         },
         {
-          name: "Payment Events",
+          name: "Events",
           description:
-            "Events generated throughout a payment's lifecycle. Allows integrations to track state changes such as payment creation, processing, approval, decline, and cancellation.",
+            "Events generated throughout the lifecycle of payments and subscriptions. Allows integrations to track state changes, recurring billing activity, and other relevant events within the payment system.",
         },
         {
           name: "Subscriptions",

@@ -1,8 +1,8 @@
 import { createHmac } from "node:crypto";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
-  PaymentEvent,
-  PaymentEventType,
+  Event,
+  EventType,
   WebhookEndpoint,
 } from "../../../generated/prisma/client.ts";
 import { webhookEndpointService } from "./webhook-endpoint.service.ts";
@@ -58,20 +58,20 @@ async function findAllByEndpointId(
   });
 }
 
-async function send(endpoint: WebhookEndpoint, paymentEvent: PaymentEvent) {
+async function send(endpoint: WebhookEndpoint, event: Event) {
   const delivery = await prismaSingleton.webhookDelivery.create({
     data: {
       endpointId: endpoint.id,
-      paymentEventId: paymentEvent.id,
+      eventId: event.id,
       status: "PENDING",
     },
   });
 
   const body = JSON.stringify({
-    id: paymentEvent.id,
-    type: paymentEvent.type,
-    createdAt: paymentEvent.createdAt,
-    data: paymentEvent.payload,
+    id: event.id,
+    type: event.type,
+    createdAt: event.createdAt,
+    data: event.payload,
   });
 
   const signature = createHmac("sha256", endpoint.secret)
@@ -111,14 +111,14 @@ async function send(endpoint: WebhookEndpoint, paymentEvent: PaymentEvent) {
   }
 }
 
-async function dispatch(paymentEvent: PaymentEvent) {
+async function dispatch(event: Event) {
   const subscribedEndpoints =
-    await webhookEndpointService.findAllSubscribedToEvent(paymentEvent.type);
+    await webhookEndpointService.findAllSubscribedToEvent(event.type);
 
   for (const endpoint of subscribedEndpoints) {
-    const events = endpoint.events as PaymentEventType[];
-    if (!events.includes(paymentEvent.type)) continue;
-    await send(endpoint, paymentEvent);
+    const events = endpoint.events as EventType[];
+    if (!events.includes(event.type)) continue;
+    await send(endpoint, event);
   }
 }
 
