@@ -35,6 +35,21 @@ enum PaymentEventType {
   PAYMENT_CANCELED
 }
 
+enum EventType {
+  PAYMENT_CREATED
+  PAYMENT_PROCESSING
+  PAYMENT_APPROVED
+  PAYMENT_DECLINED
+  PAYMENT_CANCELED
+
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_ACTIVATED
+  SUBSCRIPTION_RENEWED
+  SUBSCRIPTION_PAUSED
+  SUBSCRIPTION_RESUMED
+  SUBSCRIPTION_CANCELED
+}
+
 enum WebhookDeliveryStatus {
   PENDING
   SUCCESS
@@ -91,9 +106,10 @@ model Payment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  apiKey    ApiKey         @relation(fields: [apiKeyId], references: [id])
-  events    PaymentEvent[]
-  checkouts Checkout[]
+  apiKey        ApiKey         @relation(fields: [apiKeyId], references: [id])
+  paymentEvents PaymentEvent[]
+  checkouts     Checkout[]
+  events        Event[]
 
   @@unique([apiKeyId, externalId])
   @@unique([apiKeyId, idempotencyKey])
@@ -115,6 +131,29 @@ model PaymentEvent {
   @@index([paymentId])
   @@index([type])
   @@map("payment_events")
+}
+
+model Event {
+  id String @id @default(uuid())
+
+  type    EventType
+  payload Json?
+
+  paymentId      String? @map("payment_id")
+  subscriptionId String? @map("subscription_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  payment      Payment?      @relation(fields: [paymentId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  webhookDeliveries WebhookDelivery[]
+
+  @@index([type])
+  @@index([paymentId])
+  @@index([subscriptionId])
+  @@index([createdAt])
+  @@map("events")
 }
 
 model WebhookEndpoint {
@@ -149,6 +188,8 @@ model WebhookDelivery {
 
   endpoint     WebhookEndpoint @relation(fields: [endpointId], references: [id])
   paymentEvent PaymentEvent    @relation(fields: [paymentEventId], references: [id])
+  event        Event?          @relation(fields: [eventId], references: [id])
+  eventId      String?
 
   @@index([endpointId])
   @@index([paymentEventId])
@@ -197,6 +238,7 @@ model Subscription {
   apiKeyId  String     @map("api_key_id")
   apiKey    ApiKey     @relation(fields: [apiKeyId], references: [id])
   checkouts Checkout[]
+  events    Event[]
 
   @@map("subscriptions")
 }
