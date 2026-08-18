@@ -19,6 +19,7 @@ import {
   DesktopIcon,
   StarIcon,
   ArrowUpRightIcon,
+  ReceiptIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -28,6 +29,7 @@ const navigationLinks = [
   { label: "Dashboard", href: "/", icon: GaugeIcon },
   { label: "Payments", href: "/payments", icon: CurrencyCircleDollarIcon },
   { label: "Subscriptions", href: "/subscriptions", icon: StarIcon },
+  { label: "Events", href: "/events", icon: ReceiptIcon },
   { label: "Webhooks", href: "/webhooks", icon: WebhooksLogoIcon },
   { label: "API Keys", href: "/api-keys", icon: KeyIcon },
 ] as const;
