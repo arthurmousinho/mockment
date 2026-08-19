@@ -156,10 +156,10 @@ export function WebhookDeliveriesSheet({
                                 </div>
                                 <div className="space-y-1">
                                   <dt className="text-xs text-muted-foreground">
-                                    Payment Event ID
+                                    Event ID
                                   </dt>
                                   <dd className="break-all font-mono text-xs">
-                                    {delivery.paymentEventId}
+                                    {delivery.eventId}
                                   </dd>
                                 </div>
                                 <div className="space-y-1">

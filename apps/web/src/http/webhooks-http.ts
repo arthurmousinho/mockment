@@ -1,14 +1,14 @@
 import { api, apiErrorHandler } from "@/lib/ky";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import type { PaymentEventType } from "./payment-events-http";
 import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
+import type { EventType } from "./events-http";
 
 export type WebhookEndpoint = {
   id: string;
   url: string;
-  events: PaymentEventType[];
+  events: EventType[];
   apiKeyId: string;
   createdAt: string;
   updatedAt: string;
@@ -31,7 +31,7 @@ export function FindAllWebhookEndpointsRequest(
 
 export type CreateWebhookEndpointRequestData = {
   url: string;
-  events: PaymentEventType[];
+  events: EventType[];
   apiKey: string;
 };
 
@@ -39,7 +39,7 @@ export type CreateWebhookEndpointResponseData = {
   id: string;
   url: string;
   secret: string;
-  events: PaymentEventType[];
+  events: EventType[];
   apiKeyId: string;
   createdAt: string;
   updatedAt: string;
@@ -121,7 +121,7 @@ export type WebhookDelivery = {
   statusCode: number | null;
   error: string | null;
   endpointId: string;
-  paymentEventId: string;
+  eventId: string;
   deliveredAt: string | null;
   createdAt: string;
 };
@@ -161,7 +161,7 @@ export function FindAllWebhookEndpointDeliveriesRequest(
       const response = await api.get(
         `webhooks/deliveries/endpoint/${endpointId}`,
       );
-      return await response.json<WebhookDelivery[]>();
+      return await response.json<PaginatedAPIResponse<WebhookDelivery>>();
     },
     enabled: options?.enabled,
   });

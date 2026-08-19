@@ -33,10 +33,14 @@ export function WebhookEndpointDeliveriesSheet({
 }: WebhookEndpointDeliveriesSheetProps) {
   const [open, setOpen] = useState(false);
 
-  const { data, isPending, isError, refetch } =
-    FindAllWebhookEndpointDeliveriesRequest(endpointId, {
-      enabled: open,
-    });
+  const {
+    data: response,
+    isPending,
+    isError,
+    refetch,
+  } = FindAllWebhookEndpointDeliveriesRequest(endpointId, {
+    enabled: open,
+  });
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -78,7 +82,7 @@ export function WebhookEndpointDeliveriesSheet({
                 </TableHeader>
 
                 <TableBody>
-                  {data?.map((delivery) => {
+                  {response?.data.map((delivery) => {
                     return (
                       <>
                         <TableRow key={delivery.id} className="cursor-pointer">
@@ -113,7 +117,7 @@ export function WebhookEndpointDeliveriesSheet({
                     );
                   })}
 
-                  {data?.length === 0 && (
+                  {response?.data.length === 0 && (
                     <TableRow>
                       <TableCell
                         colSpan={5}
