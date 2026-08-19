@@ -25,8 +25,6 @@ export type CreateWebhookEndpointInput = z.infer<
 
 export const updateWebhookEndpointSchema = z.object({
   url: z
-    .string({ message: "A URL deve ser um texto." })
-    .trim()
     .url("A URL informada é inválida.")
     .max(2048, "A URL deve possuir no máximo 2048 caracteres.")
     .optional(),
@@ -43,7 +41,7 @@ export const webhookDeliverySchema = z.object({
   statusCode: z.number().int().positive(),
   error: z.string().nullable(),
   endpointId: z.uuid(),
-  paymentEventId: z.uuid(),
+  eventId: z.uuid(),
   deliveredAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });
