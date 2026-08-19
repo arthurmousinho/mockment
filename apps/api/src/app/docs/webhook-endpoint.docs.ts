@@ -94,7 +94,7 @@ export const webhookEndpointDocs = {
     tags: ["Webhook Endpoints"],
     params: idParamsSchema,
     response: {
-      200: {
+      201: {
         description:
           "When the webhook endpoint secret is rotated successfully.",
         content: {
