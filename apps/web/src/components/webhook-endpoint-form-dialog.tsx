@@ -39,14 +39,25 @@ const PAYMENT_EVENT_TYPES: EventType[] = [
   "PAYMENT_CANCELED",
 ] as const;
 
+const SUBSCRIPTION_EVENT_TYPES: EventType[] = [
+  "SUBSCRIPTION_CREATED",
+  "SUBSCRIPTION_ACTIVATED",
+  "SUBSCRIPTION_RENEWED",
+  "SUBSCRIPTION_PAUSED",
+  "SUBSCRIPTION_RESUMED",
+  "SUBSCRIPTION_CANCELED",
+];
+
+const ALL_EVENT_TYPES = [
+  ...PAYMENT_EVENT_TYPES,
+  ...SUBSCRIPTION_EVENT_TYPES,
+] as [EventType, ...EventType[]];
+
 function buildSchema(isEditing: boolean) {
   return z.object({
-    url: z
-      .string({ message: "A URL deve ser um texto" })
-      .trim()
-      .url("Informe uma URL válida."),
+    url: z.url("Informe uma URL válida."),
     events: z
-      .array(z.enum(PAYMENT_EVENT_TYPES))
+      .array(z.enum(ALL_EVENT_TYPES))
       .min(1, "Selecione ao menos um evento."),
     apiKey: isEditing
       ? z.string().trim().optional()
@@ -135,7 +146,7 @@ export function WebhookEndpointFormDialog({
       <DialogTrigger asChild onClick={() => setOpen(true)}>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-md">
         {secret ? (
           <RevealedSecretDialog
             title="Webhook created"
@@ -197,43 +208,81 @@ export function WebhookEndpointFormDialog({
                   render={() => (
                     <FormItem>
                       <FormLabel>Events</FormLabel>
-                      <div className="space-y-2">
-                        {PAYMENT_EVENT_TYPES.map((type, index) => (
-                          <FormField
-                            key={index}
-                            control={form.control}
-                            name="events"
-                            render={({ field }) => {
-                              const checked = field.value?.includes(type);
-                              return (
-                                <FormItem className="flex flex-row items-center gap-2">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={checked}
-                                      onCheckedChange={(isChecked) => {
-                                        if (isChecked) {
-                                          field.onChange([
-                                            ...field.value,
-                                            type,
-                                          ]);
-                                        } else {
-                                          field.onChange(
-                                            field.value.filter(
-                                              (value) => value !== type,
-                                            ),
-                                          );
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <EventTypeBadge type={type} />
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        ))}
+                      <div className="flex flex-row gap-4">
+                        <div>
+                          {PAYMENT_EVENT_TYPES.map((type, index) => (
+                            <FormField
+                              key={index}
+                              control={form.control}
+                              name="events"
+                              render={({ field }) => {
+                                const checked = field.value?.includes(type);
+                                return (
+                                  <FormItem className="flex flex-row items-center gap-2">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={checked}
+                                        onCheckedChange={(isChecked) => {
+                                          if (isChecked) {
+                                            field.onChange([
+                                              ...field.value,
+                                              type,
+                                            ]);
+                                          } else {
+                                            field.onChange(
+                                              field.value.filter(
+                                                (value) => value !== type,
+                                              ),
+                                            );
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <EventTypeBadge type={type} />
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <div>
+                          {SUBSCRIPTION_EVENT_TYPES.map((type, index) => (
+                            <FormField
+                              key={index}
+                              control={form.control}
+                              name="events"
+                              render={({ field }) => {
+                                const checked = field.value?.includes(type);
+                                return (
+                                  <FormItem className="flex flex-row items-center gap-2">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={checked}
+                                        onCheckedChange={(isChecked) => {
+                                          if (isChecked) {
+                                            field.onChange([
+                                              ...field.value,
+                                              type,
+                                            ]);
+                                          } else {
+                                            field.onChange(
+                                              field.value.filter(
+                                                (value) => value !== type,
+                                              ),
+                                            );
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <EventTypeBadge type={type} />
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <FormMessage />
                       </div>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
