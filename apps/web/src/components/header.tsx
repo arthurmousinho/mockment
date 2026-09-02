@@ -13,7 +13,7 @@ import {
   WebhooksLogoIcon,
   CurrencyCircleDollarIcon,
   BookOpenIcon,
-  GaugeIcon,
+  PathIcon,
   SunIcon,
   MoonIcon,
   DesktopIcon,
@@ -26,7 +26,7 @@ import { useTheme } from "./theme-provider";
 import { Logo } from "./logo";
 
 const navigationLinks = [
-  { label: "Dashboard", href: "/", icon: GaugeIcon },
+  { label: "Guide", href: "/", icon: PathIcon },
   { label: "Payments", href: "/payments", icon: CurrencyCircleDollarIcon },
   { label: "Subscriptions", href: "/subscriptions", icon: StarIcon },
   { label: "Events", href: "/events", icon: ReceiptIcon },

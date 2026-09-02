@@ -9,13 +9,14 @@ import { CheckoutDefaultSuccessPage } from "@/pages/checkout-default-success";
 import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
 import { EventsPage } from "@/pages/events";
+import { GuidePage } from "@/pages/guide";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
     children: [
-      { path: "", element: <h1>dahboard</h1> },
+      { path: "", element: <GuidePage /> },
       { path: "payments", element: <PaymentsPage /> },
       { path: "subscriptions", element: <SubscriptionsPage /> },
       { path: "events", element: <EventsPage /> },
