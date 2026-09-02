@@ -41,6 +41,7 @@ export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 
 export const createSubscriptionResponseSchema = subscriptionSchema.safeExtend({
   checkoutLink: z.url(),
+  initPaymentId: z.uuid(),
 });
 
 export type CreateSubscriptionOutput = z.infer<
