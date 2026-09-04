@@ -49,15 +49,17 @@ async function now(): Promise<Date> {
 }
 
 async function set(input: CurrentVirtualDateTimeInput) {
-  const clock = await prismaSingleton.virtualClock.update({
+  const updatedVirtualClock = await prismaSingleton.virtualClock.update({
     where: { id: CLOCK_ID },
     data: { currentDateTime: input.currentDateTime },
   });
 
+  eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
+
   const processedSubscriptions =
     await subscriptionService.processDueSubscriptions();
 
-  return { ...clock, ...processedSubscriptions };
+  return { ...updatedVirtualClock, ...processedSubscriptions };
 }
 
 async function advance({
@@ -78,23 +80,26 @@ async function advance({
   nextDate = addMonths(nextDate, months);
   nextDate = addYears(nextDate, years);
 
-  const clock = await prismaSingleton.virtualClock.update({
+  const updatedVirtualClock = await prismaSingleton.virtualClock.update({
     where: { id: CLOCK_ID },
     data: { currentDateTime: nextDate },
   });
 
+  eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
+
   const processedSubscriptions =
     await subscriptionService.processDueSubscriptions();
 
-  return { ...clock, ...processedSubscriptions };
+  return { ...updatedVirtualClock, ...processedSubscriptions };
 }
 
 async function reset(): Promise<Date> {
-  const clock = await prismaSingleton.virtualClock.update({
+  const updatedVirtualClock = await prismaSingleton.virtualClock.update({
     where: { id: CLOCK_ID },
     data: { currentDateTime: new Date() },
   });
-  return clock.currentDateTime;
+  eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
+  return updatedVirtualClock.currentDateTime;
 }
 
 export const virtualClockService = {
