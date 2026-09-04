@@ -12,6 +12,7 @@ import type {
   CurrentVirtualDateTimeInput,
 } from "../schemas/virtual-clock.schema.ts";
 import { subscriptionService } from "./subscription.service.ts";
+import { eventEmitterSingleton } from "../../config/event-emitter.ts";
 
 const CLOCK_ID = "default";
 
@@ -30,10 +31,14 @@ async function tickOneMinute() {
   const currentNow = await now();
   const nextTick = addMinutes(currentNow, 1);
 
-  return await prismaSingleton.virtualClock.update({
+  const updatedVirtualClock = await prismaSingleton.virtualClock.update({
     where: { id: CLOCK_ID },
     data: { currentDateTime: nextTick },
   });
+
+  eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
+
+  return updatedVirtualClock;
 }
 
 async function now(): Promise<Date> {
