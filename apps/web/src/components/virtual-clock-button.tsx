@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowCounterClockwiseIcon,
   CircleNotchIcon,
@@ -19,46 +19,67 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AdvanceCurrentVirtualDateTimeRequest,
-  GetCurrentVirtualDateTimeRequest,
   ResetCurrentVirtualDateTimeRequest,
   SetCurrentVirtualDateTimeRequest,
 } from "@/http/virtual-clock-http";
 import { formatDateTime } from "@/lib/formatters";
+import { useVirtualClockEvents } from "@/hooks/use-virtual-clock-events";
 
 const DRIFT_THRESHOLD_MS = 60 * 1000;
-const TICK_INTERVAL_MS = 1000;
 
-const QUICK_ADVANCES: { label: string; data: Record<string, number> }[] = [
+const QUICK_ADVANCES = [
   { label: "+1 Hour", data: { hours: 1 } },
   { label: "+1 Day", data: { days: 1 } },
   { label: "+1 Week", data: { weeks: 1 } },
   { label: "+1 Month", data: { months: 1 } },
-];
+] as const;
 
-function toDatetimeLocalValue(iso: string) {
-  const date = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
+const CUSTOM_ADVANCE_FIELDS = [
+  ["minutes", "Minutes"],
+  ["hours", "Hours"],
+  ["days", "Days"],
+  ["weeks", "Weeks"],
+  ["months", "Months"],
+  ["years", "Years"],
+] as const;
 
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate(),
-  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+type CustomAdvance = {
+  minutes: string;
+  hours: string;
+  days: string;
+  weeks: string;
+  months: string;
+  years: string;
+};
+
+const INITIAL_CUSTOM_ADVANCE: CustomAdvance = {
+  minutes: "",
+  hours: "",
+  days: "",
+  weeks: "",
+  months: "",
+  years: "",
+};
+
+function toDatetimeLocalValue(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return [
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
+    `${pad(date.getHours())}:${pad(date.getMinutes())}`,
+  ].join("T");
 }
 
 export function VirtualClockButton() {
   const [open, setOpen] = useState(false);
+
   const [pendingDateTime, setPendingDateTime] = useState("");
 
-  const [customAdvance, setCustomAdvance] = useState({
-    minutes: "",
-    hours: "",
-    days: "",
-    weeks: "",
-    months: "",
-    years: "",
-  });
+  const [customAdvance, setCustomAdvance] = useState<CustomAdvance>(
+    INITIAL_CUSTOM_ADVANCE,
+  );
 
-  const { data: virtualClock, isPending: isLoadingVirtualClock } =
-    GetCurrentVirtualDateTimeRequest();
+  const { virtualDateTime, liveVirtualDateTime } = useVirtualClockEvents();
 
   const { mutate: setVirtualDateTime, isPending: isSettingVirtualDateTime } =
     SetCurrentVirtualDateTimeRequest(
@@ -75,47 +96,26 @@ export function VirtualClockButton() {
     isPending: isResettingVirtualDateTime,
   } = ResetCurrentVirtualDateTimeRequest();
 
-  const offsetRef = useRef(0);
-  const [now, setNow] = useState(() => new Date());
+  const isLoading = !virtualDateTime;
+
+  const isTimeAltered =
+    virtualDateTime !== null &&
+    // eslint-disable-next-line react-hooks/purity
+    Math.abs(virtualDateTime.getTime() - Date.now()) > DRIFT_THRESHOLD_MS;
 
   useEffect(() => {
-    if (!virtualClock?.currentDateTime) return;
-
-    offsetRef.current =
-      new Date(virtualClock.currentDateTime).getTime() - Date.now();
+    if (!open || !virtualDateTime) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNow(new Date());
-  }, [virtualClock?.currentDateTime]);
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), TICK_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, []);
-
-  const liveVirtualDateTime = useMemo(
-    // eslint-disable-next-line react-hooks/refs
-    () => new Date(now.getTime() + offsetRef.current),
-    [now],
-  );
-
-  useEffect(() => {
-    if (open && virtualClock?.currentDateTime) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPendingDateTime(toDatetimeLocalValue(virtualClock.currentDateTime));
-    }
-  }, [open, virtualClock?.currentDateTime]);
-
-  // eslint-disable-next-line react-hooks/refs
-  const isTimeAltered = offsetRef.current > DRIFT_THRESHOLD_MS;
+    setPendingDateTime(toDatetimeLocalValue(virtualDateTime));
+  }, [open, virtualDateTime]);
 
   function handleApplyDateTime() {
     if (!pendingDateTime) return;
-
     setVirtualDateTime();
   }
 
-  function handleQuickAdvance(advanceData: Record<string, number>) {
-    advanceVirtualDateTime(advanceData);
+  function handleQuickAdvance(data: Record<string, number>) {
+    advanceVirtualDateTime(data);
   }
 
   function handleCustomAdvance() {
@@ -125,14 +125,30 @@ export function VirtualClockButton() {
         .filter(([, value]) => Number(value) > 0),
     );
 
-    if (Object.keys(payload).length === 0) return;
+    if (Object.keys(payload).length === 0) {
+      return;
+    }
 
     advanceVirtualDateTime(payload);
+  }
+
+  function handleCustomAdvanceChange(
+    field: keyof CustomAdvance,
+    value: string,
+  ) {
+    setCustomAdvance((current) => ({
+      ...current,
+      [field]: value,
+    }));
   }
 
   function handleReset() {
     resetVirtualDateTime();
   }
+
+  const formattedDateTime = liveVirtualDateTime
+    ? formatDateTime(liveVirtualDateTime.toISOString())
+    : "—";
 
   return (
     <>
@@ -154,11 +170,7 @@ export function VirtualClockButton() {
               <ClockIcon className="h-5 w-5" weight="bold" />
 
               <span className="text-sm font-medium">
-                {isLoadingVirtualClock
-                  ? "Loading..."
-                  : virtualClock?.currentDateTime
-                    ? formatDateTime(liveVirtualDateTime.toISOString())
-                    : "—"}
+                {isLoading ? "Loading..." : formattedDateTime}
               </span>
             </Button>
           </PopoverTrigger>
@@ -167,27 +179,30 @@ export function VirtualClockButton() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TimerIcon className="h-4 w-4 text-muted-foreground" />
+
                 <h4 className="text-sm font-medium leading-none">
                   Virtual Clock
                 </h4>
               </div>
+
               <Badge variant={isTimeAltered ? "default" : "secondary"}>
                 {isTimeAltered ? "Modified" : "Real Time"}
               </Badge>
             </div>
+
             <p className="mt-2 text-sm text-muted-foreground">
-              {isLoadingVirtualClock
-                ? "Loading..."
-                : virtualClock?.currentDateTime
-                  ? formatDateTime(liveVirtualDateTime.toISOString())
-                  : "—"}
+              {formattedDateTime}
             </p>
+
             <Separator className="my-4" />
+
             <Tabs defaultValue="advance">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="advance">Advance</TabsTrigger>
+
                 <TabsTrigger value="set">Set Date & Time</TabsTrigger>
               </TabsList>
+
               <TabsContent value="advance" className="space-y-4">
                 <div className="flex flex-wrap gap-2">
                   {QUICK_ADVANCES.map((option) => (
@@ -202,33 +217,22 @@ export function VirtualClockButton() {
                     </Button>
                   ))}
                 </div>
+
                 <div className="grid grid-cols-3 gap-2">
-                  {(
-                    [
-                      ["minutes", "Minutes"],
-                      ["hours", "Hours"],
-                      ["days", "Days"],
-                      ["weeks", "Weeks"],
-                      ["months", "Months"],
-                      ["years", "Years"],
-                    ] as const
-                  ).map(([field, label]) => (
+                  {CUSTOM_ADVANCE_FIELDS.map(([field, label]) => (
                     <div key={field} className="space-y-1">
-                      <Label htmlFor={field} className="text-xs">
+                      <Label htmlFor={`advance-${field}`} className="text-xs">
                         {label}
                       </Label>
 
                       <Input
-                        id={field}
+                        id={`advance-${field}`}
                         type="number"
                         min={0}
                         inputMode="numeric"
                         value={customAdvance[field]}
                         onChange={(event) =>
-                          setCustomAdvance((prev) => ({
-                            ...prev,
-                            [field]: event.target.value,
-                          }))
+                          handleCustomAdvanceChange(field, event.target.value)
                         }
                       />
                     </div>
@@ -248,9 +252,11 @@ export function VirtualClockButton() {
                   Advance Time
                 </Button>
               </TabsContent>
+
               <TabsContent value="set" className="space-y-4">
                 <div className="space-y-1">
                   <Label htmlFor="virtual-datetime">Date & Time</Label>
+
                   <Input
                     id="virtual-datetime"
                     type="datetime-local"
@@ -258,6 +264,7 @@ export function VirtualClockButton() {
                     onChange={(event) => setPendingDateTime(event.target.value)}
                   />
                 </div>
+
                 <Button
                   className="w-full"
                   disabled={!pendingDateTime || isSettingVirtualDateTime}
@@ -270,9 +277,10 @@ export function VirtualClockButton() {
                 </Button>
               </TabsContent>
             </Tabs>
+
             <Button
               variant="outline"
-              className="w-full"
+              className="mt-4 w-full"
               disabled={isResettingVirtualDateTime}
               onClick={handleReset}
             >
