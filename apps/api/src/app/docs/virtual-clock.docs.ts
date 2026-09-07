@@ -21,6 +21,27 @@ export const virtualClockDocs = {
       },
     },
   },
+  events: {
+    summary: "Subscribe to virtual clock events",
+    description:
+      "Opens a Server-Sent Events (SSE) stream that sends the current virtual date and time whenever the virtual clock is updated.",
+    tags: ["Virtual Clock"],
+    response: {
+      200: {
+        description:
+          "A persistent SSE connection that emits virtual clock updates.",
+        content: {
+          "text/event-stream": {
+            schema: {
+              type: "string",
+              example:
+                'event: clock-tick\ndata: "2026-09-07T12:00:00.000Z"\n\n',
+            },
+          },
+        },
+      },
+    },
+  },
   advance: {
     summary: "Advance virtual clock",
     description: "Advances the virtual clock by the specified amount of time.",

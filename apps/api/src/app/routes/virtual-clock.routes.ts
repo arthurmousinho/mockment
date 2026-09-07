@@ -14,32 +14,36 @@ export async function virtualClockRoutes(app: FastifyInstance) {
     return reply.status(200).send({ currentDateTime });
   });
 
-  app.get("/events", async (request, reply) => {
-    reply.hijack();
+  app.get(
+    "/events",
+    { schema: virtualClockDocs.events },
+    async (request, reply) => {
+      reply.hijack();
 
-    reply.raw.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-      "Access-Control-Allow-Origin": env.WEB_URL,
-    });
+      reply.raw.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "Access-Control-Allow-Origin": env.WEB_URL,
+      });
 
-    const onClockTick = (currentDateTime: Date) => {
-      reply.raw.write(
-        `event: clock-tick\n` +
-          `data: ${JSON.stringify(currentDateTime.toISOString())}\n\n`,
-      );
-    };
+      const onClockTick = (currentDateTime: Date) => {
+        reply.raw.write(
+          `event: clock-tick\n` +
+            `data: ${JSON.stringify(currentDateTime.toISOString())}\n\n`,
+        );
+      };
 
-    eventEmitterSingleton.on("clock-tick", onClockTick);
+      eventEmitterSingleton.on("clock-tick", onClockTick);
 
-    const currentDateTime = await virtualClockService.now();
-    onClockTick(currentDateTime);
+      const currentDateTime = await virtualClockService.now();
+      onClockTick(currentDateTime);
 
-    request.raw.on("close", () => {
-      eventEmitterSingleton.off("clock-tick", onClockTick);
-    });
-  });
+      request.raw.on("close", () => {
+        eventEmitterSingleton.off("clock-tick", onClockTick);
+      });
+    },
+  );
 
   app.post(
     "/advance",
