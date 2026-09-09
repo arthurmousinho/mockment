@@ -13,7 +13,7 @@ import {
 } from "../../common/utils.ts";
 
 function generateKeyPair() {
-  const rawKey = `sk_live_${crypto.randomBytes(32).toString("hex")}`;
+  const rawKey = `mk_test_${crypto.randomBytes(32).toString("hex")}`;
   const keyHash = crypto.createHash("sha256").update(rawKey).digest("hex");
   return { rawKey, keyHash };
 }
