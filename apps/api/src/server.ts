@@ -1,7 +1,4 @@
 import cors from "@fastify/cors";
-import swagger from "@fastify/swagger";
-import swaggerUi from "@fastify/swagger-ui";
-
 import { ZodError } from "zod";
 import { createApp } from "./app.ts";
 import { apiKeyRoutes } from "./app/routes/api-key.routes.ts";
