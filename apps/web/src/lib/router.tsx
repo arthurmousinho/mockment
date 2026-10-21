@@ -10,6 +10,7 @@ import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
 import { EventsPage } from "@/pages/events";
 import { GuidePage } from "@/pages/guide";
+import { NotFoundPage } from "@/pages/not-found";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: "checkout/:id", element: <CheckoutPage /> },
       { path: "success-checkout", element: <CheckoutDefaultSuccessPage /> },
       { path: "cancel-checkout", element: <CheckoutDefaultCancelPage /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
   {
