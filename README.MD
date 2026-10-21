@@ -127,6 +127,12 @@ git clone https://github.com/arthurmousinho/mockment.git
 cd mockment
 ```
 
+Create your local environment configuration by copying the example file:
+
+```bash
+cp .env.example .env
+```
+
 Install all workspace dependencies:
 
 ```bash
@@ -139,19 +145,7 @@ Mockment uses MySQL running inside Docker. Start the required containers before 
 docker compose up -d
 ```
 
-Create your local environment configuration by copying the example file:
-
-```bash
-cp .env.example .env
-```
-
 The default configuration should work for most development environments, but you can adjust the variables if necessary.
-
-Next, create the database schema using Prisma migrations:
-
-```bash
-pnpm prisma migrate dev
-```
 
 Finally, start the development environment:
 
@@ -161,10 +155,12 @@ pnpm dev
 
 After everything is running, the services will be available at:
 
-| Service       | URL                   |
-| ------------- | --------------------- |
-| REST API      | http://localhost:8080 |
-| Web Dashboard | http://localhost:4200 |
+| Service           | URL                                  |
+| ----------------- | ------------------------------------ |
+| REST API          | http://localhost:8080                |
+| API Doc (Swagger) | http://localhost:8080/docs           |
+| API Doc (Scalar)  | http://localhost:4200/scalar-api-doc |
+| Web Dashboard     | http://localhost:4200                |
 
 ## Quick Start
 
