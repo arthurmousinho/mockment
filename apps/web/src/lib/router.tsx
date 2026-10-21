@@ -11,34 +11,77 @@ import { SubscriptionsPage } from "@/pages/subscriptions";
 import { EventsPage } from "@/pages/events";
 import { GuidePage } from "@/pages/guide";
 import { NotFoundPage } from "@/pages/not-found";
+import { PageLayout } from "@/layouts/page-layout";
 
 export const router = createBrowserRouter([
   {
-    element: <FrontendLayout />,
+    element: <PageLayout />,
     children: [
       {
-        path: "/",
-        element: <MainLayout />,
+        element: <FrontendLayout />,
         children: [
-          { path: "", element: <GuidePage /> },
-          { path: "payments", element: <PaymentsPage /> },
-          { path: "subscriptions", element: <SubscriptionsPage /> },
-          { path: "events", element: <EventsPage /> },
-          { path: "webhooks", element: <WebhooksPage /> },
-          { path: "api-keys", element: <ApiKeysPage /> },
+          {
+            path: "/",
+            element: <MainLayout />,
+            children: [
+              { path: "", handle: { title: "Guide" }, element: <GuidePage /> },
+              {
+                path: "payments",
+                handle: { title: "Payments" },
+                element: <PaymentsPage />,
+              },
+              {
+                path: "subscriptions",
+                handle: { title: "Subscriptions" },
+                element: <SubscriptionsPage />,
+              },
+              {
+                path: "events",
+                handle: { title: "Events" },
+                element: <EventsPage />,
+              },
+              {
+                path: "webhooks",
+                handle: { title: "Webhooks" },
+                element: <WebhooksPage />,
+              },
+              {
+                path: "api-keys",
+                handle: { title: "API Keys" },
+                element: <ApiKeysPage />,
+              },
+            ],
+          },
+          {
+            path: "checkout/:id",
+            handle: { title: "Checkout" },
+            element: <CheckoutPage />,
+          },
+          {
+            path: "success-checkout",
+            handle: { title: "Payment approved" },
+            element: <CheckoutDefaultSuccessPage />,
+          },
+          {
+            path: "cancel-checkout",
+            handle: { title: "Payment canceled" },
+            element: <CheckoutDefaultCancelPage />,
+          },
+          {
+            path: "*",
+            handle: { title: "404 — Page not found" },
+            element: <NotFoundPage />,
+          },
         ],
       },
-      { path: "checkout/:id", element: <CheckoutPage /> },
-      { path: "success-checkout", element: <CheckoutDefaultSuccessPage /> },
-      { path: "cancel-checkout", element: <CheckoutDefaultCancelPage /> },
-      { path: "*", element: <NotFoundPage /> },
+      {
+        path: "scalar-api-doc",
+        handle: { title: "API Documentation" },
+        lazy: async () => {
+          const { ScalarApiDocPage } = await import("@/pages/scalar-api-doc");
+          return { Component: ScalarApiDocPage };
+        },
+      },
     ],
-  },
-  {
-    path: "scalar-api-doc",
-    lazy: async () => {
-      const { ScalarApiDocPage } = await import("@/pages/scalar-api-doc");
-      return { Component: ScalarApiDocPage };
-    },
   },
 ]);
