@@ -17,7 +17,7 @@
     "zod-to-json-schema": "^3.25.2"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "prisma migrate dev && tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js"
   },
