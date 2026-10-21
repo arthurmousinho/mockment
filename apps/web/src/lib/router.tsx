@@ -4,7 +4,7 @@ import { ApiKeysPage } from "@/pages/api-keys";
 import { PaymentsPage } from "@/pages/payments";
 import { WebhooksPage } from "@/pages/webhooks";
 import { CheckoutPage } from "@/pages/checkout";
-import { ScalarApiDocPage } from "@/pages/scalar-api-doc";
+import { FrontendLayout } from "@/layouts/frontend-layout";
 import { CheckoutDefaultSuccessPage } from "@/pages/checkout-default-success";
 import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
@@ -13,19 +13,30 @@ import { GuidePage } from "@/pages/guide";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <MainLayout />,
+    element: <FrontendLayout />,
     children: [
-      { path: "", element: <GuidePage /> },
-      { path: "payments", element: <PaymentsPage /> },
-      { path: "subscriptions", element: <SubscriptionsPage /> },
-      { path: "events", element: <EventsPage /> },
-      { path: "webhooks", element: <WebhooksPage /> },
-      { path: "api-keys", element: <ApiKeysPage /> },
+      {
+        path: "/",
+        element: <MainLayout />,
+        children: [
+          { path: "", element: <GuidePage /> },
+          { path: "payments", element: <PaymentsPage /> },
+          { path: "subscriptions", element: <SubscriptionsPage /> },
+          { path: "events", element: <EventsPage /> },
+          { path: "webhooks", element: <WebhooksPage /> },
+          { path: "api-keys", element: <ApiKeysPage /> },
+        ],
+      },
+      { path: "checkout/:id", element: <CheckoutPage /> },
+      { path: "success-checkout", element: <CheckoutDefaultSuccessPage /> },
+      { path: "cancel-checkout", element: <CheckoutDefaultCancelPage /> },
     ],
   },
-  { path: "scalar-api-doc", element: <ScalarApiDocPage /> },
-  { path: "checkout/:id", element: <CheckoutPage /> },
-  { path: "success-checkout", element: <CheckoutDefaultSuccessPage /> },
-  { path: "cancel-checkout", element: <CheckoutDefaultCancelPage /> },
+  {
+    path: "scalar-api-doc",
+    lazy: async () => {
+      const { ScalarApiDocPage } = await import("@/pages/scalar-api-doc");
+      return { Component: ScalarApiDocPage };
+    },
+  },
 ]);

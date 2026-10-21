@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/jetbrains-mono";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-app-theme="dark"], [data-app-theme="dark"] *));
 
 @theme inline {
   --font-sans: var(--font-sans);
@@ -87,7 +87,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+[data-app-theme="dark"] {
   --font-sans: "IBM Plex Sans Variable", sans-serif;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -126,7 +126,17 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+}
+
+/* Keep the frontend canvas independent of Scalar’s global body styles. */
+html[data-app-theme] body {
+  @apply bg-background text-foreground;
+}
+
+html[data-app-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-app-theme="dark"] {
+  color-scheme: dark;
 }
