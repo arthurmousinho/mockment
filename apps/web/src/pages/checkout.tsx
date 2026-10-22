@@ -33,7 +33,7 @@ const paymentMethodTabs = [
 
 export function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, isPending, isError, refetch } = GetCheckoutDetailsRequest(id!);
+  const { data, isPending, isError } = GetCheckoutDetailsRequest(id!);
   const { mutate: completeReqeust, isPending: isCompleting } =
     CompleteCheckoutRequest(id ?? "");
 
@@ -54,15 +54,14 @@ export function CheckoutPage() {
   function handleCompleteCheckout(status: CheckoutCompletionStatus) {
     completeReqeust(status, {
       onSuccess: () => {
-        if (status === "APPROVED" && data?.successUrl) {
+        if (!data) return;
+
+        if (status === "APPROVED") {
           window.location.href = data.successUrl;
           return;
         }
-        if (status === "CANCELED" && data?.cancelUrl) {
-          window.location.href = data.cancelUrl;
-          return;
-        }
-        refetch();
+
+        window.location.href = data.cancelUrl;
       },
     });
   }

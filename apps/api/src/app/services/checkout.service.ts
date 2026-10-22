@@ -108,6 +108,7 @@ async function complete(id: string, status: CheckoutCompletionStatus) {
       }
       break;
     case "DECLINED":
+      await paymentService.changeStatus(checkout.paymentId, "PROCESSING");
       await paymentService.changeStatus(checkout.paymentId, "DECLINED");
       break;
     case "CANCELED":
