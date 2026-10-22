@@ -13,7 +13,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -92,9 +91,9 @@ export function ApiKeysPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <header className="flex items-start justify-between gap-6">
-        <div className="space-y-2">
+    <div className="min-w-0 space-y-4">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="min-w-0 space-y-2">
           <div className="flex items-center gap-2">
             <KeyIcon size={24} className="font-medium" />
             <h1 className="text-xl font-medium tracking-tight">API Keys</h1>
@@ -108,7 +107,7 @@ export function ApiKeysPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <ApiKeyFormDialog>
             <Button>
@@ -133,7 +132,9 @@ export function ApiKeysPage() {
         <TableBody>
           {response?.data.map((item) => (
             <TableRow key={item.id}>
-              <TableCell>{item.name}</TableCell>
+              <TableCell className="max-w-64 whitespace-normal break-words">
+                {item.name}
+              </TableCell>
               <TableCell className="text-right">
                 {formatDateTime(item.createdAt)}
               </TableCell>
@@ -192,18 +193,14 @@ export function ApiKeysPage() {
             </TableRow>
           )}
         </TableBody>
-        <TableFooter className="w-full bg-transparent">
-          <TableRow>
-            <TableCell colSpan={5} className="w-full py-2">
-              <Paginator
-                pagination={response.pagination}
-                onPageChange={setPage}
-                onLimitChange={setLimit}
-              />
-            </TableCell>
-          </TableRow>
-        </TableFooter>
       </Table>
+      <div className="border-t px-2 py-3">
+        <Paginator
+          pagination={response.pagination}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+        />
+      </div>
 
       <Dialog
         open={Boolean(rotatedKey)}

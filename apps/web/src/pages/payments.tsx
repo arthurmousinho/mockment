@@ -15,7 +15,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -90,9 +89,9 @@ export function PaymentsPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <header className="flex items-start justify-between gap-6">
-        <div className="space-y-2">
+    <div className="min-w-0 space-y-4">
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="min-w-0 space-y-2">
           <div className="flex items-center gap-2">
             <CurrencyCircleDollarIcon size={24} className="font-medium" />
             <h1 className="text-xl font-medium tracking-tight">Payments</h1>
@@ -213,18 +212,14 @@ export function PaymentsPage() {
             </TableRow>
           )}
         </TableBody>
-        <TableFooter className="w-full bg-transparent">
-          <TableRow>
-            <TableCell colSpan={7} className="w-full py-2">
-              <Paginator
-                pagination={response.pagination}
-                onPageChange={setPage}
-                onLimitChange={setLimit}
-              />
-            </TableCell>
-          </TableRow>
-        </TableFooter>
       </Table>
+      <div className="border-t px-2 py-3">
+        <Paginator
+          pagination={response.pagination}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+        />
+      </div>
     </div>
   );
 }

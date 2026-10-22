@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import type { PaginatedAPIResponse } from "@/types/http.type";
 
@@ -27,22 +26,22 @@ export function Paginator({ variant = "default", ...props }: PaginatorProps) {
     props.pagination;
 
   return (
-    <footer className="flex w-full items-center justify-between">
+    <div className="flex w-full flex-wrap items-center justify-between gap-3">
       <span className="text-sm text-muted-foreground">
         Total of {total} records
       </span>
-      <footer className="flex items-center space-x-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         {variant === "default" && (
-          <Label>
+          <span className="text-sm">
             Page {page} of {totalPages} pages
-          </Label>
+          </span>
         )}
         {variant === "default" && (
           <Select
             value={limit.toString()}
             onValueChange={(value) => props.onLimitChange(Number(value))}
           >
-            <SelectTrigger className="h-12 w-17.5">
+            <SelectTrigger className="h-8 w-17.5" aria-label="Records per page">
               <SelectValue placeholder="Records per page" />
             </SelectTrigger>
             <SelectContent>
@@ -54,10 +53,12 @@ export function Paginator({ variant = "default", ...props }: PaginatorProps) {
             </SelectContent>
           </Select>
         )}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {variant === "default" && (
             <Button
               variant="outline"
+              size="icon"
+              aria-label="First page"
               onClick={() => props.onPageChange(1)}
               disabled={!hasPreviousPage}
             >
@@ -66,6 +67,8 @@ export function Paginator({ variant = "default", ...props }: PaginatorProps) {
           )}
           <Button
             variant="outline"
+            size="icon"
+            aria-label="Previous page"
             onClick={() => props.onPageChange(page - 1)}
             disabled={!hasPreviousPage}
           >
@@ -73,6 +76,8 @@ export function Paginator({ variant = "default", ...props }: PaginatorProps) {
           </Button>
           <Button
             variant="outline"
+            size="icon"
+            aria-label="Next page"
             onClick={() => props.onPageChange(page + 1)}
             disabled={!hasNextPage}
           >
@@ -81,6 +86,8 @@ export function Paginator({ variant = "default", ...props }: PaginatorProps) {
           {variant === "default" && (
             <Button
               variant="outline"
+              size="icon"
+              aria-label="Last page"
               onClick={() => props.onPageChange(totalPages)}
               disabled={!hasNextPage}
             >
@@ -88,7 +95,7 @@ export function Paginator({ variant = "default", ...props }: PaginatorProps) {
             </Button>
           )}
         </div>
-      </footer>
-    </footer>
+      </div>
+    </div>
   );
 }
