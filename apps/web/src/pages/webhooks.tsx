@@ -108,7 +108,7 @@ export function WebhooksPage() {
           </p>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-2 lg:max-w-full">
+        <nav className="flex flex-wrap items-center gap-2 lg:shrink-0 lg:flex-nowrap">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <WebhookDeliveriesSheet>
             <Button variant="secondary">

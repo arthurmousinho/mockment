@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -45,7 +44,7 @@ export function WebhookEndpointDeliveriesSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex w-full flex-col gap-0 sm:min-w-[50vw]">
+      <SheetContent className="gap-0 overflow-hidden data-[side=right]:sm:max-w-3xl data-[side=right]:xl:max-w-[60vw]">
         <SheetHeader>
           <SheetTitle>Webhook Endpoint Deliveries</SheetTitle>
           <SheetDescription>
@@ -53,7 +52,7 @@ export function WebhookEndpointDeliveriesSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col px-3 pb-4 sm:px-4">
           {isPending && (
             <div className="py-10 text-center text-sm text-muted-foreground">
               Loading...
@@ -70,7 +69,7 @@ export function WebhookEndpointDeliveriesSheet({
           )}
 
           {!isPending && !isError && (
-            <ScrollArea className="-mx-4 min-h-0 flex-1 px-4">
+            <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
@@ -84,43 +83,41 @@ export function WebhookEndpointDeliveriesSheet({
                 <TableBody>
                   {response?.data.map((delivery) => {
                     return (
-                      <>
-                        <TableRow key={delivery.id} className="cursor-pointer">
-                          <TableCell>
-                            <Badge
-                              variant={
-                                delivery.status === "SUCCESS"
-                                  ? "default"
-                                  : "destructive"
-                              }
-                            >
-                              {delivery.status === "SUCCESS"
-                                ? "Success"
-                                : "Failed"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <StatusCodeBadge statusCode={delivery.statusCode} />
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-destructive">
-                              {delivery.error ?? "—"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right text-xs text-muted-foreground">
-                            {delivery.deliveredAt
-                              ? formatDateTime(delivery.deliveredAt)
-                              : "—"}
-                          </TableCell>
-                        </TableRow>
-                      </>
+                      <TableRow key={delivery.id} className="cursor-pointer">
+                        <TableCell>
+                          <Badge
+                            variant={
+                              delivery.status === "SUCCESS"
+                                ? "default"
+                                : "destructive"
+                            }
+                          >
+                            {delivery.status === "SUCCESS"
+                              ? "Success"
+                              : "Failed"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <StatusCodeBadge statusCode={delivery.statusCode} />
+                        </TableCell>
+                        <TableCell className="min-w-40 max-w-80 whitespace-normal break-all">
+                          <span className="text-destructive">
+                            {delivery.error ?? "—"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground">
+                          {delivery.deliveredAt
+                            ? formatDateTime(delivery.deliveredAt)
+                            : "—"}
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
 
                   {response?.data.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={4}
                         className="py-10 text-center text-muted-foreground"
                       >
                         No deliveries found.
@@ -129,7 +126,7 @@ export function WebhookEndpointDeliveriesSheet({
                   )}
                 </TableBody>
               </Table>
-            </ScrollArea>
+            </div>
           )}
         </div>
       </SheetContent>

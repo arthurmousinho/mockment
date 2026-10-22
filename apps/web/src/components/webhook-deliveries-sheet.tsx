@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -20,7 +19,7 @@ import {
 import { FindAllWebhookDeliveriesRequest } from "@/http/webhooks-http";
 import { formatDateTime } from "@/lib/formatters";
 import { CaretDownIcon } from "@phosphor-icons/react";
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { StatusCodeBadge } from "./status-code-badge";
 import { Paginator } from "./paginator";
@@ -51,7 +50,7 @@ export function WebhookDeliveriesSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex w-full flex-col gap-0 sm:min-w-[50vw]">
+      <SheetContent className="gap-0 overflow-hidden data-[side=right]:sm:max-w-3xl data-[side=right]:xl:max-w-[60vw]">
         <SheetHeader>
           <SheetTitle>All Webhook Deliveries</SheetTitle>
           <SheetDescription>
@@ -59,7 +58,7 @@ export function WebhookDeliveriesSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col px-3 pb-4 sm:px-4">
           {isPending && (
             <div className="py-10 text-center text-sm text-muted-foreground">
               Loading...
@@ -76,7 +75,7 @@ export function WebhookDeliveriesSheet({
           )}
 
           {!isPending && !isError && (
-            <ScrollArea className="-mx-4 min-h-0 flex-1 px-4">
+            <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
@@ -93,7 +92,7 @@ export function WebhookDeliveriesSheet({
                     const isExpanded = expandedId === delivery.id;
 
                     return (
-                      <>
+                      <Fragment key={delivery.id}>
                         <TableRow
                           key={delivery.id}
                           onClick={() => toggleExpanded(delivery.id)}
@@ -136,8 +135,11 @@ export function WebhookDeliveriesSheet({
 
                         {isExpanded && (
                           <TableRow key={`${delivery.id}-details`}>
-                            <TableCell colSpan={5} className="bg-muted/40 p-0">
-                              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 px-6 py-4 text-sm">
+                            <TableCell
+                              colSpan={5}
+                              className="bg-muted/40 p-0 whitespace-normal"
+                            >
+                              <dl className="grid grid-cols-1 gap-x-6 gap-y-3 px-3 py-4 text-sm sm:grid-cols-2 sm:px-6">
                                 <div className="space-y-1">
                                   <dt className="text-xs text-muted-foreground">
                                     Delivery ID
@@ -170,11 +172,11 @@ export function WebhookDeliveriesSheet({
                                     {formatDateTime(delivery.createdAt)}
                                   </dd>
                                 </div>
-                                <div className="col-span-2 space-y-1">
+                                <div className="space-y-1 sm:col-span-2">
                                   <dt className="text-xs text-muted-foreground">
                                     Error
                                   </dt>
-                                  <dd className="text-xs text-destructive">
+                                  <dd className="text-xs break-all text-destructive">
                                     {delivery.error ?? "—"}
                                   </dd>
                                 </div>
@@ -182,7 +184,7 @@ export function WebhookDeliveriesSheet({
                             </TableCell>
                           </TableRow>
                         )}
-                      </>
+                      </Fragment>
                     );
                   })}
 
@@ -198,10 +200,10 @@ export function WebhookDeliveriesSheet({
                   )}
                 </TableBody>
               </Table>
-            </ScrollArea>
+            </div>
           )}
           {response && (
-            <footer className="px-4">
+            <footer className="shrink-0 border-t pt-3">
               <Paginator
                 pagination={response.pagination}
                 onPageChange={setPage}
