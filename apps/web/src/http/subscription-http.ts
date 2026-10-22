@@ -1,3 +1,4 @@
+import type { Event } from "./events-http";
 import { api, apiErrorHandler } from "@/lib/ky";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
@@ -21,6 +22,10 @@ export type Subscription = {
   createdAt: string;
   updatedAt: string;
   apiKeyId: string;
+};
+
+export type DetailedSubscription = Subscription & {
+  events: Pick<Event, "id" | "type" | "createdAt">[];
 };
 
 export type CreateSubscriptionResponse = Subscription & {
@@ -135,5 +140,19 @@ export function PauseSubscriptionRequest() {
       toast.success("Subscription paused successfully.");
     },
     onError: apiErrorHandler,
+  });
+}
+
+export function GetSubscriptionDetailsRequest(
+  id: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: ["subscriptions", id],
+    queryFn: async () => {
+      const request = await api.get(`subscriptions/${id}`);
+      return await request.json<DetailedSubscription>();
+    },
+    enabled: options?.enabled ?? true,
   });
 }

@@ -1,4 +1,4 @@
-import { SubscriptionCreatedContent } from "./subscription-created-content";
+import { SubscriptionDetailsContent } from "./subscription-details-content";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -141,12 +141,13 @@ export function SubscriptionFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         {createdSubscription ? (
-          <SubscriptionCreatedContent subscription={createdSubscription} />
+          <SubscriptionDetailsContent
+            subscription={createdSubscription}
+            created
+          />
         ) : (
           <>
             <DialogHeader>

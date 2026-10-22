@@ -1,3 +1,4 @@
+import { SubscriptionDetailsDialog } from "@/components/subscription-details-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
@@ -157,12 +158,14 @@ export function SubscriptionsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <DropdownMenuItem
-                      onSelect={(event) => event.preventDefault()}
-                    >
-                      <EyeIcon size={32} />
-                      Details
-                    </DropdownMenuItem>
+                    <SubscriptionDetailsDialog id={item.id}>
+                      <DropdownMenuItem
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        <EyeIcon size={32} />
+                        Details
+                      </DropdownMenuItem>
+                    </SubscriptionDetailsDialog>
                     <DropdownMenuItem
                       disabled={
                         !canChangeSubscriptionStatus(item.status, "ACTIVE") ||
