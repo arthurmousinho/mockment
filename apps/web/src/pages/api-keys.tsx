@@ -1,3 +1,4 @@
+import { RefetchButton } from "@/components/refetch-button";
 import { ApiKeyFormDialog } from "@/components/api-key-form-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ export function ApiKeysPage() {
   const {
     data: response,
     isPending,
+    isFetching,
     isError,
     refetch,
   } = FindAllApiKeysRequest({ page, limit });
@@ -106,12 +108,15 @@ export function ApiKeysPage() {
           </p>
         </div>
 
-        <ApiKeyFormDialog>
-          <Button>
-            <PlusIcon size={18} />
-            New API Key
-          </Button>
-        </ApiKeyFormDialog>
+        <div className="flex items-center gap-2">
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <ApiKeyFormDialog>
+            <Button>
+              <PlusIcon size={18} />
+              New API Key
+            </Button>
+          </ApiKeyFormDialog>
+        </div>
       </header>
 
       <Table>

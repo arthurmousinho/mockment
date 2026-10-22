@@ -1,3 +1,4 @@
+import { RefetchButton } from "@/components/refetch-button";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
@@ -52,6 +53,7 @@ export function WebhooksPage() {
   const {
     data: response,
     isPending,
+    isFetching,
     isError,
     refetch,
   } = FindAllWebhookEndpointsRequest({
@@ -108,6 +110,7 @@ export function WebhooksPage() {
         </div>
 
         <nav className="flex items-center gap-2">
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <WebhookDeliveriesSheet>
             <Button variant="secondary">
               <CellTowerIcon size={18} />

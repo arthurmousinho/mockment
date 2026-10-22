@@ -1,3 +1,4 @@
+import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { SubscriptionFormDialog } from "@/components/subscription-form-dialog";
@@ -46,6 +47,7 @@ export function SubscriptionsPage() {
   const {
     data: response,
     isPending,
+    isFetching,
     isError,
     refetch,
   } = FindAllSubscriptionsRequest({
@@ -104,12 +106,15 @@ export function SubscriptionsPage() {
             simulate the complete subscription lifecycle from a single place.
           </p>
         </div>
-        <SubscriptionFormDialog>
-          <Button>
-            <PlusIcon size={18} />
-            New Subscription
-          </Button>
-        </SubscriptionFormDialog>
+        <div className="flex items-center gap-2">
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <SubscriptionFormDialog>
+            <Button>
+              <PlusIcon size={18} />
+              New Subscription
+            </Button>
+          </SubscriptionFormDialog>
+        </div>
       </header>
 
       <Table>

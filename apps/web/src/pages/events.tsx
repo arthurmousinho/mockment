@@ -1,3 +1,4 @@
+import { RefetchButton } from "@/components/refetch-button";
 import { EventDetailsDialog } from "@/components/event-details-dialog";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
@@ -29,6 +30,7 @@ export function EventsPage() {
   const {
     data: response,
     isPending,
+    isFetching,
     isError,
     refetch,
   } = FindAllEventsRequest({ page, limit });
@@ -61,6 +63,7 @@ export function EventsPage() {
             activity, and other relevant events within the payment system.
           </p>
         </div>
+        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
       </header>
 
       <Table>

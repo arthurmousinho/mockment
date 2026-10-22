@@ -1,3 +1,4 @@
+import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { PaymentDetailsDialog } from "@/components/payment-details-dialog";
@@ -47,6 +48,7 @@ export function PaymentsPage() {
   const {
     data: response,
     isPending,
+    isFetching,
     isError,
     refetch,
   } = FindAllPaymentsRequest({ page, limit });
@@ -103,6 +105,7 @@ export function PaymentsPage() {
             troubleshoot payment flows from a single place.
           </p>
         </div>
+        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
       </header>
 
       <Table>
