@@ -10,7 +10,7 @@ export type SubscriptionStatus = "ACTIVE" | "CANCELED" | "PAUSED" | "PENDING";
 
 export type Subscription = {
   id: string;
-  description: string;
+  description: string | null;
   amountInCents: number;
   currency: PaymentCurrency;
   method: PaymentMethod;
@@ -21,6 +21,11 @@ export type Subscription = {
   createdAt: string;
   updatedAt: string;
   apiKeyId: string;
+};
+
+export type CreateSubscriptionResponse = Subscription & {
+  checkoutLink: string;
+  initPaymentId: string;
 };
 
 export type CreateSubscriptionRequestData = {
@@ -44,7 +49,7 @@ export function CreateSubscriptionRequest() {
         description: data.description,
       };
       const request = await api.post(`subscriptions`, { headers, json: body });
-      return await request.json<Subscription>();
+      return await request.json<CreateSubscriptionResponse>();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
