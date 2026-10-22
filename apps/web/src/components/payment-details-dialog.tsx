@@ -1,6 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { useState, type ReactNode } from "react";
 import {
   Dialog,
+  DialogClose,
+  DialogFooter,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -160,6 +163,13 @@ export function PaymentDetailsDialog({
             </div>
           </div>
         )}
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">
+              Done
+            </Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

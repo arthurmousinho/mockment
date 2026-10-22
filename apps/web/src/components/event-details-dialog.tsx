@@ -1,6 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { type ReactNode } from "react";
 import {
   Dialog,
+  DialogClose,
+  DialogFooter,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -57,6 +60,13 @@ export function EventDetailsDialog({
             </pre>
           </div>
         </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">
+              Done
+            </Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
