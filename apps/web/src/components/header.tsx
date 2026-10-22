@@ -5,9 +5,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
+  ListIcon,
   GithubLogoIcon,
   KeyIcon,
   WebhooksLogoIcon,
@@ -51,17 +53,69 @@ export function Header() {
   const { setTheme } = useTheme();
 
   return (
-    <Card className="flex flex-row items-center justify-between w-full px-6 py-4 bg-slate-100 dark:bg-muted rounded">
+    <Card className="@container flex w-full flex-row items-center justify-between gap-3 rounded bg-slate-100 px-3 py-3 sm:px-6 sm:py-4 dark:bg-muted">
       <Logo />
 
-      <nav className="flex items-center space-x-2">
+      <nav
+        aria-label="Main navigation"
+        className="flex shrink-0 items-center gap-2"
+      >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="@min-[68rem]:hidden"
+              aria-label="Open navigation menu"
+            >
+              <ListIcon size={18} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {navigationLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <DropdownMenuItem key={link.href} asChild>
+                  <Link to={link.href}>
+                    <Icon size={18} />
+                    {link.label}
+                  </Link>
+                </DropdownMenuItem>
+              );
+            })}
+            <DropdownMenuSeparator />
+            {apiDocLinks.map((doc) => (
+              <DropdownMenuItem key={doc.label} asChild>
+                <a href={doc.href} target="_blank" rel="noopener noreferrer">
+                  <BookOpenIcon size={18} />
+                  {doc.label}
+                  <ArrowUpRightIcon size={16} />
+                </a>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a
+                href="https://github.com/arthurmousinho/mockment"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <GithubLogoIcon size={18} />
+                Star on GitHub
+              </a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {navigationLinks.map((link, index) => {
           const Icon = link.icon;
           return (
             <Link
               to={link.href}
               key={index}
-              className={cn(buttonVariants({ variant: "secondary" }))}
+              className={cn(
+                buttonVariants({ variant: "secondary" }),
+                "hidden @min-[68rem]:inline-flex",
+              )}
             >
               <Icon size={18} />
               {link.label}
@@ -71,7 +125,10 @@ export function Header() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary">
+            <Button
+              variant="secondary"
+              className="hidden @min-[68rem]:inline-flex"
+            >
               <BookOpenIcon size={18} />
               API Doc
             </Button>
@@ -99,7 +156,7 @@ export function Header() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="relative">
               <SunIcon
                 size={18}
                 className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
@@ -127,7 +184,11 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button variant="outline" asChild>
+        <Button
+          variant="outline"
+          className="hidden @min-[68rem]:inline-flex"
+          asChild
+        >
           <a
             href="https://github.com/arthurmousinho/mockment"
             target="_blank"
