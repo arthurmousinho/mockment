@@ -6,16 +6,16 @@ import {
 
 const paymentEventsSchema = z
   .array(z.enum(EventType), {
-    message: "Os eventos devem ser uma lista válida.",
+    message: "Events must be a valid list.",
   })
-  .min(1, "Selecione pelo menos um evento.")
+  .min(1, "Select at least one event.")
   .refine(
     (events) => new Set(events).size === events.length,
-    "Não é permitido informar eventos duplicados.",
+    "Duplicate events are not allowed.",
   );
 
 export const createWebhookEndpointSchema = z.object({
-  url: z.url("A URL informada é inválida."),
+  url: z.url("Invalid URL."),
   events: paymentEventsSchema,
 });
 
@@ -25,8 +25,8 @@ export type CreateWebhookEndpointInput = z.infer<
 
 export const updateWebhookEndpointSchema = z.object({
   url: z
-    .url("A URL informada é inválida.")
-    .max(2048, "A URL deve possuir no máximo 2048 caracteres.")
+    .url("Invalid URL.")
+    .max(2048, "URL must be at most 2048 characters long.")
     .optional(),
   events: paymentEventsSchema.optional(),
 });

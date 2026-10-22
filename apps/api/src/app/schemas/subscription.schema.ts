@@ -24,17 +24,17 @@ export const subscriptionSchema = z.object({
 
 export const createSubscriptionSchema = z.object({
   amountInCents: z.coerce
-    .number({ error: "O valor deve ser um número." })
-    .int({ error: "O valor deve ser um número inteiro." })
-    .positive({ error: "O valor deve ser maior que zero." }),
-  currency: z.enum(PaymentCurrency, { error: "Moeda inválida." }),
-  method: z.enum(PaymentMethod, { error: "Método de pagamento inválido." }),
+    .number({ error: "Amount must be a number." })
+    .int({ error: "Amount must be an integer." })
+    .positive({ error: "Amount must be greater than zero." }),
+  currency: z.enum(PaymentCurrency, { error: "Invalid currency." }),
+  method: z.enum(PaymentMethod, { error: "Invalid payment method." }),
   description: z
-    .string({ error: "A descrição deve ser um texto." })
+    .string({ error: "Description must be a string." })
     .trim()
-    .max(255, { error: "A descrição deve ter no máximo 255 caracteres." })
+    .max(255, { error: "Description must be at most 255 characters long." })
     .optional(),
-  interval: z.enum(BillingInterval, { message: "Intervalo inválido" }),
+  interval: z.enum(BillingInterval, { message: "Invalid billing interval." }),
 });
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
@@ -50,21 +50,21 @@ export type CreateSubscriptionOutput = z.infer<
 
 export const updateSubscriptionSchema = z.object({
   amountInCents: z.coerce
-    .number({ error: "O valor deve ser um número." })
-    .int({ error: "O valor deve ser um número inteiro." })
-    .positive({ error: "O valor deve ser maior que zero." })
+    .number({ error: "Amount must be a number." })
+    .int({ error: "Amount must be an integer." })
+    .positive({ error: "Amount must be greater than zero." })
     .optional(),
-  currency: z.enum(PaymentCurrency, { error: "Moeda inválida." }).optional(),
+  currency: z.enum(PaymentCurrency, { error: "Invalid currency." }).optional(),
   method: z
-    .enum(PaymentMethod, { error: "Método de pagamento inválido." })
+    .enum(PaymentMethod, { error: "Invalid payment method." })
     .optional(),
   description: z
-    .string({ error: "A descrição deve ser um texto." })
+    .string({ error: "Description must be a string." })
     .trim()
-    .max(255, { error: "A descrição deve ter no máximo 255 caracteres." })
+    .max(255, { error: "Description must be at most 255 characters long." })
     .optional(),
   interval: z
-    .enum(BillingInterval, { message: "Intervalo inválido" })
+    .enum(BillingInterval, { message: "Invalid billing interval." })
     .optional(),
 });
 

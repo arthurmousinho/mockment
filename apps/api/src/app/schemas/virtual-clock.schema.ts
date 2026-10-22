@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const advanceVirtualClockSchema = z.object({
-  minutes: z.number({ message: "O valor deve ser um número." }).optional(),
-  hours: z.number({ message: "O valor deve ser um número." }).optional(),
-  days: z.number({ message: "O valor deve ser um número." }).optional(),
-  weeks: z.number({ message: "O valor deve ser um número." }).optional(),
-  months: z.number({ message: "O valor deve ser um número." }).optional(),
-  years: z.number({ message: "O valor deve ser um número." }).optional(),
+  minutes: z.number({ message: "Value must be a number." }).optional(),
+  hours: z.number({ message: "Value must be a number." }).optional(),
+  days: z.number({ message: "Value must be a number." }).optional(),
+  weeks: z.number({ message: "Value must be a number." }).optional(),
+  months: z.number({ message: "Value must be a number." }).optional(),
+  years: z.number({ message: "Value must be a number." }).optional(),
 });
 
 export type AdvanceVirtualClockInput = z.infer<
@@ -15,7 +15,7 @@ export type AdvanceVirtualClockInput = z.infer<
 
 export const currentVirtualDateTimeSchema = z.object({
   currentDateTime: z.iso.datetime({
-    message: "O valor deve ser uma data válida.",
+    message: "Value must be a valid date and time.",
   }),
 });
 

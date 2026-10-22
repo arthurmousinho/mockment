@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const createApiKeySchema = z.object({
   name: z
-    .string({ message: "O nome deve ser um texto" })
+    .string({ message: "Name must be a string." })
     .trim()
-    .min(3, "O nome deve possuir pelo menos 3 caracteres.")
-    .max(100, "O nome deve possuir no máximo 100 caracteres."),
+    .min(3, "Name must be at least 3 characters long.")
+    .max(100, "Name must be at most 100 characters long."),
 });
 
 export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;

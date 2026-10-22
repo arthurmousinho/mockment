@@ -21,28 +21,28 @@ export const paymentSchema = z.object({
 
 export const createPaymentSchema = z.object({
   amountInCents: z.coerce
-    .number({ message: "O valor deve ser um número." })
-    .int({ message: "O valor deve ser um número inteiro." })
-    .positive({ message: "O valor deve ser maior que zero." }),
-  currency: z.enum(PaymentCurrency, { message: "Moeda inválida." }),
-  method: z.enum(PaymentMethod, { message: "Método de pagamento inválido." }),
+    .number({ message: "Amount must be a number." })
+    .int({ message: "Amount must be an integer." })
+    .positive({ message: "Amount must be greater than zero." }),
+  currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
+  method: z.enum(PaymentMethod, { message: "Invalid payment method." }),
   description: z
-    .string({ message: "A descrição deve ser um texto." })
+    .string({ message: "Description must be a string." })
     .trim()
-    .max(255, { message: "A descrição deve ter no máximo 255 caracteres." })
+    .max(255, { message: "Description must be at most 255 characters long." })
     .optional(),
   externalId: z
-    .string({ message: "O identificador externo deve ser um texto." })
+    .string({ message: "External ID must be a string." })
     .trim()
     .max(255, {
-      message: "O identificador externo deve ter no máximo 255 caracteres.",
+      message: "External ID must be at most 255 characters long.",
     })
     .optional(),
   idempotencyKey: z
-    .string({ message: "A chave de idempotência deve ser um texto." })
+    .string({ message: "Idempotency key must be a string." })
     .trim()
     .max(255, {
-      message: "A chave de idempotência deve ter no máximo 255 caracteres.",
+      message: "Idempotency key must be at most 255 characters long.",
     })
     .optional(),
 });
