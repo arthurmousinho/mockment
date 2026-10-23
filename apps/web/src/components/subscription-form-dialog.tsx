@@ -27,7 +27,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
+import { MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import { z } from "zod";
 import { useState, type ReactNode } from "react";
 import {
@@ -69,6 +70,10 @@ function buildSchema(isEditing: boolean) {
     interval: z.enum(SubscriptionIntervalValues, {
       message: "Invalid billing interval.",
     }),
+    intervalCount: z
+      .number({ message: "Interval count must be a number." })
+      .int({ message: "Interval count must be an integer." })
+      .positive({ message: "Interval count must be greater than zero." }),
     apiKey: isEditing
       ? z.string().optional()
       : z
@@ -110,9 +115,18 @@ export function SubscriptionFormDialog({
       method: subscription?.method ?? "PIX",
       description: subscription?.description ?? "",
       interval: subscription?.interval ?? "MONTH",
+      intervalCount: subscription?.intervalCount ?? 1,
       apiKey: "",
     },
   });
+
+  const [interval, intervalCount] = useWatch({
+    control: form.control,
+    name: ["interval", "intervalCount"],
+  });
+  const validIntervalCount =
+    Number.isInteger(intervalCount) && intervalCount >= 1;
+  const cycleUnit = interval.toLowerCase();
 
   function onSubmit(data: SubscriptionFormData) {
     if (isSubmitting) return;
@@ -243,33 +257,101 @@ export function SubscriptionFormDialog({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="interval"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Billing Interval</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione um intervalo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SubscriptionIntervalValues.map((interval, index) => (
-                            <SelectItem key={index} value={interval}>
-                              <SubscriptionIntervalBadge interval={interval} />
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <div className="flex flex-row items-center gap-2">
+                    <FormField
+                      control={form.control}
+                      name="interval"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel>Billing Interval</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecione um intervalo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {SubscriptionIntervalValues.map(
+                                (interval, index) => (
+                                  <SelectItem key={index} value={interval}>
+                                    <SubscriptionIntervalBadge
+                                      interval={interval}
+                                    />
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="intervalCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Interval Count</FormLabel>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              aria-label="Decrease interval count"
+                              disabled={!validIntervalCount || field.value <= 1}
+                              onClick={() =>
+                                field.onChange(Math.max(1, field.value - 1))
+                              }
+                            >
+                              <MinusIcon aria-hidden="true" />
+                            </Button>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={1}
+                                step={1}
+                                className="min-w-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                {...field}
+                                value={
+                                  Number.isNaN(field.value) ? "" : field.value
+                                }
+                                onChange={(event) =>
+                                  field.onChange(event.target.valueAsNumber)
+                                }
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              aria-label="Increase interval count"
+                              onClick={() =>
+                                field.onChange(
+                                  validIntervalCount ? field.value + 1 : 1,
+                                )
+                              }
+                            >
+                              <PlusIcon aria-hidden="true" />
+                            </Button>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <p
+                    className="text-muted-foreground text-xs"
+                    aria-live="polite"
+                  >
+                    {validIntervalCount
+                      ? `This subscription bills every ${intervalCount} ${cycleUnit}${intervalCount === 1 ? "" : "s"}.`
+                      : "Enter a positive whole number to set the billing cycle."}
+                  </p>
+                </div>
                 {!isEditing && (
                   <FormField
                     control={form.control}

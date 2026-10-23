@@ -35,6 +35,11 @@ export const createSubscriptionSchema = z.object({
     .max(255, { error: "Description must be at most 255 characters long." })
     .optional(),
   interval: z.enum(BillingInterval, { message: "Invalid billing interval." }),
+  intervalCount: z.coerce
+    .number({ error: "Interval count must be a number." })
+    .int({ error: "Interval count must be an integer." })
+    .positive({ error: "Interval count must be greater than zero." })
+    .default(1),
 });
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
@@ -49,6 +54,11 @@ export type CreateSubscriptionOutput = z.infer<
 >;
 
 export const updateSubscriptionSchema = z.object({
+  intervalCount: z.coerce
+    .number({ error: "Interval count must be a number." })
+    .int({ error: "Interval count must be an integer." })
+    .positive({ error: "Interval count must be greater than zero." })
+    .optional(),
   amountInCents: z.coerce
     .number({ error: "Amount must be a number." })
     .int({ error: "Amount must be an integer." })

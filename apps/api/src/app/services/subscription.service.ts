@@ -22,16 +22,17 @@ import { eventService } from "./event.service.ts";
 function calculateNextBillingDate(
   currentDate: Date,
   interval: BillingInterval,
+  intervalCount: number,
 ): Date {
   switch (interval) {
     case "DAY":
-      return addDays(currentDate, 1);
+      return addDays(currentDate, intervalCount);
     case "WEEK":
-      return addWeeks(currentDate, 1);
+      return addWeeks(currentDate, intervalCount);
     case "MONTH":
-      return addMonths(currentDate, 1);
+      return addMonths(currentDate, intervalCount);
     case "YEAR":
-      return addYears(currentDate, 1);
+      return addYears(currentDate, intervalCount);
   }
 }
 
@@ -46,7 +47,7 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
       method: input.method,
       description: input.description ?? null,
       interval: input.interval,
-      intervalCount: 1,
+      intervalCount: input.intervalCount,
       status: "PENDING",
       nextBillingAt: null,
     },
@@ -167,7 +168,11 @@ async function activate(id: string) {
   }
 
   const now = await virtualClockService.now();
-  const nextBillingAt = calculateNextBillingDate(now, subscription.interval);
+  const nextBillingAt = calculateNextBillingDate(
+    now,
+    subscription.interval,
+    subscription.intervalCount,
+  );
 
   const activatedSubscription = await prismaSingleton.subscription.update({
     where: {
@@ -197,10 +202,16 @@ async function update(id: string, input: UpdateSubscriptionInput) {
       ...(input.currency && { currency: input.currency }),
       ...(input.method && { method: input.method }),
       ...(input.description && { description: input.description }),
-      ...(input.interval !== undefined && {
-        interval: input.interval,
+      ...((input.interval !== undefined ||
+        input.intervalCount !== undefined) && {
+        interval: input.interval ?? subscription.interval,
+        intervalCount: input.intervalCount ?? subscription.intervalCount,
         nextBillingAt: subscription.nextBillingAt
-          ? calculateNextBillingDate(subscription.nextBillingAt, input.interval)
+          ? calculateNextBillingDate(
+              subscription.nextBillingAt,
+              input.interval ?? subscription.interval,
+              input.intervalCount ?? subscription.intervalCount,
+            )
           : null,
       }),
     },
@@ -228,6 +239,7 @@ async function processDueSubscriptions() {
       nextBillingAt = calculateNextBillingDate(
         nextBillingAt,
         subscription.interval,
+        subscription.intervalCount,
       );
       await prismaSingleton.subscription.update({
         where: { id: subscription.id },

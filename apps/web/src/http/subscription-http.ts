@@ -40,6 +40,7 @@ export type CreateSubscriptionRequestData = {
   method: PaymentMethod;
   interval: SubscriptionInterval;
   description?: string;
+  intervalCount?: number;
 };
 
 export function CreateSubscriptionRequest() {
@@ -51,6 +52,7 @@ export function CreateSubscriptionRequest() {
         currency: data.currency,
         method: data.method,
         interval: data.interval,
+        intervalCount: data.intervalCount,
         description: data.description,
       };
       const request = await api.post(`subscriptions`, { headers, json: body });
