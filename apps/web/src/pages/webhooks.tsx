@@ -1,6 +1,7 @@
 import { RefetchButton } from "@/components/refetch-button";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
+import { ListingSearch } from "@/components/listing-search";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,8 @@ import { useState } from "react";
 export function WebhooksPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [rotatedSecret, setRotatedSecret] = useState<string | null>(null);
 
   const {
@@ -58,6 +61,7 @@ export function WebhooksPage() {
   } = FindAllWebhookEndpointsRequest({
     page,
     limit,
+    search,
   });
   const { mutate: rotateRequest, isPending: isRotating } =
     RotateWebhookEndpointRequest();
@@ -124,6 +128,26 @@ export function WebhooksPage() {
           </WebhookEndpointFormDialog>
         </nav>
       </header>
+
+      <ListingSearch
+        value={searchInput}
+        appliedValue={search}
+        onValueChange={setSearchInput}
+        onSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        label="Search webhook endpoints"
+        inputLabel="Endpoint ID, URL, or API key ID"
+        placeholder="Search by endpoint ID, URL, or API key ID..."
+        status={
+          isFetching
+            ? "Updating endpoints..."
+            : search
+              ? `${response.pagination.total} matching endpoints`
+              : ""
+        }
+      />
 
       <Table>
         <TableHeader>
@@ -220,7 +244,9 @@ export function WebhooksPage() {
                 colSpan={6}
                 className="py-10 text-center text-muted-foreground"
               >
-                No Webhooks found.
+                {search
+                  ? "No endpoints match your search."
+                  : "No endpoints found."}
               </TableCell>
             </TableRow>
           )}
@@ -230,7 +256,10 @@ export function WebhooksPage() {
         <Paginator
           pagination={response.pagination}
           onPageChange={setPage}
-          onLimitChange={setLimit}
+          onLimitChange={(nextLimit) => {
+            setLimit(nextLimit);
+            setPage(1);
+          }}
         />
       </div>
 

@@ -1,8 +1,14 @@
 import { z } from "zod";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
 import {
   EventType,
   WebhookDeliveryStatus,
 } from "../../../generated/prisma/enums.ts";
+
+export const webhookEndpointListSchema = searchablePaginationSchema;
+export type WebhookEndpointListInput = z.infer<
+  typeof webhookEndpointListSchema
+>;
 
 const paymentEventsSchema = z
   .array(z.enum(EventType), {

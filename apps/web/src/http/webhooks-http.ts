@@ -15,7 +15,7 @@ export type WebhookEndpoint = {
 };
 
 export function FindAllWebhookEndpointsRequest(
-  paginationData: PaginatedRequest,
+  paginationData: PaginatedRequest & { search?: string },
 ) {
   return useQuery({
     queryKey: ["webhooks", "endpoints", paginationData],

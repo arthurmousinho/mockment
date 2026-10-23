@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type {
   CreateWebhookEndpointInput,
+  WebhookEndpointListInput,
   UpdateWebhookEndpointInput,
 } from "../schemas/webhook.schema.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
@@ -10,7 +11,7 @@ import type {
   EventType,
   WebhookEndpoint,
 } from "../../../generated/prisma/client.ts";
-import type { PaginationInput } from "../../common/pagination.schema.ts";
+import { buildWebhookEndpointSearchFilter } from "../filters/webhook-endpoint.filters.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -32,21 +33,23 @@ async function create(apiKey: string, input: CreateWebhookEndpointInput) {
   });
 }
 
-async function findAll(paginationInput: PaginationInput) {
-  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+async function findAll(input: WebhookEndpointListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildWebhookEndpointSearchFilter(input.search);
   const [endpoint, total] = await Promise.all([
     prismaSingleton.webhookEndpoint.findMany({
+      where,
       skip,
       take,
       orderBy: { createdAt: "desc" },
       omit: { secret: true },
     }),
-    prismaSingleton.webhookEndpoint.count(),
+    prismaSingleton.webhookEndpoint.count({ where }),
   ]);
   return buildPaginatedResponse({
     data: endpoint,
-    page: paginationInput.page,
-    limit: paginationInput.limit,
+    page: input.page,
+    limit: input.limit,
     total,
   });
 }

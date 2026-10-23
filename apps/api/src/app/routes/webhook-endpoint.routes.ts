@@ -2,10 +2,10 @@ import { UnauthorizedError } from "../../common/http-error.ts";
 import type { FastifyInstance } from "fastify";
 import {
   createWebhookEndpointSchema,
+  webhookEndpointListSchema,
   updateWebhookEndpointSchema,
 } from "../schemas/webhook.schema.ts";
 import { webhookEndpointService } from "../services/webhook-endpoint.service.ts";
-import { paginationSchema } from "../../common/pagination.schema.ts";
 import { webhookEndpointDocs } from "../docs/webhook-endpoint.docs.ts";
 
 export async function webhookEndpointRoutes(app: FastifyInstance) {
@@ -13,8 +13,8 @@ export async function webhookEndpointRoutes(app: FastifyInstance) {
     "/",
     { schema: webhookEndpointDocs.findAll },
     async (request, reply) => {
-      const paginationInput = paginationSchema.parse(request.query);
-      const endpoints = await webhookEndpointService.findAll(paginationInput);
+      const input = webhookEndpointListSchema.parse(request.query);
+      const endpoints = await webhookEndpointService.findAll(input);
       return reply.status(200).send(endpoints);
     },
   );

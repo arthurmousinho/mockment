@@ -3,7 +3,7 @@ import {
   idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
-  paginationParamsSchema,
+  searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
   createWebhookEndpointResponseSchema,
@@ -16,9 +16,10 @@ import {
 export const webhookEndpointDocs = {
   findAll: {
     summary: "List webhook endpoints",
-    description: "Returns a paginated list of webhook endpoints.",
+    description:
+      "Returns a paginated list of webhook endpoints. Search matches partial endpoint IDs, URLs, and API key IDs.",
     tags: ["Webhook Endpoints"],
-    querystring: paginationParamsSchema,
+    querystring: searchablePaginationParamsSchema,
     response: {
       200: {
         description: "When the webhook endpoints are retrieved successfully.",
