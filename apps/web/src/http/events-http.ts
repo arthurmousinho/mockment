@@ -25,7 +25,7 @@ export type Event = {
 };
 
 export function FindAllEventsRequest(
-  paginationData: PaginatedRequest,
+  paginationData: PaginatedRequest & { search?: string },
   options?: { enabled?: boolean },
 ) {
   return useQuery({

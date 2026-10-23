@@ -1,11 +1,14 @@
-import type { PaginationInput } from "../../common/pagination.schema.ts";
+import { buildEventSearchFilter } from "../filters/event.filters.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
 } from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import { webhookDeliveryService } from "./webhook-delivery.service.ts";
-import type { EmitEventInput } from "../schemas/event.schema.ts";
+import type {
+  EmitEventInput,
+  EventListInput,
+} from "../schemas/event.schema.ts";
 
 async function emit(input: EmitEventInput) {
   const event = await prismaSingleton.event.create({
@@ -20,20 +23,22 @@ async function emit(input: EmitEventInput) {
   return event;
 }
 
-async function findAll(paginationInput: PaginationInput) {
-  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+async function findAll(input: EventListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildEventSearchFilter(input.search);
   const [events, total] = await Promise.all([
     prismaSingleton.event.findMany({
+      where,
       skip,
       take,
       orderBy: { createdAt: "desc" },
     }),
-    prismaSingleton.event.count(),
+    prismaSingleton.event.count({ where }),
   ]);
   return buildPaginatedResponse({
     data: events,
-    page: paginationInput.page,
-    limit: paginationInput.limit,
+    page: input.page,
+    limit: input.limit,
     total,
   });
 }

@@ -2,6 +2,7 @@ import { RefetchButton } from "@/components/refetch-button";
 import { EventDetailsDialog } from "@/components/event-details-dialog";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
+import { ListingSearch } from "@/components/listing-search";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +26,8 @@ import { useState } from "react";
 export function EventsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
   const {
     data: response,
@@ -32,7 +35,7 @@ export function EventsPage() {
     isFetching,
     isError,
     refetch,
-  } = FindAllEventsRequest({ page, limit });
+  } = FindAllEventsRequest({ page, limit, search });
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -64,6 +67,26 @@ export function EventsPage() {
         </div>
         <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
       </header>
+
+      <ListingSearch
+        value={searchInput}
+        appliedValue={search}
+        onValueChange={setSearchInput}
+        onSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        label="Search events"
+        inputLabel="Event ID, type, payment ID, or subscription ID"
+        placeholder="Search by ID, event type, or related ID..."
+        status={
+          isFetching
+            ? "Updating events..."
+            : search
+              ? `${response.pagination.total} matching events`
+              : ""
+        }
+      />
 
       <Table>
         <TableHeader>
@@ -113,7 +136,7 @@ export function EventsPage() {
                 colSpan={4}
                 className="py-10 text-center text-muted-foreground"
               >
-                No Events found.
+                {search ? "No events match your search." : "No events found."}
               </TableCell>
             </TableRow>
           )}
@@ -123,7 +146,10 @@ export function EventsPage() {
         <Paginator
           pagination={response.pagination}
           onPageChange={setPage}
-          onLimitChange={setLimit}
+          onLimitChange={(nextLimit) => {
+            setLimit(nextLimit);
+            setPage(1);
+          }}
         />
       </div>
     </div>

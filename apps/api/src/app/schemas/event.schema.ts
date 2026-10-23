@@ -1,5 +1,9 @@
 import z from "zod";
 import { EventType } from "../../../generated/prisma/enums.ts";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
+
+export const eventListSchema = searchablePaginationSchema;
+export type EventListInput = z.infer<typeof eventListSchema>;
 
 export const emitEventSchema = z.object({
   type: z.enum(EventType),
