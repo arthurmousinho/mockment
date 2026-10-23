@@ -1,17 +1,17 @@
 import { UnauthorizedError } from "../../common/http-error.ts";
 import {
   createSubscriptionSchema,
+  subscriptionListSchema,
   updateSubscriptionSchema,
 } from "../schemas/subscription.schema.ts";
 import type { FastifyInstance } from "fastify";
 import { subscriptionService } from "../services/subscription.service.ts";
-import { paginationSchema } from "../../common/pagination.schema.ts";
 import { subscriptionDocs } from "../docs/subscription.docs.ts";
 
 export async function subcriptionRoutes(app: FastifyInstance) {
   app.get("/", { schema: subscriptionDocs.findAll }, async (request, reply) => {
-    const paginationInput = paginationSchema.parse(request.query);
-    const subscriptions = await subscriptionService.findAll(paginationInput);
+    const input = subscriptionListSchema.parse(request.query);
+    const subscriptions = await subscriptionService.findAll(input);
     return reply.status(200).send(subscriptions);
   });
 

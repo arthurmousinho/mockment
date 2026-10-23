@@ -1,6 +1,7 @@
 import { SubscriptionDetailsDialog } from "@/components/subscription-details-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
+import { ListingSearch } from "@/components/listing-search";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { SubscriptionFormDialog } from "@/components/subscription-form-dialog";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
@@ -43,6 +44,8 @@ import { useState } from "react";
 export function SubscriptionsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
   const {
     data: response,
@@ -53,6 +56,7 @@ export function SubscriptionsPage() {
   } = FindAllSubscriptionsRequest({
     page,
     limit,
+    search,
   });
 
   const { mutate: pauseRequest, isPending: isPausing } =
@@ -116,6 +120,26 @@ export function SubscriptionsPage() {
           </SubscriptionFormDialog>
         </div>
       </header>
+
+      <ListingSearch
+        value={searchInput}
+        appliedValue={search}
+        onValueChange={setSearchInput}
+        onSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        label="Search subscriptions"
+        inputLabel="Subscription ID or description"
+        placeholder="Search by ID or description..."
+        status={
+          isFetching
+            ? "Updating subscriptions..."
+            : search
+              ? `${response.pagination.total} matching subscriptions`
+              : ""
+        }
+      />
 
       <Table>
         <TableHeader>
@@ -207,7 +231,9 @@ export function SubscriptionsPage() {
                 colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
-                No Subscriptions found.
+                {search
+                  ? "No subscriptions match your search."
+                  : "No subscriptions found."}
               </TableCell>
             </TableRow>
           )}
@@ -217,7 +243,10 @@ export function SubscriptionsPage() {
         <Paginator
           pagination={response.pagination}
           onPageChange={setPage}
-          onLimitChange={setLimit}
+          onLimitChange={(nextLimit) => {
+            setLimit(nextLimit);
+            setPage(1);
+          }}
         />
       </div>
     </div>

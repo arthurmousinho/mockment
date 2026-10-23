@@ -2,6 +2,7 @@ import { prismaSingleton } from "../../config/prisma.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import type {
   CreateSubscriptionInput,
+  SubscriptionListInput,
   UpdateSubscriptionInput,
 } from "../schemas/subscription.schema.ts";
 import type {
@@ -12,7 +13,7 @@ import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
 import { virtualClockService } from "./virtual-clock.service.ts";
 import { addDays, addMonths, addWeeks, addYears } from "date-fns";
 import { paymentService } from "./payment.service.ts";
-import type { PaginationInput } from "../../common/pagination.schema.ts";
+import { buildSubscriptionSearchFilter } from "../filters/subscription.filters.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -77,20 +78,22 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
   };
 }
 
-async function findAll(paginationInput: PaginationInput) {
-  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+async function findAll(input: SubscriptionListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildSubscriptionSearchFilter(input.search);
   const [subscriptions, total] = await Promise.all([
     prismaSingleton.subscription.findMany({
+      where,
       skip,
       take,
       orderBy: { createdAt: "desc" },
     }),
-    prismaSingleton.subscription.count(),
+    prismaSingleton.subscription.count({ where }),
   ]);
   return buildPaginatedResponse({
     data: subscriptions,
-    page: paginationInput.page,
-    limit: paginationInput.limit,
+    page: input.page,
+    limit: input.limit,
     total,
   });
 }

@@ -3,7 +3,7 @@ import {
   idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
-  paginationParamsSchema,
+  searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
   createSubscriptionResponseSchema,
@@ -16,9 +16,10 @@ import {
 export const subscriptionDocs = {
   findAll: {
     summary: "List subscriptions",
-    description: "Returns a paginated list of subscriptions.",
+    description:
+      "Returns a paginated list of subscriptions. Search matches partial subscription IDs and descriptions.",
     tags: ["Subscriptions"],
-    querystring: paginationParamsSchema,
+    querystring: searchablePaginationParamsSchema,
     response: {
       200: {
         description: "When the subscriptions are retrieved successfully.",

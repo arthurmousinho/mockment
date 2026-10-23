@@ -90,7 +90,9 @@ export function UpdateSubscriptionRequest() {
   });
 }
 
-export function FindAllSubscriptionsRequest(paginationData: PaginatedRequest) {
+export function FindAllSubscriptionsRequest(
+  paginationData: PaginatedRequest & { search?: string },
+) {
   return useQuery({
     queryKey: ["subscriptions", paginationData],
     queryFn: async () => {

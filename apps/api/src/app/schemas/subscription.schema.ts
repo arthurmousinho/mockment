@@ -1,4 +1,5 @@
 import z from "zod";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
 import {
   BillingInterval,
   EventType,
@@ -6,6 +7,9 @@ import {
   PaymentMethod,
   SubscriptionStatus,
 } from "../../../generated/prisma/enums.ts";
+
+export const subscriptionListSchema = searchablePaginationSchema;
+export type SubscriptionListInput = z.infer<typeof subscriptionListSchema>;
 
 export const subscriptionSchema = z.object({
   id: z.uuid(),
