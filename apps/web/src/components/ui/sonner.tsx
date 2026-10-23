@@ -1,4 +1,6 @@
 import { useTheme } from "@/components/theme-provider";
+import { createPortal } from "react-dom";
+import "sonner/dist/styles.css";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import {
   CheckCircleIcon,
@@ -11,9 +13,11 @@ import {
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
-  return (
+  return createPortal(
     <Sonner
       theme={theme as ToasterProps["theme"]}
+      position="top-right"
+      closeButton
       className="toaster group"
       icons={{
         success: <CheckCircleIcon className="size-4" />,
@@ -28,6 +32,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
+          zIndex: 99999,
         } as React.CSSProperties
       }
       toastOptions={{
@@ -36,7 +41,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       {...props}
-    />
+    />,
+    document.body,
   );
 };
 

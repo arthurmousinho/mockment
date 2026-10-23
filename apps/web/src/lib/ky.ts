@@ -1,15 +1,27 @@
 import ky, { HTTPError } from "ky";
 import { toast } from "sonner";
-import type { APIError } from "@/types/http.type";
 
 export const api = ky.create({
   prefix: import.meta.env.VITE_API_URL,
 });
 
-export async function apiErrorHandler(error: unknown) {
+export function apiErrorHandler(error: unknown) {
   if (error instanceof HTTPError) {
-    const errorResponse: APIError = await error.response.json();
-    errorResponse.message.map((msg) => toast.error(msg));
+    const data = error.data;
+    const message =
+      data && typeof data === "object" && "message" in data
+        ? data.message
+        : undefined;
+    const messages = (Array.isArray(message) ? message : [message]).filter(
+      (value): value is string =>
+        typeof value === "string" && value.trim().length > 0,
+    );
+
+    if (messages.length > 0) {
+      messages.forEach((msg) => toast.error(msg));
+    } else {
+      toast.error(`Request failed (${error.response.status}). Please try again.`);
+    }
     return;
   }
 
