@@ -195,7 +195,12 @@ export function WebhookEndpointFormDialog({
                       <FormItem>
                         <FormLabel>API Key</FormLabel>
                         <FormControl>
-                          <Input placeholder="sk_live_..." {...field} />
+                          <Input
+                            placeholder="mk_test_..."
+                            autoComplete="off"
+                            type="password"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

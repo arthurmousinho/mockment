@@ -361,8 +361,9 @@ export function SubscriptionFormDialog({
                         <FormLabel>API Key</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="sk_live_..."
+                            placeholder="mk_test_..."
                             autoComplete="off"
+                            type="password"
                             {...field}
                           />
                         </FormControl>
