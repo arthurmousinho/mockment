@@ -1,12 +1,15 @@
 import crypto from "node:crypto";
 import { prismaSingleton } from "../../config/prisma.ts";
-import type { CreateApiKeyInput } from "../schemas/api-key.schema.ts";
+import type {
+  CreateApiKeyInput,
+  ApiKeyListInput,
+} from "../schemas/api-key.schema.ts";
 import {
   ConflictError,
   NotFoundError,
   UnauthorizedError,
 } from "../../common/http-error.ts";
-import type { PaginationInput } from "../../common/pagination.schema.ts";
+import { buildApiKeySearchFilter } from "../filters/api-key.filters.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -35,21 +38,23 @@ async function create(input: CreateApiKeyInput) {
   };
 }
 
-async function findAll(paginationInput: PaginationInput) {
-  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+async function findAll(input: ApiKeyListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildApiKeySearchFilter(input.search);
   const [apiKeys, total] = await Promise.all([
     prismaSingleton.apiKey.findMany({
+      where,
       skip,
       take,
       orderBy: { createdAt: "desc" },
       omit: { keyHash: true },
     }),
-    prismaSingleton.apiKey.count(),
+    prismaSingleton.apiKey.count({ where }),
   ]);
   return buildPaginatedResponse({
     data: apiKeys,
-    page: paginationInput.page,
-    limit: paginationInput.limit,
+    page: input.page,
+    limit: input.limit,
     total,
   });
 }

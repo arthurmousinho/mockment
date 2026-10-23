@@ -3,7 +3,7 @@ import {
   idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
-  paginationParamsSchema,
+  searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
   createApiKeyResponseSchema,
@@ -15,9 +15,10 @@ import {
 export const apiKeyDocs = {
   findAll: {
     summary: "List API keys",
-    description: "Returns a paginated list of API keys.",
+    description:
+      "Returns a paginated list of API keys. Search matches partial API key IDs and names.",
     tags: ["API Keys"],
-    querystring: paginationParamsSchema,
+    querystring: searchablePaginationParamsSchema,
     response: {
       200: {
         description: "When the API keys are retrieved successfully.",

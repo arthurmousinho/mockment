@@ -1,4 +1,8 @@
 import { z } from "zod";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
+
+export const apiKeyListSchema = searchablePaginationSchema;
+export type ApiKeyListInput = z.infer<typeof apiKeyListSchema>;
 
 export const createApiKeySchema = z.object({
   name: z

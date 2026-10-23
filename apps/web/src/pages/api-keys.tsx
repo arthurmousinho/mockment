@@ -35,10 +35,13 @@ import {
 import { useState } from "react";
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
 import { Paginator } from "@/components/paginator";
+import { ListingSearch } from "@/components/listing-search";
 
 export function ApiKeysPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [rotatedKey, setRotatedKey] = useState<string | null>(null);
 
   const {
@@ -47,7 +50,7 @@ export function ApiKeysPage() {
     isFetching,
     isError,
     refetch,
-  } = FindAllApiKeysRequest({ page, limit });
+  } = FindAllApiKeysRequest({ page, limit, search });
   const { mutate: deleteRequest, isPending: isDeleting } =
     DeleteApiKeyRequest();
   const { mutate: revokeRequest, isPending: isRevoking } =
@@ -117,6 +120,26 @@ export function ApiKeysPage() {
           </ApiKeyFormDialog>
         </div>
       </header>
+
+      <ListingSearch
+        value={searchInput}
+        appliedValue={search}
+        onValueChange={setSearchInput}
+        onSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        label="Search API keys"
+        inputLabel="API key ID or name"
+        placeholder="Search by ID or name..."
+        status={
+          isFetching
+            ? "Updating API keys..."
+            : search
+              ? `${response.pagination.total} matching API keys`
+              : ""
+        }
+      />
 
       <Table>
         <TableHeader>
@@ -188,7 +211,9 @@ export function ApiKeysPage() {
                 colSpan={5}
                 className="py-10 text-center text-muted-foreground"
               >
-                No API keys found.
+                {search
+                  ? "No API keys match your search."
+                  : "No API keys found."}
               </TableCell>
             </TableRow>
           )}
@@ -198,7 +223,10 @@ export function ApiKeysPage() {
         <Paginator
           pagination={response.pagination}
           onPageChange={setPage}
-          onLimitChange={setLimit}
+          onLimitChange={(nextLimit) => {
+            setLimit(nextLimit);
+            setPage(1);
+          }}
         />
       </div>
 

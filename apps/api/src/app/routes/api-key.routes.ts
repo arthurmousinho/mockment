@@ -1,13 +1,15 @@
-import { paginationSchema } from "../../common/pagination.schema.ts";
 import { apiKeyDocs } from "../docs/api-key.docs.ts";
-import { createApiKeySchema } from "../schemas/api-key.schema.ts";
+import {
+  createApiKeySchema,
+  apiKeyListSchema,
+} from "../schemas/api-key.schema.ts";
 import { apiKeyService } from "../services/api-key.service.ts";
 import type { FastifyInstance } from "fastify";
 
 export async function apiKeyRoutes(app: FastifyInstance) {
   app.get("/", { schema: apiKeyDocs.findAll }, async (request, reply) => {
-    const paginationInput = paginationSchema.parse(request.query);
-    const apiKeys = await apiKeyService.findAll(paginationInput);
+    const input = apiKeyListSchema.parse(request.query);
+    const apiKeys = await apiKeyService.findAll(input);
     return reply.status(200).send(apiKeys);
   });
 

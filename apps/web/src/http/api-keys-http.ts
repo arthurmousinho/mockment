@@ -12,7 +12,9 @@ export type ApiKey = {
   updatedAt: string;
 };
 
-export function FindAllApiKeysRequest(paginationData: PaginatedRequest) {
+export function FindAllApiKeysRequest(
+  paginationData: PaginatedRequest & { search?: string },
+) {
   return useQuery({
     queryKey: ["api-keys", paginationData],
     queryFn: async () => {
