@@ -1,21 +1,23 @@
 import type { Subscription } from "../../../generated/prisma/browser.ts";
 import type { PaymentStatus } from "../../../generated/prisma/enums.ts";
-import type { TransactionClient } from "../../../generated/prisma/internal/prismaNamespace.ts";
 import {
   BadRequestError,
   ConflictError,
   NotFoundError,
 } from "../../common/http-error.ts";
-import type { PaginationInput } from "../../common/pagination.schema.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
 } from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
-import type { CreatePaymentInput } from "../schemas/payment.schema.ts";
+import type {
+  CreatePaymentInput,
+  PaymentListInput,
+} from "../schemas/payment.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { checkoutService } from "./checkout.service.ts";
 import { eventService } from "./event.service.ts";
+import { buildPaymentSearchFilter } from "../filters/payment.filters.ts";
 
 async function create(
   apiKey: string,
@@ -89,20 +91,22 @@ async function create(
   return paymentPayload;
 }
 
-async function findAll(paginationInput: PaginationInput) {
-  const { skip, take } = buildPrismaPaginationParams(paginationInput);
+async function findAll(input: PaymentListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildPaymentSearchFilter(input.search);
   const [payments, total] = await Promise.all([
     prismaSingleton.payment.findMany({
+      where,
       skip,
       take,
       orderBy: { createdAt: "desc" },
     }),
-    prismaSingleton.payment.count(),
+    prismaSingleton.payment.count({ where }),
   ]);
   return buildPaginatedResponse({
     data: payments,
-    page: paginationInput.page,
-    limit: paginationInput.limit,
+    page: input.page,
+    limit: input.limit,
     total,
   });
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { paginationResponseSchema } from "./pagination.schema.ts";
 import { HttpErrorTypes } from "./http-error.ts";
+import { searchQuerySchema } from "./search.schema.ts";
 
 export function openApiSchema<T extends z.ZodType>(schema: T) {
   return z.toJSONSchema(schema, {
@@ -35,6 +36,14 @@ export const paginationParamsSchema = {
     },
   },
 } as const;
+
+export const searchablePaginationParamsSchema = {
+  ...paginationParamsSchema,
+  properties: {
+    ...paginationParamsSchema.properties,
+    search: openApiSchema(searchQuerySchema.shape.search),
+  },
+};
 
 export function paginatedResponseSchema<T extends z.ZodType>(schema: T) {
   return openApiSchema(

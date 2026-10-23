@@ -55,7 +55,9 @@ export function CreatePaymentRequest() {
   });
 }
 
-export function FindAllPaymentsRequest(paginationData: PaginatedRequest) {
+export function FindAllPaymentsRequest(
+  paginationData: PaginatedRequest & { search?: string },
+) {
   return useQuery({
     queryKey: ["payments", paginationData],
     queryFn: async () => {

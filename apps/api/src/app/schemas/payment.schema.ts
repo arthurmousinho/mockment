@@ -1,10 +1,14 @@
 import { z } from "zod";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
 import {
   EventType,
   PaymentCurrency,
   PaymentMethod,
   PaymentStatus,
 } from "../../../generated/prisma/enums.ts";
+
+export const paymentListSchema = searchablePaginationSchema;
+export type PaymentListInput = z.infer<typeof paymentListSchema>;
 
 export const paymentSchema = z.object({
   id: z.uuid(),

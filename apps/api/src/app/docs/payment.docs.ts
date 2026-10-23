@@ -3,7 +3,7 @@ import {
   idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
-  paginationParamsSchema,
+  searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
   createPaymentResponseSchema,
@@ -15,9 +15,10 @@ import {
 export const paymentDocs = {
   findAll: {
     summary: "List payments",
-    description: "Returns a paginated list of payments.",
+    description:
+      "Returns a paginated list of payments. Search matches partial payment IDs, descriptions, external IDs, and idempotency keys.",
     tags: ["Payments"],
-    querystring: paginationParamsSchema,
+    querystring: searchablePaginationParamsSchema,
     response: {
       200: {
         description: "When the payments are retrieved successfully.",

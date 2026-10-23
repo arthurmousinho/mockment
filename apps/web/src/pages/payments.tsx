@@ -6,6 +6,7 @@ import { PaymentFormDialog } from "@/components/payment-form-dialog";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { Button } from "@/components/ui/button";
+import { ListingSearch } from "@/components/listing-search";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,8 @@ import { useState } from "react";
 export function PaymentsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
   const {
     data: response,
@@ -52,7 +55,7 @@ export function PaymentsPage() {
     isFetching,
     isError,
     refetch,
-  } = FindAllPaymentsRequest({ page, limit });
+  } = FindAllPaymentsRequest({ page, limit, search });
 
   const { mutate: proccessRequest, isPending: isProcessing } =
     ProcessPaymentRequest();
@@ -116,6 +119,19 @@ export function PaymentsPage() {
           </PaymentFormDialog>
         </div>
       </header>
+
+      <ListingSearch
+        value={searchInput}
+        appliedValue={search}
+        onValueChange={setSearchInput}
+        onSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        label="Search payments"
+        inputLabel="Payment ID, description, external ID, or idempotency key"
+        placeholder="Search by ID, description, or reference..."
+      />
 
       <Table>
         <TableHeader>
@@ -217,7 +233,9 @@ export function PaymentsPage() {
                 colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
-                No Payments found.
+                {search
+                  ? "No payments match your search."
+                  : "No payments found."}
               </TableCell>
             </TableRow>
           )}
@@ -227,7 +245,10 @@ export function PaymentsPage() {
         <Paginator
           pagination={response.pagination}
           onPageChange={setPage}
-          onLimitChange={setLimit}
+          onLimitChange={(nextLimit) => {
+            setLimit(nextLimit);
+            setPage(1);
+          }}
         />
       </div>
     </div>
