@@ -132,7 +132,7 @@ export function ApiKeysPage() {
         <TableBody>
           {response?.data.map((item) => (
             <TableRow key={item.id}>
-              <TableCell className="max-w-64 whitespace-normal break-words">
+              <TableCell className="max-w-64 whitespace-normal wrap-break-wor">
                 {item.name}
               </TableCell>
               <TableCell className="text-right">

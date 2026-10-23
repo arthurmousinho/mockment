@@ -24,6 +24,37 @@ export type Payment = {
   updatedAt: string;
 };
 
+export type CreatePaymentRequestData = {
+  apiKey: string;
+  amountInCents: number;
+  currency: PaymentCurrency;
+  method: PaymentMethod;
+  description?: string;
+  externalId?: string;
+  idempotencyKey?: string;
+};
+
+export type CreatePaymentResponse = Omit<Payment, "apiKeyId"> & {
+  checkoutLink: string;
+};
+
+export function CreatePaymentRequest() {
+  return useMutation({
+    mutationFn: async ({ apiKey, ...body }: CreatePaymentRequestData) => {
+      const request = await api.post("payments", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        json: body,
+      });
+      return await request.json<CreatePaymentResponse>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      toast.success("Payment created successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function FindAllPaymentsRequest(paginationData: PaginatedRequest) {
   return useQuery({
     queryKey: ["payments", paginationData],

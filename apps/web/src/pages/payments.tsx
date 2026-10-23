@@ -2,6 +2,7 @@ import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { PaymentDetailsDialog } from "@/components/payment-details-dialog";
+import { PaymentFormDialog } from "@/components/payment-form-dialog";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ import {
   CurrencyCircleDollarIcon,
   XIcon,
   EyeIcon,
+  PlusIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
 
@@ -104,7 +106,15 @@ export function PaymentsPage() {
             troubleshoot payment flows from a single place.
           </p>
         </div>
-        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+        <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <PaymentFormDialog>
+            <Button>
+              <PlusIcon size={18} />
+              New Payment
+            </Button>
+          </PaymentFormDialog>
+        </div>
       </header>
 
       <Table>
