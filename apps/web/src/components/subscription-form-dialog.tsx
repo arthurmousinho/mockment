@@ -215,7 +215,7 @@ export function SubscriptionFormDialog({
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione uma moeda" />
+                            <SelectValue placeholder="Select a currency" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -242,7 +242,7 @@ export function SubscriptionFormDialog({
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione um método" />
+                            <SelectValue placeholder="Select a payment method" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -271,7 +271,7 @@ export function SubscriptionFormDialog({
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Selecione um intervalo" />
+                                <SelectValue placeholder="Select a billing interval" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>

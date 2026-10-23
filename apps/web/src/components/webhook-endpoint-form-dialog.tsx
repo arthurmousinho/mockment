@@ -55,16 +55,16 @@ const ALL_EVENT_TYPES = [
 
 function buildSchema(isEditing: boolean) {
   return z.object({
-    url: z.url("Informe uma URL válida."),
+    url: z.url("Enter a valid URL."),
     events: z
       .array(z.enum(ALL_EVENT_TYPES))
-      .min(1, "Selecione ao menos um evento."),
+      .min(1, "Select at least one event."),
     apiKey: isEditing
       ? z.string().trim().optional()
       : z
-          .string({ message: "A API key deve ser um texto" })
+          .string({ message: "API key must be a string." })
           .trim()
-          .min(1, "Informe a API key."),
+          .min(1, "Enter the API key."),
   });
 }
 

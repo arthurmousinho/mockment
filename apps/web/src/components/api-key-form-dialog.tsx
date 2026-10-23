@@ -27,10 +27,10 @@ import { RevealedSecretDialog } from "./revealed-secret-dialog";
 
 const apiKeySchema = z.object({
   name: z
-    .string({ message: "O nome deve ser um texto" })
+    .string({ message: "Name must be a string." })
     .trim()
-    .min(3, "O nome deve possuir pelo menos 3 caracteres.")
-    .max(100, "O nome deve possuir no máximo 100 caracteres."),
+    .min(3, "Name must be at least 3 characters long.")
+    .max(100, "Name must be at most 100 characters long."),
 });
 
 type ApiKeyFormData = z.infer<typeof apiKeySchema>;
@@ -78,8 +78,8 @@ export function ApiKeyFormDialog({ children }: ApiKeyFormDialogProps) {
       <DialogContent className="sm:max-w-sm">
         {rawKey ? (
           <RevealedSecretDialog
-            title="API key criada"
-            description="Copie sua chave agora. Por segurança, ela não será exibida novamente."
+            title="API key created"
+            description="Copy your key now. For security, it will not be shown again."
             value={rawKey}
             onDone={() => handleOpenChange(false)}
           />
@@ -112,7 +112,7 @@ export function ApiKeyFormDialog({ children }: ApiKeyFormDialogProps) {
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button type="button" variant="outline">
-                      Cancelar
+                      Cancel
                     </Button>
                   </DialogClose>
                   <Button type="submit" disabled={isCreating}>

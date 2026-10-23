@@ -209,8 +209,8 @@ export function ApiKeysPage() {
         <DialogContent className="sm:max-w-sm">
           {rotatedKey && (
             <RevealedSecretDialog
-              title="API key rotacionada"
-              description="Copie sua nova chave agora. Por segurança, ela não será exibida novamente."
+              title="API key rotated"
+              description="Copy your new key now. For security, it will not be shown again."
               value={rotatedKey}
               onDone={() => setRotatedKey(null)}
             />

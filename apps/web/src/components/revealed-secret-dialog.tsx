@@ -21,7 +21,7 @@ export function RevealedSecretDialog({
   title,
   description,
   value,
-  doneLabel = "Concluído",
+  doneLabel = "Done",
   onDone,
 }: RevealedSecretDialogProps) {
   const { copied, copy } = useCopyToClipboard();
