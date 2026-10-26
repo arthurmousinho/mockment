@@ -108,7 +108,7 @@ model Payment {
 }
 
 model Event {
-  id String @id @default(uuid())
+  id String @id
 
   type    EventType
   payload Json?

@@ -47,7 +47,7 @@ export const webhookDeliverySchema = z.object({
   statusCode: z.number().int().positive(),
   error: z.string().nullable(),
   endpointId: z.uuid(),
-  eventId: z.uuid(),
+  eventId: z.string(),
   deliveredAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });

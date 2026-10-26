@@ -2,6 +2,7 @@ import { buildEventSearchFilter } from "../filters/event.filters.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import { webhookDeliveryService } from "./webhook-delivery.service.ts";
@@ -13,6 +14,7 @@ import type {
 async function emit(input: EmitEventInput) {
   const event = await prismaSingleton.event.create({
     data: {
+      id: createPrefixedId("evt"),
       type: input.type,
       paymentId: input.paymentId ?? null,
       subscriptionId: input.subscriptionId ?? null,

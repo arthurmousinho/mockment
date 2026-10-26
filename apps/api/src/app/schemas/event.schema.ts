@@ -15,7 +15,7 @@ export const emitEventSchema = z.object({
 export type EmitEventInput = z.infer<typeof emitEventSchema>;
 
 export const findAllEventsSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   type: z.enum(EventType),
   paymentId: z.string().nullable(),
   subscriptionId: z.string().nullable(),
