@@ -110,7 +110,30 @@ export function SubscriptionsPage() {
             simulate the complete subscription lifecycle from a single place.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+      </header>
+
+      <header className="flex flex-row items-center justify-between gap-2">
+        <ListingSearch
+          className="flex-1"
+          value={searchInput}
+          appliedValue={search}
+          onValueChange={setSearchInput}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search subscriptions"
+          inputLabel="Subscription ID or description"
+          placeholder="Search by ID or description..."
+          status={
+            isFetching
+              ? "Updating subscriptions..."
+              : search
+                ? `${response.pagination.total} matching subscriptions`
+                : ""
+          }
+        />
+        <div className="flex flex-row items-center gap-2">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <SubscriptionFormDialog>
             <Button>
@@ -120,26 +143,6 @@ export function SubscriptionsPage() {
           </SubscriptionFormDialog>
         </div>
       </header>
-
-      <ListingSearch
-        value={searchInput}
-        appliedValue={search}
-        onValueChange={setSearchInput}
-        onSearch={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        label="Search subscriptions"
-        inputLabel="Subscription ID or description"
-        placeholder="Search by ID or description..."
-        status={
-          isFetching
-            ? "Updating subscriptions..."
-            : search
-              ? `${response.pagination.total} matching subscriptions`
-              : ""
-        }
-      />
 
       <Table>
         <TableHeader>
