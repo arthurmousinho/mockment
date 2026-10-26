@@ -110,7 +110,30 @@ export function ApiKeysPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+      </header>
+
+      <header className="flex flex-row items-center justify-between gap-2">
+        <ListingSearch
+          className="flex-1"
+          value={searchInput}
+          appliedValue={search}
+          onValueChange={setSearchInput}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search API keys"
+          inputLabel="API key ID or name"
+          placeholder="Search by ID or name..."
+          status={
+            isFetching
+              ? "Updating API keys..."
+              : search
+                ? `${response.pagination.total} matching API keys`
+                : ""
+          }
+        />
+        <div className="flex flex-row items-center gap-2">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <ApiKeyFormDialog>
             <Button>
@@ -120,26 +143,6 @@ export function ApiKeysPage() {
           </ApiKeyFormDialog>
         </div>
       </header>
-
-      <ListingSearch
-        value={searchInput}
-        appliedValue={search}
-        onValueChange={setSearchInput}
-        onSearch={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        label="Search API keys"
-        inputLabel="API key ID or name"
-        placeholder="Search by ID or name..."
-        status={
-          isFetching
-            ? "Updating API keys..."
-            : search
-              ? `${response.pagination.total} matching API keys`
-              : ""
-        }
-      />
 
       <Table>
         <TableHeader>
