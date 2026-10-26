@@ -8,6 +8,7 @@ import {
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
@@ -63,6 +64,7 @@ async function create(
 
   const payment = await prismaSingleton.payment.create({
     data: {
+      id: createPrefixedId("pay"),
       amountInCents: input.amountInCents,
       currency: input.currency,
       method: input.method,

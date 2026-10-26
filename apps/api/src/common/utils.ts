@@ -1,4 +1,9 @@
+import { randomUUID } from "node:crypto";
 import type { PaginationInput } from "./pagination.schema.ts";
+
+export function createPrefixedId(prefix: string) {
+  return `${prefix}_${randomUUID()}`;
+}
 
 export function buildPrismaPaginationParams(input: PaginationInput) {
   return {

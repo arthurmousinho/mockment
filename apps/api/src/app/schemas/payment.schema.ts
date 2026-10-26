@@ -11,7 +11,7 @@ export const paymentListSchema = searchablePaginationSchema;
 export type PaymentListInput = z.infer<typeof paymentListSchema>;
 
 export const paymentSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   amountInCents: z.number(),
   currency: z.enum(PaymentCurrency),
   method: z.enum(PaymentMethod),
@@ -62,7 +62,7 @@ export type CreatePaymentOutput = z.infer<typeof createPaymentResponseSchema>;
 export const detailedPaymentSchema = paymentSchema.safeExtend({
   events: z.array(
     z.object({
-      id: z.uuid(),
+      id: z.string(),
       type: z.enum(EventType),
       createdAt: z.iso.datetime(),
     }),

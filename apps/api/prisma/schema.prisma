@@ -81,7 +81,7 @@ model ApiKey {
 }
 
 model Payment {
-  id String @id @default(uuid())
+  id String @id
 
   amountInCents Int             @map("amount_in_cents")
   currency      PaymentCurrency
