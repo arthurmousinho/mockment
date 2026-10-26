@@ -203,60 +203,62 @@ export function SubscriptionFormDialog({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {PaymentCurrencyValues.map((currency, index) => (
-                            <SelectItem key={index} value={currency}>
-                              <PaymentCurrencyBadge currency={currency} />
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="method"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Method</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a payment method" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {PaymentMethodValues.map((method, index) => (
-                            <SelectItem key={index} value={method}>
-                              <PaymentMethodBadge method={method} />
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem className="min-w-0">
+                        <FormLabel>Currency</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a currency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PaymentCurrencyValues.map((currency, index) => (
+                              <SelectItem key={index} value={currency}>
+                                <PaymentCurrencyBadge currency={currency} />
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="method"
+                    render={({ field }) => (
+                      <FormItem className="min-w-0">
+                        <FormLabel>Payment Method</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a payment method" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PaymentMethodValues.map((method, index) => (
+                              <SelectItem key={index} value={method}>
+                                <PaymentMethodBadge method={method} />
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <div className="space-y-2">
                   <div className="flex flex-row items-center gap-2">
                     <FormField
@@ -294,7 +296,7 @@ export function SubscriptionFormDialog({
                       control={form.control}
                       name="intervalCount"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="w-full">
                           <FormLabel>Interval Count</FormLabel>
                           <div className="flex items-center gap-1">
                             <Button
