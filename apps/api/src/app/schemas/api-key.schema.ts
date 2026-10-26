@@ -15,7 +15,7 @@ export const createApiKeySchema = z.object({
 export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;
 
 export const findAllApiKeysSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   name: z.string(),
   revokedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
@@ -25,7 +25,7 @@ export const findAllApiKeysSchema = z.object({
 export type FindAllApiKeysOutput = z.infer<typeof findAllApiKeysSchema>;
 
 export const createApiKeyResponseSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   name: z.string(),
   rawKey: z.string(),
 });

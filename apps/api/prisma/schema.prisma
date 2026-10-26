@@ -63,7 +63,7 @@ enum SubscriptionStatus {
 }
 
 model ApiKey {
-  id String @id @default(uuid())
+  id String @id
 
   name    String
   keyHash String @unique @map("key_hash")
@@ -130,7 +130,7 @@ model Event {
 }
 
 model WebhookEndpoint {
-  id String @id @default(uuid())
+  id String @id
 
   url      String
   secret   String
@@ -147,7 +147,7 @@ model WebhookEndpoint {
 }
 
 model WebhookDelivery {
-  id String @id @default(uuid())
+  id String @id
 
   status     WebhookDeliveryStatus @default(PENDING)
   statusCode Int?                  @map("status_code")
@@ -169,7 +169,7 @@ model WebhookDelivery {
 }
 
 model Checkout {
-  id String @id @default(uuid())
+  id String @id
 
   successUrl String @map("success_url")
   cancelUrl  String @map("cancel_url")

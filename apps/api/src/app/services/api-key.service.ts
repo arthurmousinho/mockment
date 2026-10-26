@@ -13,6 +13,7 @@ import { buildApiKeySearchFilter } from "../filters/api-key.filters.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 
 function generateKeyPair() {
@@ -26,6 +27,7 @@ async function create(input: CreateApiKeyInput) {
 
   const createdApiKey = await prismaSingleton.apiKey.create({
     data: {
+      id: createPrefixedId("aky"),
       name: input.name,
       keyHash,
     },

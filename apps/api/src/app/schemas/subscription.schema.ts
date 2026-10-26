@@ -23,7 +23,7 @@ export const subscriptionSchema = z.object({
   intervalCount: z.number().positive().int(),
   status: z.enum(SubscriptionStatus),
   nextBillingAt: z.iso.datetime().nullable(),
-  apiKeyId: z.uuid(),
+  apiKeyId: z.string(),
 });
 
 export const createSubscriptionSchema = z.object({
