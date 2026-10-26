@@ -10,6 +10,7 @@ import type { PaginationInput } from "../../common/pagination.schema.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 
 async function findAll(paginationInput: PaginationInput) {
@@ -61,6 +62,7 @@ async function findAllByEndpointId(
 async function send(endpoint: WebhookEndpoint, event: Event) {
   const delivery = await prismaSingleton.webhookDelivery.create({
     data: {
+      id: createPrefixedId("wdel"),
       endpointId: endpoint.id,
       eventId: event.id,
       status: "PENDING",
