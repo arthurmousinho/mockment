@@ -112,7 +112,30 @@ export function WebhooksPage() {
           </p>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-2 lg:shrink-0 lg:flex-nowrap">
+      </header>
+
+      <header className="flex flex-row items-center justify-between gap-2">
+        <ListingSearch
+          className="flex-1"
+          value={searchInput}
+          appliedValue={search}
+          onValueChange={setSearchInput}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search webhook endpoints"
+          inputLabel="Endpoint ID, URL, or API key ID"
+          placeholder="Search by endpoint ID, URL, or API key ID..."
+          status={
+            isFetching
+              ? "Updating endpoints..."
+              : search
+                ? `${response.pagination.total} matching endpoints`
+                : ""
+          }
+        />
+        <div className="flex flex-row items-center gap-2">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <WebhookDeliveriesSheet>
             <Button variant="secondary">
@@ -126,28 +149,8 @@ export function WebhooksPage() {
               New Endpoint
             </Button>
           </WebhookEndpointFormDialog>
-        </nav>
+        </div>
       </header>
-
-      <ListingSearch
-        value={searchInput}
-        appliedValue={search}
-        onValueChange={setSearchInput}
-        onSearch={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        label="Search webhook endpoints"
-        inputLabel="Endpoint ID, URL, or API key ID"
-        placeholder="Search by endpoint ID, URL, or API key ID..."
-        status={
-          isFetching
-            ? "Updating endpoints..."
-            : search
-              ? `${response.pagination.total} matching endpoints`
-              : ""
-        }
-      />
 
       <Table>
         <TableHeader>
