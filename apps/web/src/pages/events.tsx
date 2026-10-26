@@ -65,28 +65,31 @@ export function EventsPage() {
             activity, and other relevant events within the payment system.
           </p>
         </div>
-        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
       </header>
 
-      <ListingSearch
-        value={searchInput}
-        appliedValue={search}
-        onValueChange={setSearchInput}
-        onSearch={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        label="Search events"
-        inputLabel="Event ID, type, payment ID, or subscription ID"
-        placeholder="Search by ID, event type, or related ID..."
-        status={
-          isFetching
-            ? "Updating events..."
-            : search
-              ? `${response.pagination.total} matching events`
-              : ""
-        }
-      />
+      <header className="flex flex-row items-center justify-between gap-2">
+        <ListingSearch
+          className="flex-1"
+          value={searchInput}
+          appliedValue={search}
+          onValueChange={setSearchInput}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search events"
+          inputLabel="Event ID, type, payment ID, or subscription ID"
+          placeholder="Search by ID, event type, or related ID..."
+          status={
+            isFetching
+              ? "Updating events..."
+              : search
+                ? `${response.pagination.total} matching events`
+                : ""
+          }
+        />
+        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+      </header>
 
       <Table>
         <TableHeader>
