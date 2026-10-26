@@ -101,7 +101,6 @@ export function PaymentsPage() {
             <CurrencyCircleDollarIcon size={24} className="font-medium" />
             <h1 className="text-xl font-medium tracking-tight">Payments</h1>
           </div>
-
           <p className="text-sm text-muted-foreground">
             The Payments section allows you to create, monitor, and manage
             payment transactions processed through your gateway. Track payment
@@ -109,7 +108,23 @@ export function PaymentsPage() {
             troubleshoot payment flows from a single place.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+      </header>
+
+      <header className="flex flex-row items-center justify-between">
+        <ListingSearch
+          className="flex-1"
+          value={searchInput}
+          appliedValue={search}
+          onValueChange={setSearchInput}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search payments"
+          inputLabel="Payment ID, description, external ID, or idempotency key"
+          placeholder="Search by ID, description, or reference..."
+        />
+        <div className="flex flex-row items-center gap-2">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <PaymentFormDialog>
             <Button>
@@ -120,21 +135,8 @@ export function PaymentsPage() {
         </div>
       </header>
 
-      <ListingSearch
-        value={searchInput}
-        appliedValue={search}
-        onValueChange={setSearchInput}
-        onSearch={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        label="Search payments"
-        inputLabel="Payment ID, description, external ID, or idempotency key"
-        placeholder="Search by ID, description, or reference..."
-      />
-
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted/70">
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead className="text-right">Amount</TableHead>
