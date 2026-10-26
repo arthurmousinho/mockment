@@ -51,6 +51,8 @@ const paymentFormSchema = z.object({
   currency: z.enum(PaymentCurrencyValues),
   method: z.enum(PaymentMethodValues),
   apiKey: z.string().trim().min(1, "API key is required."),
+  successUrl: z.union([z.url(), z.literal("")]),
+  cancelUrl: z.union([z.url(), z.literal("")]),
   description: z
     .string()
     .trim()
@@ -81,6 +83,8 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
       currency: "BRL",
       method: "PIX",
       apiKey: "",
+      successUrl: "",
+      cancelUrl: "",
       description: "",
       externalId: "",
       idempotencyKey: "",
@@ -101,6 +105,8 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
     createPayment(
       {
         ...data,
+        successUrl: data.successUrl || undefined,
+        cancelUrl: data.cancelUrl || undefined,
         description: data.description || undefined,
         externalId: data.externalId || undefined,
         idempotencyKey: data.idempotencyKey || undefined,
@@ -218,6 +224,40 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
                           placeholder="mk_test_..."
                           autoComplete="off"
                           type="password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="successUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Success URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="url"
+                          placeholder="https://example.com/payment/success"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cancelUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cancel URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="url"
+                          placeholder="https://example.com/payment/cancel"
                           {...field}
                         />
                       </FormControl>

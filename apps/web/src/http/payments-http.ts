@@ -29,6 +29,8 @@ export type CreatePaymentRequestData = {
   amountInCents: number;
   currency: PaymentCurrency;
   method: PaymentMethod;
+  successUrl?: string;
+  cancelUrl?: string;
   description?: string;
   externalId?: string;
   idempotencyKey?: string;

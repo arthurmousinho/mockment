@@ -79,6 +79,8 @@ async function create(
   const checkoutLink = await checkoutService.generateLink({
     apiKeyId: validatedApiKey.id,
     paymentId: payment.id,
+    ...(input.successUrl && { successUrl: input.successUrl }),
+    ...(input.cancelUrl && { cancelUrl: input.cancelUrl }),
     ...(subscriptionId && { subscriptionId }),
   });
 

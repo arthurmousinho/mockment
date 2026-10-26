@@ -30,6 +30,8 @@ export const createPaymentSchema = z.object({
     .positive({ message: "Amount must be greater than zero." }),
   currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
   method: z.enum(PaymentMethod, { message: "Invalid payment method." }),
+  successUrl: z.url({ message: "Invalid success URL." }).optional(),
+  cancelUrl: z.url({ message: "Invalid cancel URL." }).optional(),
   description: z
     .string({ message: "Description must be a string." })
     .trim()
