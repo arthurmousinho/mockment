@@ -111,7 +111,6 @@ export function WebhooksPage() {
             payments, refunds, chargebacks, or transaction status updates.
           </p>
         </div>
-
       </header>
 
       <header className="flex flex-row items-center justify-between gap-2">
@@ -153,7 +152,7 @@ export function WebhooksPage() {
       </header>
 
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted/70">
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead className="text-right">URL</TableHead>

@@ -109,7 +109,6 @@ export function ApiKeysPage() {
             flows just like you would with a real payment provider.
           </p>
         </div>
-
       </header>
 
       <header className="flex flex-row items-center justify-between gap-2">
@@ -145,7 +144,7 @@ export function ApiKeysPage() {
       </header>
 
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted/70">
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead className="text-right">Created At</TableHead>

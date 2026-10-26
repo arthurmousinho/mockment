@@ -92,7 +92,7 @@ export function EventsPage() {
       </header>
 
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted/70">
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead className="text-right">Type</TableHead>
