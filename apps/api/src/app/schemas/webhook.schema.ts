@@ -42,11 +42,11 @@ export type UpdateWebhookEndpointInput = z.infer<
 >;
 
 export const webhookDeliverySchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   status: z.enum(WebhookDeliveryStatus),
   statusCode: z.number().int().positive(),
   error: z.string().nullable(),
-  endpointId: z.uuid(),
+  endpointId: z.string(),
   eventId: z.string(),
   deliveredAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
@@ -59,9 +59,9 @@ export const findAllWebhookDeliveriesSchema = webhookDeliverySchema.safeExtend({
 });
 
 export const webhookEndpointSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   url: z.url(),
-  apiKeyId: z.uuid(),
+  apiKeyId: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

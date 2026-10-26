@@ -15,6 +15,7 @@ import { buildWebhookEndpointSearchFilter } from "../filters/webhook-endpoint.fi
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 
 function generateSecret() {
@@ -25,6 +26,7 @@ async function create(apiKey: string, input: CreateWebhookEndpointInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
   return await prismaSingleton.webhookEndpoint.create({
     data: {
+      id: createPrefixedId("whk"),
       url: input.url,
       events: input.events,
       secret: generateSecret(),
