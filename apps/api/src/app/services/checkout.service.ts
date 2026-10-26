@@ -3,6 +3,7 @@ import type { PaginationInput } from "../../common/pagination.schema.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 import { env } from "../../config/env.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
@@ -28,6 +29,7 @@ async function generateLink(input: GenerateCheckoutLinkInput) {
 
   const checkout = await prismaSingleton.checkout.create({
     data: {
+      id: createPrefixedId("chk"),
       apiKeyId: input.apiKeyId,
       paymentId: input.paymentId,
       successUrl: input.successUrl ?? defaultSuccessLink,

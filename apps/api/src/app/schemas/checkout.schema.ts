@@ -22,8 +22,8 @@ export const completeCheckoutSchema = z.object({
 });
 
 export const findAllCheckoutsSchema = z.object({
-  id: z.uuid(),
-  apiKeyId: z.uuid(),
+  id: z.string(),
+  apiKeyId: z.string(),
   createdAt: z.iso.datetime(),
   successUrl: z.url(),
   cancelUrl: z.url(),
@@ -32,8 +32,8 @@ export const findAllCheckoutsSchema = z.object({
 });
 
 export const detailedCheckoutSchema = z.object({
-  id: z.uuid(),
-  apiKeyId: z.uuid(),
+  id: z.string(),
+  apiKeyId: z.string(),
   createdAt: z.iso.datetime(),
   successUrl: z.url(),
   cancelUrl: z.url(),
