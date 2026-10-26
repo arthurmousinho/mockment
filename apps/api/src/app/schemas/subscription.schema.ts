@@ -12,7 +12,7 @@ export const subscriptionListSchema = searchablePaginationSchema;
 export type SubscriptionListInput = z.infer<typeof subscriptionListSchema>;
 
 export const subscriptionSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   description: z.string().nullable(),
   amountInCents: z.number().positive().int(),
   currency: z.enum(PaymentCurrency),
@@ -50,7 +50,7 @@ export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 
 export const createSubscriptionResponseSchema = subscriptionSchema.safeExtend({
   checkoutLink: z.url(),
-  initPaymentId: z.uuid(),
+  initPaymentId: z.string(),
 });
 
 export type CreateSubscriptionOutput = z.infer<
@@ -87,7 +87,7 @@ export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>;
 export const detailedSubscriptionSchema = subscriptionSchema.safeExtend({
   events: z.array(
     z.object({
-      id: z.uuid(),
+      id: z.string(),
       type: z.enum(EventType),
       createdAt: z.iso.datetime(),
     }),

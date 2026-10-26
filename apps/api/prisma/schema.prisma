@@ -189,7 +189,7 @@ model Checkout {
 }
 
 model Subscription {
-  id String @id @default(uuid())
+  id String @id
 
   description String?
 

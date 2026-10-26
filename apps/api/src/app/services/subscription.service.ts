@@ -17,6 +17,7 @@ import { buildSubscriptionSearchFilter } from "../filters/subscription.filters.t
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
+  createPrefixedId,
 } from "../../common/utils.ts";
 import { eventService } from "./event.service.ts";
 
@@ -42,6 +43,7 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
 
   const pendingSubscription = await prismaSingleton.subscription.create({
     data: {
+      id: createPrefixedId("sub"),
       apiKeyId: validatedApiKey.id,
       amountInCents: input.amountInCents,
       currency: input.currency,
