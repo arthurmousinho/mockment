@@ -12,6 +12,28 @@ export type SimulationScenarioListInput = z.infer<
   typeof simulationScenarioListSchema
 >;
 
+export const createSimulationScenarioSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  description: z.string().trim().max(500).optional(),
+  stepIntervalMs: z.number().int().positive().max(60_000).nullable().optional(),
+  steps: z.array(simulationScenarioStepSchema).min(1).max(100),
+});
+
+export type CreateSimulationScenarioInput = z.infer<
+  typeof createSimulationScenarioSchema
+>;
+
+export const updateSimulationScenarioSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  description: z.string().trim().max(500).nullable(),
+  stepIntervalMs: z.number().int().positive().max(60_000).nullable(),
+  steps: z.array(simulationScenarioStepSchema).min(1).max(100),
+});
+
+export type UpdateSimulationScenarioInput = z.infer<
+  typeof updateSimulationScenarioSchema
+>;
+
 export const simulationScenarioSchema = z.object({
   id: z.string(),
   name: z.string(),

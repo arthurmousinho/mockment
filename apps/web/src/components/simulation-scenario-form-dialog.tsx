@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CreateSimulationScenarioRequest } from "@/http/create-simulation-scenario-http";
+import {
+  CreateSimulationScenarioRequest,
+  UpdateSimulationScenarioRequest,
+} from "@/http/simulation-scenarios-http";
+import type { SimulationScenario } from "@/http/simulation-scenarios-http";
 
 const stepsSchema = z.array(
   z.object({
@@ -38,8 +42,10 @@ const initialSteps = `[
 
 export function SimulationScenarioFormDialog({
   children,
+  scenario,
 }: {
   children: ReactNode;
+  scenario?: SimulationScenario;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -48,6 +54,19 @@ export function SimulationScenarioFormDialog({
   const [stepsText, setStepsText] = useState(initialSteps);
   const [stepsError, setStepsError] = useState<string | null>(null);
   const createScenario = CreateSimulationScenarioRequest();
+  const updateScenario = UpdateSimulationScenarioRequest();
+  const isSaving = createScenario.isPending || updateScenario.isPending;
+
+  useEffect(() => {
+    if (!open) return;
+    setName(scenario?.name ?? "");
+    setDescription(scenario?.description ?? "");
+    setStepIntervalMs(
+      scenario?.stepIntervalMs == null ? "" : String(scenario.stepIntervalMs),
+    );
+    setStepsText(scenario ? JSON.stringify(scenario.steps, null, 2) : initialSteps);
+    setStepsError(null);
+  }, [open, scenario]);
 
   function resetForm() {
     setName("");
@@ -85,6 +104,21 @@ export function SimulationScenarioFormDialog({
       return;
     }
 
+    const onSuccess = () => handleOpenChange(false);
+    if (scenario) {
+      updateScenario.mutate(
+        {
+          id: scenario.id,
+          name: name.trim(),
+          description: description.trim() || null,
+          stepIntervalMs: interval,
+          steps: validation.data,
+        },
+        { onSuccess },
+      );
+      return;
+    }
+
     createScenario.mutate(
       {
         name: name.trim(),
@@ -92,7 +126,7 @@ export function SimulationScenarioFormDialog({
         stepIntervalMs: interval,
         steps: validation.data,
       },
-      { onSuccess: () => handleOpenChange(false) },
+      { onSuccess },
     );
   }
 
@@ -101,9 +135,13 @@ export function SimulationScenarioFormDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create simulation scenario</DialogTitle>
+          <DialogTitle>
+            {scenario ? "Edit simulation scenario" : "Create simulation scenario"}
+          </DialogTitle>
           <DialogDescription>
-            Save an ordered scenario definition with optional input data for each step.
+            {scenario
+              ? "Update the scenario details and ordered steps."
+              : "Save an ordered scenario definition with optional input data for each step."}
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -160,8 +198,12 @@ export function SimulationScenarioFormDialog({
             <DialogClose asChild>
               <Button type="button" variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" disabled={createScenario.isPending}>
-              {createScenario.isPending ? "Saving…" : "Create scenario"}
+            <Button type="submit" disabled={isSaving}>
+              {isSaving
+                ? "Saving…"
+                : scenario
+                  ? "Save changes"
+                  : "Create scenario"}
             </Button>
           </DialogFooter>
         </form>

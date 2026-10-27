@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { FlaskIcon, PlusIcon } from "@phosphor-icons/react";
+import { DotsThreeIcon, FlaskIcon, PencilSimpleIcon, PlusIcon } from "@phosphor-icons/react";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
 import { RefetchButton } from "@/components/refetch-button";
 import { SimulationScenarioFormDialog } from "@/components/simulation-scenario-form-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -82,12 +88,13 @@ export function SimulationScenariosPage() {
             <TableHead className="text-right">Steps</TableHead>
             <TableHead className="text-right">Delay</TableHead>
             <TableHead className="text-right">Created At</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 {search
                   ? "No simulation scenarios match your search."
                   : "No simulation scenarios found. Create one to get started."}
@@ -106,6 +113,23 @@ export function SimulationScenariosPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   {formatDateTime(scenario.createdAt)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" aria-label="Scenario options">
+                        <DotsThreeIcon size={32} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right">
+                      <SimulationScenarioFormDialog scenario={scenario}>
+                        <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                          <PencilSimpleIcon size={20} />
+                          Edit
+                        </DropdownMenuItem>
+                      </SimulationScenarioFormDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))
