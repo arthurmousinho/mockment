@@ -224,3 +224,17 @@ model VirtualClock {
 
   @@map("virtual_clock")
 }
+
+model SimulationScenario {
+  id String @id
+
+  name           String
+  description    String? @db.Text
+  stepIntervalMs Int?    @map("step_interval_ms")
+  steps          Json
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("simulation_scenarios")
+}
