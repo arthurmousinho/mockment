@@ -23,6 +23,7 @@ import {
   ArrowUpRightIcon,
   ReceiptIcon,
   LinkSimpleIcon,
+  FlaskIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -32,6 +33,7 @@ const navigationLinks = [
   { label: "Guide", href: "/", icon: PathIcon },
   { label: "Payments", href: "/payments", icon: CurrencyCircleDollarIcon },
   { label: "Checkouts", href: "/checkouts", icon: LinkSimpleIcon },
+  { label: "Simulations", href: "/simulations", icon: FlaskIcon },
   { label: "Subscriptions", href: "/subscriptions", icon: StarIcon },
   { label: "Events", href: "/events", icon: ReceiptIcon },
   { label: "Webhooks", href: "/webhooks", icon: WebhooksLogoIcon },

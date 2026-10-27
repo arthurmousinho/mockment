@@ -11,6 +11,7 @@ import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
 import { EventsPage } from "@/pages/events";
 import { GuidePage } from "@/pages/guide";
+import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
 import { NotFoundPage } from "@/pages/not-found";
 import { PageLayout } from "@/layouts/page-layout";
 
@@ -35,6 +36,11 @@ export const router = createBrowserRouter([
                 path: "checkouts",
                 handle: { title: "Checkouts" },
                 element: <CheckoutsPage />,
+              },
+              {
+                path: "simulations",
+                handle: { title: "Simulation Scenarios" },
+                element: <SimulationScenariosPage />,
               },
               {
                 path: "subscriptions",
