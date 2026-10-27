@@ -62,6 +62,14 @@ enum SubscriptionStatus {
   CANCELED
 }
 
+enum SimulationRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
 model ApiKey {
   id String @id
 
@@ -229,12 +237,34 @@ model SimulationScenario {
   id String @id
 
   name           String
-  description    String? @db.Text
-  stepIntervalMs Int?    @map("step_interval_ms")
+  description    String?
+  stepIntervalMs Int?            @map("step_interval_ms")
   steps          Json
+  runs           SimulationRun[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("simulation_scenarios")
+}
+
+model SimulationRun {
+  id String @id
+
+  scenarioId String              @map("scenario_id")
+  status     SimulationRunStatus @default(PENDING)
+
+  currentStep Int   @default(0) @map("current_step")
+  totalSteps  Int   @map("total_steps")
+  error       Json?
+
+  startedAt  DateTime? @map("started_at")
+  finishedAt DateTime  @map("finished_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  scenario SimulationScenario @relation(fields: [scenarioId], references: [id])
+
+  @@index([scenarioId])
+  @@map("simulation_runs")
 }
