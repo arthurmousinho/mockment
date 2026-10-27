@@ -70,6 +70,14 @@ enum SimulationRunStatus {
   CANCELED
 }
 
+enum SimulationStepRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
 model ApiKey {
   id String @id
 
@@ -259,12 +267,36 @@ model SimulationRun {
   error       Json?
 
   startedAt  DateTime? @map("started_at")
-  finishedAt DateTime  @map("finished_at")
+  finishedAt DateTime? @map("finished_at")
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
 
-  scenario SimulationScenario @relation(fields: [scenarioId], references: [id])
+  scenario SimulationScenario  @relation(fields: [scenarioId], references: [id])
+  steps    SimulationStepRun[]
 
   @@index([scenarioId])
   @@map("simulation_runs")
+}
+
+model SimulationStepRun {
+  id String @id
+
+  runId     String                  @map("run_id")
+  stepIndex Int                     @map("step_index")
+  status    SimulationStepRunStatus @default(PENDING)
+
+  input  Json?
+  output Json?
+  error  Json?
+
+  startedAt  DateTime? @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  run SimulationRun @relation(fields: [runId], references: [id])
+
+  @@unique([runId, stepIndex])
+  @@index([runId, status])
+  @@map("simulation_step_runs")
 }
