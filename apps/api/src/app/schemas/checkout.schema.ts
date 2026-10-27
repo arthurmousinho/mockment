@@ -29,6 +29,7 @@ export const findAllCheckoutsSchema = z.object({
   cancelUrl: z.url(),
   paymentId: z.string(),
   subscriptionId: z.string().nullable(),
+  link: z.url(),
 });
 
 export const detailedCheckoutSchema = z.object({

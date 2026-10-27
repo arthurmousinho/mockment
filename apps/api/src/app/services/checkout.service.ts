@@ -50,7 +50,7 @@ async function getGeneratedLinkByPaymentId(paymentId: string) {
 
 async function findAll(paginationInput: PaginationInput) {
   const { skip, take } = buildPrismaPaginationParams(paginationInput);
-  const [endpoint, total] = await Promise.all([
+  const [checkouts, total] = await Promise.all([
     prismaSingleton.checkout.findMany({
       skip,
       take,
@@ -58,8 +58,11 @@ async function findAll(paginationInput: PaginationInput) {
     }),
     prismaSingleton.checkout.count(),
   ]);
+
   return buildPaginatedResponse({
-    data: endpoint,
+    data: checkouts.map((item) => {
+      return { ...item, link: buildCheckoutLink(item.id) };
+    }),
     page: paginationInput.page,
     limit: paginationInput.limit,
     total,
