@@ -19,7 +19,7 @@ export type SimulationScenario = {
 };
 
 export function FindAllSimulationScenariosRequest(
-  pagination: PaginatedRequest,
+  pagination: PaginatedRequest & { search?: string },
 ) {
   return useQuery({
     queryKey: ["simulation-scenarios", pagination],

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FlaskIcon, PlusIcon } from "@phosphor-icons/react";
 import { Paginator } from "@/components/paginator";
+import { ListingSearch } from "@/components/listing-search";
 import { RefetchButton } from "@/components/refetch-button";
 import { SimulationScenarioFormDialog } from "@/components/simulation-scenario-form-dialog";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,10 @@ import { formatDateTime } from "@/lib/formatters";
 export function SimulationScenariosPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const { data, isPending, isFetching, isError, refetch } =
-    FindAllSimulationScenariosRequest({ page, limit });
+    FindAllSimulationScenariosRequest({ page, limit, search });
 
   if (isPending) return <div>Loading simulation scenarios...</div>;
 
@@ -46,14 +49,29 @@ export function SimulationScenariosPage() {
         </p>
       </header>
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-        <SimulationScenarioFormDialog>
-          <Button>
-            <PlusIcon size={18} />
-            New Scenario
-          </Button>
-        </SimulationScenarioFormDialog>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <ListingSearch
+          className="min-w-0 flex-[1_1_30rem]"
+          value={searchInput}
+          appliedValue={search}
+          onValueChange={setSearchInput}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search simulation scenarios"
+          inputLabel="Simulation scenario name or description"
+          placeholder="Search by name or description..."
+        />
+        <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <SimulationScenarioFormDialog>
+            <Button>
+              <PlusIcon size={18} />
+              New Scenario
+            </Button>
+          </SimulationScenarioFormDialog>
+        </div>
       </div>
 
       <Table>
@@ -70,7 +88,9 @@ export function SimulationScenariosPage() {
           {data.data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="h-24 text-center">
-                No simulation scenarios found. Create one to get started.
+                {search
+                  ? "No simulation scenarios match your search."
+                  : "No simulation scenarios found. Create one to get started."}
               </TableCell>
             </TableRow>
           ) : (

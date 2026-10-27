@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { paginationSchema } from "../../common/pagination.schema.ts";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
 
 export const simulationScenarioStepSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -7,7 +7,7 @@ export const simulationScenarioStepSchema = z.object({
   input: z.record(z.string(), z.unknown()).optional(),
 });
 
-export const simulationScenarioListSchema = paginationSchema;
+export const simulationScenarioListSchema = searchablePaginationSchema;
 export type SimulationScenarioListInput = z.infer<
   typeof simulationScenarioListSchema
 >;
