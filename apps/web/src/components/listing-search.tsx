@@ -32,7 +32,7 @@ export function ListingSearch({
     <form
       role="search"
       aria-label={label}
-      className={cn("flex flex-wrap items-center gap-2", className)}
+      className={cn("flex min-w-0 flex-wrap items-center gap-2", className)}
       onSubmit={(event) => {
         event.preventDefault();
         onSearch(value.trim());

@@ -111,9 +111,9 @@ export function ApiKeysPage() {
         </div>
       </header>
 
-      <header className="flex flex-row items-center justify-between gap-2">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <ListingSearch
-          className="flex-1"
+          className="min-w-0 flex-[1_1_30rem]"
           value={searchInput}
           appliedValue={search}
           onValueChange={setSearchInput}
@@ -132,7 +132,7 @@ export function ApiKeysPage() {
                 : ""
           }
         />
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <ApiKeyFormDialog>
             <Button>
