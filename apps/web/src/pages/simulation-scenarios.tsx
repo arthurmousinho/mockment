@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { FlaskIcon } from "@phosphor-icons/react";
+import { FlaskIcon, PlusIcon } from "@phosphor-icons/react";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
+import { SimulationScenarioFormDialog } from "@/components/simulation-scenario-form-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -47,6 +48,12 @@ export function SimulationScenariosPage() {
 
       <div className="flex flex-wrap items-center justify-end gap-2">
         <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+        <SimulationScenarioFormDialog>
+          <Button>
+            <PlusIcon size={18} />
+            New Scenario
+          </Button>
+        </SimulationScenarioFormDialog>
       </div>
 
       <Table>
