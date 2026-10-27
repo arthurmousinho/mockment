@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { MainLayout } from "../layouts/main-layout";
 import { ApiKeysPage } from "@/pages/api-keys";
+import { CheckoutsPage } from "@/pages/checkouts";
 import { PaymentsPage } from "@/pages/payments";
 import { WebhooksPage } from "@/pages/webhooks";
 import { CheckoutPage } from "@/pages/checkout";
@@ -29,6 +30,11 @@ export const router = createBrowserRouter([
                 path: "payments",
                 handle: { title: "Payments" },
                 element: <PaymentsPage />,
+              },
+              {
+                path: "checkouts",
+                handle: { title: "Checkouts" },
+                element: <CheckoutsPage />,
               },
               {
                 path: "subscriptions",

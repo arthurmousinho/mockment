@@ -3,7 +3,7 @@ import {
   idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
-  paginationParamsSchema,
+  searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
   completeCheckoutSchema,
@@ -14,9 +14,10 @@ import {
 export const checkoutDocs = {
   findAll: {
     summary: "List checkouts",
-    description: "Returns a paginated list of checkouts.",
+    description:
+      "Returns a paginated list of checkouts. Search matches checkout, payment, subscription, and API key IDs.",
     tags: ["Checkout"],
-    querystring: paginationParamsSchema,
+    querystring: searchablePaginationParamsSchema,
     response: {
       200: {
         description: "When the checkouts are retrieved successfully.",

@@ -1,9 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import type { Payment } from "./payments-http";
 import { api } from "@/lib/ky";
 import type { Subscription } from "./subscription-http";
+import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
-type Checkout = {
+export type Checkout = {
   id: string;
   successUrl: string;
   cancelUrl: string;
@@ -12,6 +13,8 @@ type Checkout = {
   subscriptionId: string | null;
   createdAt: string;
 };
+
+export type CheckoutListItem = Checkout & { link: string };
 
 type DetailedCheckout = Checkout & {
   payment: Payment;
@@ -29,6 +32,21 @@ export function GetCheckoutDetailsRequest(id: string) {
 }
 
 export type CheckoutCompletionStatus = "APPROVED" | "DECLINED" | "CANCELED";
+
+export function FindAllCheckoutsRequest(
+  paginationData: PaginatedRequest & { search?: string },
+) {
+  return useQuery({
+    queryKey: ["checkouts", paginationData],
+    queryFn: async () => {
+      const request = await api.get("checkouts", {
+        searchParams: paginationData,
+      });
+      return await request.json<PaginatedAPIResponse<CheckoutListItem>>();
+    },
+    placeholderData: keepPreviousData,
+  });
+}
 
 export function CompleteCheckoutRequest(id: string) {
   return useMutation({

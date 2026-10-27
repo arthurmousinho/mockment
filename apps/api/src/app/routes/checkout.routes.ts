@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import { checkoutService } from "../services/checkout.service.ts";
 import { completeCheckoutSchema } from "../schemas/checkout.schema.ts";
-import { paginationSchema } from "../../common/pagination.schema.ts";
+import { checkoutListSchema } from "../schemas/checkout.schema.ts";
 import { checkoutDocs } from "../docs/checkout.docs.ts";
 
 export async function checkoutRoutes(app: FastifyInstance) {
   app.get("/", { schema: checkoutDocs.findAll }, async (request, reply) => {
-    const paginationInput = paginationSchema.parse(request.query);
+    const paginationInput = checkoutListSchema.parse(request.query);
     const checkouts = await checkoutService.findAll(paginationInput);
     return reply.status(200).send(checkouts);
   });

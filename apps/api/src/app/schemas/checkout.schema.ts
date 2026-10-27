@@ -1,5 +1,9 @@
 import z from "zod";
 import { paymentSchema } from "./payment.schema.ts";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
+
+export const checkoutListSchema = searchablePaginationSchema;
+export type CheckoutListInput = z.infer<typeof checkoutListSchema>;
 
 export type GenerateCheckoutLinkInput = {
   apiKeyId: string;

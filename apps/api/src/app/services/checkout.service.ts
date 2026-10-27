@@ -1,5 +1,4 @@
 import { ConflictError, NotFoundError } from "../../common/http-error.ts";
-import type { PaginationInput } from "../../common/pagination.schema.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -8,11 +7,13 @@ import {
 import { env } from "../../config/env.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
+  CheckoutListInput,
   CheckoutCompletionStatus,
   GenerateCheckoutLinkInput,
 } from "../schemas/checkout.schema.ts";
 import { paymentService } from "./payment.service.ts";
 import { subscriptionService } from "./subscription.service.ts";
+import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 
 function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
@@ -48,15 +49,17 @@ async function getGeneratedLinkByPaymentId(paymentId: string) {
   return checkout ? buildCheckoutLink(checkout.id) : null;
 }
 
-async function findAll(paginationInput: PaginationInput) {
+async function findAll(paginationInput: CheckoutListInput) {
   const { skip, take } = buildPrismaPaginationParams(paginationInput);
+  const where = buildCheckoutSearchFilter(paginationInput.search);
   const [checkouts, total] = await Promise.all([
     prismaSingleton.checkout.findMany({
+      where,
       skip,
       take,
       orderBy: { createdAt: "desc" },
     }),
-    prismaSingleton.checkout.count(),
+    prismaSingleton.checkout.count({ where }),
   ]);
 
   return buildPaginatedResponse({
