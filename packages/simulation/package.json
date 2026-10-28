@@ -2,6 +2,9 @@
   "name": "@mockment/simulation",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
   "dependencies": {
     "zod": "^4.4.3"
   },

@@ -17,11 +17,17 @@ export type {
 
 export {
   checkoutSteps,
+  getAllStepDefinitions,
+  getPublicStepDefinitions,
+  getStepDefinition,
   paymentSteps,
   simulationSteps,
   utilitySteps,
 } from "./steps/index.ts";
-export type { SimulationStepDefinitionId } from "./steps/index.ts";
+export type {
+  PublicSimulationStepDefinition,
+  SimulationStepDefinitionId,
+} from "./steps/index.ts";
 
 export {
   checkoutCreateInputSchema,
