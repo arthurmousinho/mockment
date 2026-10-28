@@ -2,6 +2,9 @@
   "name": "@mockment/simulation",
   "private": true,
   "type": "module",
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
