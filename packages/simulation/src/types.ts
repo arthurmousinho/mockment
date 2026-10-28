@@ -22,10 +22,10 @@ export interface BooleanSimulationInputField extends SimulationInputFieldBase {
 
 export interface SelectSimulationInputField extends SimulationInputFieldBase {
   type: "select";
-  options: Array<{
+  options: readonly {
     label: string;
     value: string;
-  }>;
+  }[];
 }
 
 /** A scalar field that a frontend can render as part of a step form. */
@@ -64,8 +64,8 @@ export interface SimulationStepDefinition {
   id: SimulationStepId;
   name: string;
   description?: string;
-  inputFields: SimulationInputField[];
-  outputFields: SimulationOutputField[];
+  inputFields: readonly SimulationInputField[];
+  outputFields: readonly SimulationOutputField[];
   executor: SimulationExecutor;
 }
 
