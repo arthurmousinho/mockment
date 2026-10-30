@@ -336,6 +336,39 @@ export const resumeSubscriptionStep = {
   },
 } satisfies Step;
 
+export const pauseSubscriptionStep = {
+  id: "subscription.pause",
+  name: "Pause subscription",
+  description: "Pause an existing subscription.",
+  input: [
+    {
+      name: "id",
+      label: "Subscription ID",
+      type: "string",
+      required: true,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "description", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "method", type: "string" },
+    { name: "interval", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+    { name: "intervalCount", type: "number" },
+    { name: "status", type: "string" },
+    { name: "nextBillingAt", type: "string" },
+    { name: "apiKeyId", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "PATCH",
+    endpoint: "/subscriptions/:id/pause",
+  },
+} satisfies Step;
+
 export const STEPS = [
   createPaymentStep,
   processPaymentStep,
@@ -345,4 +378,5 @@ export const STEPS = [
   createSubscriptionStep,
   cancelSubscriptionStep,
   resumeSubscriptionStep,
+  pauseSubscriptionStep,
 ] as const;
