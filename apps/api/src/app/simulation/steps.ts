@@ -77,4 +77,35 @@ export const createPaymentStep = {
   },
 } satisfies Step;
 
-const steps = [createPaymentStep];
+export const processPaymentStep = {
+  id: "payment.process",
+  name: "Process payment",
+  description: "Move an existing payment to the processing state.",
+  input: [
+    {
+      name: "id",
+      label: "Payment ID",
+      type: "string",
+      required: true,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "method", type: "string" },
+    { name: "status", type: "string" },
+    { name: "description", type: "string" },
+    { name: "externalId", type: "string" },
+    { name: "idempotencyKey", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "PATCH",
+    endpoint: "/payments/:id/process",
+  },
+} satisfies Step;
+
+export const STEPS = [createPaymentStep, processPaymentStep] as const;
