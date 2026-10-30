@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { DotsThreeIcon, FlaskIcon, PencilSimpleIcon, PlusIcon } from "@phosphor-icons/react";
+import {
+  DotsThreeIcon,
+  FlaskIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
 import { RefetchButton } from "@/components/refetch-button";
@@ -19,7 +25,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllSimulationScenariosRequest } from "@/http/simulation-scenarios-http";
+import {
+  DeleteSimulationScenarioRequest,
+  FindAllSimulationScenariosRequest,
+} from "@/http/simulation-scenarios-http";
 import { formatDateTime } from "@/lib/formatters";
 
 export function SimulationScenariosPage() {
@@ -27,6 +36,7 @@ export function SimulationScenariosPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const deleteScenario = DeleteSimulationScenarioRequest();
   const { data, isPending, isFetching, isError, refetch } =
     FindAllSimulationScenariosRequest({ page, limit, search });
 
@@ -48,7 +58,9 @@ export function SimulationScenariosPage() {
       <header className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <FlaskIcon size={24} className="font-medium" />
-          <h1 className="text-xl font-medium tracking-tight">Simulation scenarios</h1>
+          <h1 className="text-xl font-medium tracking-tight">
+            Simulation scenarios
+          </h1>
         </div>
         <p className="text-sm text-muted-foreground">
           Build payment flows visually by connecting step outputs to inputs.
@@ -107,9 +119,13 @@ export function SimulationScenariosPage() {
                 <TableCell className="max-w-80 truncate">
                   {scenario.description || "—"}
                 </TableCell>
-                <TableCell className="text-right">{scenario.steps.length}</TableCell>
                 <TableCell className="text-right">
-                  {scenario.stepIntervalMs ? `${scenario.stepIntervalMs} ms` : "—"}
+                  {scenario.steps.length}
+                </TableCell>
+                <TableCell className="text-right">
+                  {scenario.stepIntervalMs
+                    ? `${scenario.stepIntervalMs} ms`
+                    : "—"}
                 </TableCell>
                 <TableCell className="text-right">
                   {formatDateTime(scenario.createdAt)}
@@ -117,17 +133,39 @@ export function SimulationScenariosPage() {
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="ghost" aria-label="Scenario options">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Scenario options"
+                      >
                         <DotsThreeIcon size={32} />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right">
                       <SimulationScenarioFormDialog scenario={scenario}>
-                        <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                        <DropdownMenuItem
+                          onSelect={(event) => event.preventDefault()}
+                        >
                           <PencilSimpleIcon size={20} />
                           Edit
                         </DropdownMenuItem>
                       </SimulationScenarioFormDialog>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        disabled={deleteScenario.isPending}
+                        onClick={() => {
+                          if (deleteScenario.isPending) return;
+                          deleteScenario.mutate(scenario.id, {
+                            onSuccess: () => {
+                              if (data.data.length === 1 && page > 1)
+                                setPage(page - 1);
+                            },
+                          });
+                        }}
+                      >
+                        <TrashIcon size={20} />
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

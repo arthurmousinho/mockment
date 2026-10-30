@@ -84,6 +84,19 @@ export function UpdateSimulationScenarioRequest() {
   });
 }
 
+export function DeleteSimulationScenarioRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`simulation/scenarios/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["simulation-scenarios"] });
+      toast.success("Simulation scenario deleted.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function FindAvailableSimulationStepsRequest(enabled = true) {
   return useQuery({
     queryKey: ["simulation-steps", "grouped"],

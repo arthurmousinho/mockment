@@ -20,6 +20,16 @@ function availableSteps(steps: readonly Step[]) {
 }
 
 export async function simulationRoutes(app: FastifyInstance) {
+  app.delete(
+    "/scenarios/:id",
+    { schema: simulationDocs.removeScenario },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      await simulationScenarioService.remove(id);
+      return reply.status(204).send();
+    },
+  );
+
   app.get(
     "/steps",
     { schema: simulationDocs.availableSteps },

@@ -1,5 +1,5 @@
-import type { Prisma } from "../../../generated/prisma/client.ts";
-import { NotFoundError } from "../../common/http-error.ts";
+import { Prisma } from "../../../generated/prisma/client.ts";
+import { ConflictError, NotFoundError } from "../../common/http-error.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import {
   buildPaginatedResponse,
@@ -65,4 +65,24 @@ async function update(id: string, input: UpdateSimulationScenarioInput) {
   });
 }
 
-export const simulationScenarioService = { findAll, create, update };
+async function remove(id: string) {
+  try {
+    await prismaSingleton.simulationScenario.delete({ where: { id } });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        throw new NotFoundError(
+          `Simulation scenario with ID ${id} was not found.`,
+        );
+      }
+      if (error.code === "P2003") {
+        throw new ConflictError(
+          "Simulation scenarios with existing runs cannot be deleted.",
+        );
+      }
+    }
+    throw error;
+  }
+}
+
+export const simulationScenarioService = { findAll, create, update, remove };

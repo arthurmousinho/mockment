@@ -13,6 +13,40 @@ import {
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  removeScenario: {
+    summary: "Delete a simulation scenario",
+    description: "Permanently deletes a scenario that has no runs.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    response: {
+      204: { description: "The scenario was deleted." },
+      404: {
+        description: "The scenario was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation scenario with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      409: {
+        description: "The scenario has existing runs.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "CONFLICT",
+              code: 409,
+              message:
+                "Simulation scenarios with existing runs cannot be deleted.",
+            }),
+          },
+        },
+      },
+    },
+  },
   availableSteps: {
     summary: "List available simulation steps",
     description:
