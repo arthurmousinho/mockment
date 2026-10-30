@@ -10,7 +10,7 @@ import type {
   CreateSimulationScenarioInput,
   SimulationScenarioListInput,
   UpdateSimulationScenarioInput,
-} from "../schemas/simulation-scenario.schema.ts";
+} from "../schemas/simulation.schema.ts";
 import { buildSimulationScenarioSearchFilter } from "../filters/simulation-scenario.filters.ts";
 
 async function findAll(input: SimulationScenarioListInput) {

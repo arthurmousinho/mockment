@@ -11,7 +11,6 @@ import { webhookDeliveryRoutes } from "./app/routes/webhook-delivery.routes.ts";
 import { checkoutRoutes } from "./app/routes/checkout.routes.ts";
 import { subcriptionRoutes } from "./app/routes/subscription.routes.ts";
 import { virtualClockRoutes } from "./app/routes/virtual-clock.routes.ts";
-import { simulationScenarioRoutes } from "./app/routes/simulation-scenario.routes.ts";
 import { simulationRoutes } from "./app/routes/simulation.routes.ts";
 import { virtualClockService } from "./app/services/virtual-clock.service.ts";
 import { registerSwagger } from "./config/swagger.ts";
@@ -74,10 +73,7 @@ appSingleton.register(eventRoutes, { prefix: "/events" });
 appSingleton.register(checkoutRoutes, { prefix: "/checkouts" });
 appSingleton.register(subcriptionRoutes, { prefix: "/subscriptions" });
 appSingleton.register(virtualClockRoutes, { prefix: "/virtual-clock" });
-appSingleton.register(simulationScenarioRoutes, {
-  prefix: "/simulation-scenarios",
-});
-appSingleton.register(simulationRoutes, { prefix: "/simulations" });
+appSingleton.register(simulationRoutes, { prefix: "/simulation" });
 
 // Scheduler
 await registerScheduler(appSingleton);

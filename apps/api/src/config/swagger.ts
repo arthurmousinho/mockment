@@ -21,6 +21,10 @@ export async function registerSwagger(app: FastifyInstance) {
       ],
       tags: [
         {
+          name: "Simulations",
+          description: "Available simulation steps and saved scenarios.",
+        },
+        {
           name: "Payments",
           description:
             "Core payment operations. Represents the financial transactions created by merchants, including their amount, currency, payment method, status, and lifecycle.",

@@ -26,7 +26,7 @@ export function FindAllSimulationScenariosRequest(
   return useQuery({
     queryKey: ["simulation-scenarios", pagination],
     queryFn: async () => {
-      const response = await api.get("simulation-scenarios", {
+      const response = await api.get("simulation/scenarios", {
         searchParams: pagination,
       });
       return response.json<PaginatedAPIResponse<SimulationScenario>>();
@@ -53,7 +53,7 @@ export type UpdateSimulationScenarioInput = Omit<
 export function CreateSimulationScenarioRequest() {
   return useMutation({
     mutationFn: async (input: CreateSimulationScenarioInput) => {
-      const response = await api.post("simulation-scenarios", { json: input });
+      const response = await api.post("simulation/scenarios", { json: input });
       return response.json<SimulationScenario>();
     },
     onSuccess: () => {
@@ -67,7 +67,7 @@ export function CreateSimulationScenarioRequest() {
 export function UpdateSimulationScenarioRequest() {
   return useMutation({
     mutationFn: async ({ id, ...input }: UpdateSimulationScenarioInput & { id: string }) => {
-      const response = await api.patch(`simulation-scenarios/${id}`, {
+      const response = await api.patch(`simulation/scenarios/${id}`, {
         json: input,
       });
       return response.json<SimulationScenario>();
