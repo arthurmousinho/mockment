@@ -1,3 +1,4 @@
+import { completeCheckoutSchema } from "../../schemas/checkout.schema.ts";
 import type { Step } from "../types.ts";
 
 export const getCheckoutStep = {
@@ -28,4 +29,31 @@ export const getCheckoutStep = {
   },
 } satisfies Step;
 
-export const CHECKOUT_STEPS = [getCheckoutStep] as const;
+export const completeCheckoutStep = {
+  id: "checkout.complete",
+  name: "Complete checkout",
+  description: "Complete an existing checkout with the selected payment status.",
+  input: [
+    {
+      name: "id",
+      label: "Checkout ID",
+      type: "string",
+      required: true,
+    },
+    {
+      name: "status",
+      label: "Completion status",
+      type: "select",
+      required: true,
+      options: completeCheckoutSchema.shape.status.options,
+    },
+  ],
+  output: [],
+  executor: {
+    type: "http",
+    method: "POST",
+    endpoint: "/checkouts/:id/complete",
+  },
+} satisfies Step;
+
+export const CHECKOUT_STEPS = [getCheckoutStep, completeCheckoutStep] as const;
