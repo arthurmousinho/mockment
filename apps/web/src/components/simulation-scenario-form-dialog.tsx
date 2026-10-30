@@ -11,7 +11,7 @@ import {
   type Connection,
   type Edge,
 } from "@xyflow/react";
-import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { PlusIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -145,7 +145,7 @@ function ScenarioEditor({
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [error, setError] = useState("");
-  const { getNodes, getEdges, getViewport, setCenter, deleteElements } =
+  const { getNodes, getEdges, getViewport, setCenter } =
     useReactFlow<StepFlowNode>();
   const createScenario = CreateSimulationScenarioRequest();
   const updateScenario = UpdateSimulationScenarioRequest();
@@ -275,13 +275,13 @@ function ScenarioEditor({
       <div
         className={`simulation-editor grid min-h-0 flex-1 grid-rows-[auto_1fr] overflow-hidden border lg:grid-cols-[220px_1fr] lg:grid-rows-1 ${saving ? "pointer-events-none opacity-60" : ""}`}
       >
-        <aside className="max-h-32 space-y-2 overflow-y-auto border-b bg-muted/30 p-3 lg:max-h-none lg:border-r lg:border-b-0">
+        <aside className="max-h-32 space-y-2 overflow-y-auto bg-muted/30 p-3 lg:max-h-none lg:border-r">
           <h2 className="text-xs font-medium">Available steps</h2>
           {Object.entries(groups).map(([category, steps]) => (
             <section
               key={category}
               aria-label={`${stepGroupLabels[category]} steps`}
-              className="space-y-2 border-t pt-3"
+              className="space-y-2 pt-3"
             >
               <h3 className="text-xs font-medium text-muted-foreground">
                 {stepGroupLabels[category]}
@@ -306,11 +306,6 @@ function ScenarioEditor({
               ))}
             </section>
           ))}
-          <p className="text-xs text-muted-foreground">
-            Drag a node by its header. Connect a right output to a left input
-            with the same type. Each input accepts one connection; cycles are
-            blocked.
-          </p>
         </aside>
         <div
           className="relative min-h-0"
@@ -360,30 +355,6 @@ function ScenarioEditor({
           )}
         </div>
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span>
-          {nodes.length} steps · {edges.length} connections
-        </span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={
-            saving ||
-            (!nodes.some((node) => node.selected) &&
-              !edges.some((edge) => edge.selected))
-          }
-          onClick={() =>
-            void deleteElements({
-              nodes: getNodes().filter((node) => node.selected),
-              edges: getEdges().filter((edge) => edge.selected),
-            })
-          }
-        >
-          <TrashIcon />
-          Remove selected
-        </Button>
-      </div>
       {error && (
         <p role="alert" className="shrink-0 text-xs text-destructive">
           {error}
@@ -396,7 +367,7 @@ function ScenarioEditor({
           </Button>
         </DialogClose>
         <Button type="submit" disabled={saving || !nodes.length}>
-          {saving ? "Saving…" : "Save scenario"}
+          Save
         </Button>
       </DialogFooter>
     </form>
