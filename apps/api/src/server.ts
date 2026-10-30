@@ -12,6 +12,7 @@ import { checkoutRoutes } from "./app/routes/checkout.routes.ts";
 import { subcriptionRoutes } from "./app/routes/subscription.routes.ts";
 import { virtualClockRoutes } from "./app/routes/virtual-clock.routes.ts";
 import { simulationScenarioRoutes } from "./app/routes/simulation-scenario.routes.ts";
+import { simulationRoutes } from "./app/routes/simulation.routes.ts";
 import { virtualClockService } from "./app/services/virtual-clock.service.ts";
 import { registerSwagger } from "./config/swagger.ts";
 import { registerScheduler } from "./config/scheduler.ts";
@@ -76,6 +77,7 @@ appSingleton.register(virtualClockRoutes, { prefix: "/virtual-clock" });
 appSingleton.register(simulationScenarioRoutes, {
   prefix: "/simulation-scenarios",
 });
+appSingleton.register(simulationRoutes, { prefix: "/simulations" });
 
 // Scheduler
 await registerScheduler(appSingleton);
