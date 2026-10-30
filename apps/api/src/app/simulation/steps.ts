@@ -170,9 +170,41 @@ export const declinePaymentStep = {
   },
 } satisfies Step;
 
+export const cancelPaymentStep = {
+  id: "payment.cancel",
+  name: "Cancel payment",
+  description: "Cancel an existing payment.",
+  input: [
+    {
+      name: "id",
+      label: "Payment ID",
+      type: "string",
+      required: true,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "method", type: "string" },
+    { name: "status", type: "string" },
+    { name: "description", type: "string" },
+    { name: "externalId", type: "string" },
+    { name: "idempotencyKey", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "PATCH",
+    endpoint: "/payments/:id/cancel",
+  },
+} satisfies Step;
+
 export const STEPS = [
   createPaymentStep,
   processPaymentStep,
   approvePaymentStep,
   declinePaymentStep,
+  cancelPaymentStep,
 ] as const;
