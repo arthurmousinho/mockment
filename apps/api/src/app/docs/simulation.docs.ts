@@ -1,4 +1,3 @@
-import { z } from "zod";
 import {
   httpErrorSchema,
   idParamsSchema,
@@ -7,7 +6,7 @@ import {
   searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
-  availableSimulationStepSchema,
+  availableSimulationStepsSchema,
   createSimulationScenarioSchema,
   simulationScenarioSchema,
   updateSimulationScenarioSchema,
@@ -16,14 +15,15 @@ import {
 export const simulationDocs = {
   availableSteps: {
     summary: "List available simulation steps",
-    description: "Returns step definitions for building simulation forms.",
+    description:
+      "Returns step definitions grouped by payments and subscriptions for building simulation forms.",
     tags: ["Simulations"],
     response: {
       200: {
         description: "The available simulation steps.",
         content: {
           "application/json": {
-            schema: openApiSchema(z.array(availableSimulationStepSchema)),
+            schema: openApiSchema(availableSimulationStepsSchema),
           },
         },
       },

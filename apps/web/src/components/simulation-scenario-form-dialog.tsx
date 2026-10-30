@@ -38,6 +38,7 @@ import {
   restoreGraph,
   serializeGraph,
   type AvailableStep,
+  type AvailableStepGroups,
   type StepFlowNode,
 } from "@/lib/simulation-editor";
 import "@xyflow/react/dist/style.css";
@@ -57,7 +58,10 @@ export function SimulationScenarioFormDialog({
   let restoreError = "";
   if (steps.data) {
     try {
-      graph = restoreGraph(scenario?.steps ?? [], steps.data);
+      graph = restoreGraph(
+        scenario?.steps ?? [],
+        Object.values(steps.data).flat(),
+      );
     } catch {
       restoreError =
         "This scenario contains invalid editor metadata. Its saved data has been preserved.";
@@ -100,7 +104,7 @@ export function SimulationScenarioFormDialog({
         {steps.data && graph && !steps.isError && open && (
           <ReactFlowProvider>
             <ScenarioEditor
-              definitions={steps.data}
+              groups={steps.data}
               initialNodes={graph.nodes}
               initialEdges={graph.edges}
               scenario={scenario}
@@ -114,13 +118,13 @@ export function SimulationScenarioFormDialog({
 }
 
 function ScenarioEditor({
-  definitions,
+  groups,
   initialNodes,
   initialEdges,
   scenario,
   onSaved,
 }: {
-  definitions: AvailableStep[];
+  groups: AvailableStepGroups;
   initialNodes: StepFlowNode[];
   initialEdges: Edge[];
   scenario?: SimulationScenario;
@@ -268,23 +272,36 @@ function ScenarioEditor({
       >
         <aside className="max-h-32 space-y-2 overflow-y-auto border-b bg-muted/30 p-3 lg:max-h-none lg:border-r lg:border-b-0">
           <h2 className="text-xs font-medium">Available steps</h2>
-          {!definitions.length && (
-            <p className="text-xs text-muted-foreground">
-              No steps available yet.
-            </p>
-          )}
-          {definitions.map((step) => (
-            <Button
-              type="button"
-              key={step.id}
-              variant="outline"
-              className="h-auto w-full justify-start whitespace-normal py-2 text-left"
-              disabled={nodes.length >= 100 || saving}
-              onClick={() => addStep(step)}
+          {Object.entries(groups).map(([category, steps]) => (
+            <section
+              key={category}
+              aria-label={
+                category === "payments" ? "Payment steps" : "Subscription steps"
+              }
+              className="space-y-2 border-t pt-3"
             >
-              <PlusIcon className="shrink-0" />
-              <span>{step.name}</span>
-            </Button>
+              <h3 className="text-xs font-medium text-muted-foreground">
+                {category === "payments" ? "Payments" : "Subscriptions"}
+              </h3>
+              {!steps.length && (
+                <p className="text-xs text-muted-foreground">
+                  No steps available yet.
+                </p>
+              )}
+              {steps.map((step) => (
+                <Button
+                  type="button"
+                  key={step.id}
+                  variant="outline"
+                  className="h-auto w-full justify-start whitespace-normal py-2 text-left"
+                  disabled={nodes.length >= 100 || saving}
+                  onClick={() => addStep(step)}
+                >
+                  <PlusIcon className="shrink-0" />
+                  <span>{step.name}</span>
+                </Button>
+              ))}
+            </section>
           ))}
           <p className="text-xs text-muted-foreground">
             Drag a node by its header. Connect a right output to a left input

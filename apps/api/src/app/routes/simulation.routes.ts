@@ -7,21 +7,27 @@ import {
 } from "../schemas/simulation.schema.ts";
 import { simulationScenarioService } from "../services/simulation-scenario.service.ts";
 import { STEPS } from "../simulation/steps.ts";
+import type { Step } from "../simulation/types.ts";
+
+function availableSteps(steps: readonly Step[]) {
+  return steps.map(({ id, name, description, input, output }) => ({
+    id,
+    name,
+    desc: description,
+    input,
+    output,
+  }));
+}
 
 export async function simulationRoutes(app: FastifyInstance) {
   app.get(
     "/steps",
     { schema: simulationDocs.availableSteps },
     async (_, reply) => {
-      const steps = STEPS.map(({ id, name, description, input, output }) => ({
-        id,
-        name,
-        desc: description,
-        input,
-        output,
-      }));
-
-      return reply.status(200).send(steps);
+      return reply.status(200).send({
+        payments: availableSteps(STEPS.payments),
+        subscriptions: availableSteps(STEPS.subscriptions),
+      });
     },
   );
 

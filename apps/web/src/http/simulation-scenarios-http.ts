@@ -86,7 +86,7 @@ export function UpdateSimulationScenarioRequest() {
 
 export function FindAvailableSimulationStepsRequest(enabled = true) {
   return useQuery({
-    queryKey: ["simulation-steps"],
+    queryKey: ["simulation-steps", "grouped"],
     enabled,
     queryFn: async () => {
       const response = await api.get("simulation/steps");

@@ -15,23 +15,27 @@ const outputFieldSchema = z.object({
 });
 
 // Accept the current API arrays as well as the fields envelope used by the UI.
-export const availableStepsSchema = z.array(
-  z.object({
-    id: z.string(),
-    name: z.string(),
-    desc: z.string().optional(),
-    input: z.union([
-      z.array(inputFieldSchema).transform((fields) => ({ fields })),
-      z.object({ fields: z.array(inputFieldSchema) }),
-    ]),
-    output: z.union([
-      z.array(outputFieldSchema).transform((fields) => ({ fields })),
-      z.object({ fields: z.array(outputFieldSchema) }),
-    ]),
-  }),
-);
+const availableStepSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  desc: z.string().optional(),
+  input: z.union([
+    z.array(inputFieldSchema).transform((fields) => ({ fields })),
+    z.object({ fields: z.array(inputFieldSchema) }),
+  ]),
+  output: z.union([
+    z.array(outputFieldSchema).transform((fields) => ({ fields })),
+    z.object({ fields: z.array(outputFieldSchema) }),
+  ]),
+});
 
-export type AvailableStep = z.infer<typeof availableStepsSchema>[number];
+export const availableStepsSchema = z.object({
+  payments: z.array(availableStepSchema),
+  subscriptions: z.array(availableStepSchema),
+});
+
+export type AvailableStep = z.infer<typeof availableStepSchema>;
+export type AvailableStepGroups = z.infer<typeof availableStepsSchema>;
 export type StepFlowNode = Node<
   {
     stepId: string;
