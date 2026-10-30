@@ -37,6 +37,7 @@ export async function simulationRoutes(app: FastifyInstance) {
       return reply.status(200).send({
         payments: availableSteps(STEPS.payments),
         subscriptions: availableSteps(STEPS.subscriptions),
+        checkouts: availableSteps(STEPS.checkouts),
       });
     },
   );

@@ -44,6 +44,11 @@ import {
 import "@xyflow/react/dist/style.css";
 
 const nodeTypes = { step: StepNode };
+const stepGroupLabels: Record<string, string> = {
+  payments: "Payments",
+  subscriptions: "Subscriptions",
+  checkouts: "Checkouts",
+};
 
 export function SimulationScenarioFormDialog({
   children,
@@ -275,13 +280,11 @@ function ScenarioEditor({
           {Object.entries(groups).map(([category, steps]) => (
             <section
               key={category}
-              aria-label={
-                category === "payments" ? "Payment steps" : "Subscription steps"
-              }
+              aria-label={`${stepGroupLabels[category]} steps`}
               className="space-y-2 border-t pt-3"
             >
               <h3 className="text-xs font-medium text-muted-foreground">
-                {category === "payments" ? "Payments" : "Subscriptions"}
+                {stepGroupLabels[category]}
               </h3>
               {!steps.length && (
                 <p className="text-xs text-muted-foreground">

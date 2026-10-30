@@ -25,6 +25,7 @@ export const availableSimulationStepSchema = z.object({
 export const availableSimulationStepsSchema = z.object({
   payments: z.array(availableSimulationStepSchema),
   subscriptions: z.array(availableSimulationStepSchema),
+  checkouts: z.array(availableSimulationStepSchema),
 });
 
 export const simulationScenarioStepSchema = z.object(
