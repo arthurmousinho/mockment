@@ -1,3 +1,4 @@
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
@@ -50,6 +51,10 @@ export function WebhooksPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [rotatedSecret, setRotatedSecret] = useState<string | null>(null);
 
   const {
@@ -92,9 +97,11 @@ export function WebhooksPage() {
     });
   }
 
-  function handleDelete(id: string) {
-    if (isDeleting) return;
-    deleteRequest(id);
+  function handleDelete() {
+    if (isDeleting || !pendingDelete) return;
+    deleteRequest(pendingDelete.id, {
+      onSuccess: () => setPendingDelete(null),
+    });
   }
 
   return (
@@ -228,7 +235,9 @@ export function WebhooksPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDelete(item.id)}
+                      onSelect={() =>
+                        setPendingDelete({ id: item.id, name: item.url })
+                      }
                       disabled={isDeleting}
                     >
                       <TrashIcon size={32} />
@@ -264,6 +273,17 @@ export function WebhooksPage() {
           }}
         />
       </div>
+
+      <DeleteConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete webhook endpoint?"
+        itemName={pendingDelete?.name ?? ""}
+        isPending={isDeleting}
+        onConfirm={handleDelete}
+      />
 
       <Dialog
         open={Boolean(rotatedSecret)}

@@ -1,3 +1,4 @@
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { ApiKeyFormDialog } from "@/components/api-key-form-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,10 @@ export function ApiKeysPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [rotatedKey, setRotatedKey] = useState<string | null>(null);
 
   const {
@@ -74,9 +79,11 @@ export function ApiKeysPage() {
     );
   }
 
-  function handleDelete(id: string) {
-    if (isDeleting) return;
-    deleteRequest(id);
+  function handleDelete() {
+    if (isDeleting || !pendingDelete) return;
+    deleteRequest(pendingDelete.id, {
+      onSuccess: () => setPendingDelete(null),
+    });
   }
 
   function handleRevoke(id: string) {
@@ -195,7 +202,9 @@ export function ApiKeysPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDelete(item.id)}
+                      onSelect={() =>
+                        setPendingDelete({ id: item.id, name: item.name })
+                      }
                       disabled={isDeleting}
                     >
                       <TrashIcon size={32} />
@@ -231,6 +240,17 @@ export function ApiKeysPage() {
           }}
         />
       </div>
+
+      <DeleteConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete API key?"
+        itemName={pendingDelete?.name ?? ""}
+        isPending={isDeleting}
+        onConfirm={handleDelete}
+      />
 
       <Dialog
         open={Boolean(rotatedKey)}

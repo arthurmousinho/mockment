@@ -1,3 +1,4 @@
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { useState } from "react";
 import {
   DotsThreeIcon,
@@ -36,6 +37,10 @@ export function SimulationScenariosPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const deleteScenario = DeleteSimulationScenarioRequest();
   const { data, isPending, isFetching, isError, refetch } =
     FindAllSimulationScenariosRequest({ page, limit, search });
@@ -153,15 +158,12 @@ export function SimulationScenariosPage() {
                       <DropdownMenuItem
                         className="text-destructive"
                         disabled={deleteScenario.isPending}
-                        onClick={() => {
-                          if (deleteScenario.isPending) return;
-                          deleteScenario.mutate(scenario.id, {
-                            onSuccess: () => {
-                              if (data.data.length === 1 && page > 1)
-                                setPage(page - 1);
-                            },
-                          });
-                        }}
+                        onSelect={() =>
+                          setPendingDelete({
+                            id: scenario.id,
+                            name: scenario.name,
+                          })
+                        }
                       >
                         <TrashIcon size={20} />
                         Delete
@@ -174,6 +176,25 @@ export function SimulationScenariosPage() {
           )}
         </TableBody>
       </Table>
+
+      <DeleteConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete simulation scenario?"
+        itemName={pendingDelete?.name ?? ""}
+        isPending={deleteScenario.isPending}
+        onConfirm={() => {
+          if (deleteScenario.isPending || !pendingDelete) return;
+          deleteScenario.mutate(pendingDelete.id, {
+            onSuccess: () => {
+              setPendingDelete(null);
+              if (data.data.length === 1 && page > 1) setPage(page - 1);
+            },
+          });
+        }}
+      />
 
       <Paginator
         pagination={data.pagination}
