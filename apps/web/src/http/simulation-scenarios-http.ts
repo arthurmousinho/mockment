@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api, apiErrorHandler } from "@/lib/ky";
 import { queryClient } from "@/lib/query-client";
+import { availableStepsSchema } from "@/lib/simulation-editor";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type SimulationScenarioStep = {
@@ -66,7 +67,10 @@ export function CreateSimulationScenarioRequest() {
 
 export function UpdateSimulationScenarioRequest() {
   return useMutation({
-    mutationFn: async ({ id, ...input }: UpdateSimulationScenarioInput & { id: string }) => {
+    mutationFn: async ({
+      id,
+      ...input
+    }: UpdateSimulationScenarioInput & { id: string }) => {
       const response = await api.patch(`simulation/scenarios/${id}`, {
         json: input,
       });
@@ -77,5 +81,16 @@ export function UpdateSimulationScenarioRequest() {
       toast.success("Simulation scenario updated.");
     },
     onError: apiErrorHandler,
+  });
+}
+
+export function FindAvailableSimulationStepsRequest(enabled = true) {
+  return useQuery({
+    queryKey: ["simulation-steps"],
+    enabled,
+    queryFn: async () => {
+      const response = await api.get("simulation/steps");
+      return availableStepsSchema.parse(await response.json());
+    },
   });
 }

@@ -140,3 +140,16 @@ html[data-app-theme="light"] {
 html[data-app-theme="dark"] {
   color-scheme: dark;
 }
+
+.simulation-editor .react-flow {
+  --xy-background-color: var(--background);
+  --xy-background-pattern-dots-color: var(--border);
+  --xy-edge-stroke: var(--muted-foreground);
+  --xy-edge-stroke-selected: var(--primary);
+  --xy-connectionline-stroke: var(--primary);
+  --xy-controls-button-background-color: var(--card);
+  --xy-controls-button-background-color-hover: var(--muted);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-attribution-background-color: var(--muted);
+}

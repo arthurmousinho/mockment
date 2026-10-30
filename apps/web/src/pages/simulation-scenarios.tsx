@@ -51,7 +51,7 @@ export function SimulationScenariosPage() {
           <h1 className="text-xl font-medium tracking-tight">Simulation scenarios</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Create and save reusable ordered scenario definitions for payment flow simulations.
+          Build payment flows visually by connecting step outputs to inputs.
         </p>
       </header>
 
