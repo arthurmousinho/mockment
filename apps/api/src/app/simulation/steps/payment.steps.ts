@@ -77,6 +77,37 @@ export const createPaymentStep = {
   },
 } satisfies Step;
 
+export const getPaymentStep = {
+  id: "payment.get",
+  name: "Get payment",
+  description: "Get an existing payment by its ID.",
+  input: [
+    {
+      name: "id",
+      label: "Payment ID",
+      type: "string",
+      required: true,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "method", type: "string" },
+    { name: "status", type: "string" },
+    { name: "description", type: "string" },
+    { name: "externalId", type: "string" },
+    { name: "idempotencyKey", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "GET",
+    endpoint: "/payments/:id",
+  },
+} satisfies Step;
+
 export const processPaymentStep = {
   id: "payment.process",
   name: "Process payment",
@@ -203,6 +234,7 @@ export const cancelPaymentStep = {
 
 export const PAYMENT_STEPS = [
   createPaymentStep,
+  getPaymentStep,
   processPaymentStep,
   approvePaymentStep,
   declinePaymentStep,
