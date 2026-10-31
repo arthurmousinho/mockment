@@ -23,13 +23,29 @@ This guide describes the current implementation, including gaps; it is not a roa
 - Reuse existing helpers, schemas, services, components, and dependencies.
 - Avoid speculative abstractions, new layers, shared packages, and unnecessary dependencies.
 - Preserve existing API contracts, stored scenario formats, and unrelated local changes.
-- Follow the surrounding file's style rather than reformatting whole modules.
 - Source filenames generally use kebab-case; functions and variables use camelCase.
 - Types and React components use PascalCase; constants such as `STEPS` use uppercase.
 - Both apps enable strict TypeScript and `verbatimModuleSyntax`; use type-only imports.
 - Object shapes commonly use `type` aliases, and backend inputs use `z.infer`.
-- Most source uses double quotes, semicolons, two-space indentation, and named exports.
-- Import order is not uniform; there is no repository-wide import sorting convention.
+
+### Code Style and Formatting
+
+- Match surrounding code; for new files, follow a comparable existing module in the same app.
+- Most TS/TSX source uses two-space indentation, double quotes, semicolons, named exports,
+  and trailing commas in multiline imports, objects, arrays, and calls.
+- Separate functions and logical sections with blank lines, as in `simulation-scenario.service.ts`.
+- Follow nearby control-flow formatting: that service uses braces around error guards,
+  while some frontend handlers use single-line guards. Do not normalize either style.
+- Keep short objects compact when surrounding code does; expand nested structures and
+  long calls across lines. Step output fields stay compact in `simulation/steps/checkout.steps.ts`.
+- Wrap multiline JSX with parentheses and indent nested elements; follow attribute wrapping
+  in `apps/web/src/components/api-key-form-dialog.tsx`.
+- Preserve import order, grouping, backend `.ts` extensions, and frontend import conventions.
+- Existing files have exceptions: `apps/web/eslint.config.js` uses single quotes and no
+  semicolons. Preserve file-local conventions rather than imposing the TS/TSX defaults.
+- Do not reformat whole files for small functional changes. Do not apply web Prettier to API
+  files or add formatter configuration unless requested; keep requested formatting scoped.
+- Review the diff and remove incidental quote, wrapping, import, whitespace, or brace changes.
 
 ## Backend Conventions
 
