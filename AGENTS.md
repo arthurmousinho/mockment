@@ -144,7 +144,7 @@ This guide describes the current implementation, including gaps; it is not a roa
 
 ## Simulation Module Conventions
 
-- Backend definitions live in `apps/api/src/app/simulation/steps/*.steps.ts`.
+- Backend definitions live in `apps/api/src/config/simulation/steps/*.steps.ts`.
 - Definitions use dotted IDs such as `payment.create`, `satisfies Step`, and grouped
   `as const` arrays collected in `simulation/steps.ts`.
 - `simulation/types.ts` defines input/output fields and HTTP/wait executor types.

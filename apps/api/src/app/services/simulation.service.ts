@@ -12,8 +12,8 @@ import type {
   UpdateSimulationScenarioInput,
 } from "../schemas/simulation.schema.ts";
 import { buildSimulationScenarioSearchFilter } from "../filters/simulation-scenario.filters.ts";
-import { STEPS } from "../simulation/steps.ts";
-import type { Step } from "../simulation/types.ts";
+import { STEPS } from "../../config/simulation/steps.ts";
+import type { Step } from "../../config/simulation/types.ts";
 
 function availableSteps() {
   function mapSteps(steps: readonly Step[]) {

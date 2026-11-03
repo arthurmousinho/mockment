@@ -1,4 +1,4 @@
-import { createPaymentSchema } from "../../schemas/payment.schema.ts";
+import { createPaymentSchema } from "../../../app/schemas/payment.schema.ts";
 import type { Step } from "../types.ts";
 
 export const createPaymentStep = {

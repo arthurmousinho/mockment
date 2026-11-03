@@ -1,4 +1,4 @@
-import { completeCheckoutSchema } from "../../schemas/checkout.schema.ts";
+import { completeCheckoutSchema } from "../../../app/schemas/checkout.schema.ts";
 import type { Step } from "../types.ts";
 
 export const getCheckoutStep = {

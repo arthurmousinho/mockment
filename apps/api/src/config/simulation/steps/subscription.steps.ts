@@ -1,4 +1,4 @@
-import { createSubscriptionSchema } from "../../schemas/subscription.schema.ts";
+import { createSubscriptionSchema } from "../../../app/schemas/subscription.schema.ts";
 import type { Step } from "../types.ts";
 
 export const createSubscriptionStep = {
