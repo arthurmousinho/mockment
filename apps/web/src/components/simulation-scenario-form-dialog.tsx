@@ -32,7 +32,7 @@ import {
   UpdateSimulationScenarioRequest,
   FindAvailableSimulationStepsRequest,
   type SimulationScenario,
-} from "@/http/simulation-scenarios-http";
+} from "@/http/simulations-http";
 import {
   connectionError,
   restoreGraph,

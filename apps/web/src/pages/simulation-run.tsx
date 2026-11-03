@@ -19,7 +19,7 @@ import { DetailRow } from "@/components/ui/detail-row";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
-import { FindSimulationRunRequest } from "@/http/simulation-runs-http";
+import { FindSimulationRunRequest } from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
 
 function duration(start: string | null, end: string | null) {

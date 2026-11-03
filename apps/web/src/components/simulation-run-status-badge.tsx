@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import type {
   SimulationRunStatus,
   SimulationStepRunStatus,
-} from "@/http/simulation-runs-http";
+} from "@/http/simulations-http";
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG = {

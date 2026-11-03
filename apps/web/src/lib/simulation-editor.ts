@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Connection, Edge, Node } from "@xyflow/react";
-import type { SimulationScenarioStep } from "@/http/simulation-scenarios-http";
+import type { SimulationScenarioStep } from "@/http/simulations-http";
 
 const inputFieldSchema = z.object({
   name: z.string(),

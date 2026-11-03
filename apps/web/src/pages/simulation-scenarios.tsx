@@ -32,9 +32,9 @@ import {
 import {
   DeleteSimulationScenarioRequest,
   FindAllSimulationScenariosRequest,
-} from "@/http/simulation-scenarios-http";
+} from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
-import { CreateSimulationRunRequest } from "@/http/simulation-runs-http";
+import { CreateSimulationRunRequest } from "@/http/simulations-http";
 
 export function SimulationScenariosPage() {
   const navigate = useNavigate();
