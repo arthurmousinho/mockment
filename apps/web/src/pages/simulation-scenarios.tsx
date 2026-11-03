@@ -1,10 +1,13 @@
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   DotsThreeIcon,
   FlaskIcon,
   PencilSimpleIcon,
+  PlayIcon,
   PlusIcon,
+  SpinnerGapIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import { Paginator } from "@/components/paginator";
@@ -31,8 +34,13 @@ import {
   FindAllSimulationScenariosRequest,
 } from "@/http/simulation-scenarios-http";
 import { formatDateTime } from "@/lib/formatters";
+import { CreateSimulationRunRequest } from "@/http/simulation-runs-http";
 
 export function SimulationScenariosPage() {
+  const navigate = useNavigate();
+  const createRun = CreateSimulationRunRequest();
+  const startingRun = useRef(false);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
@@ -41,9 +49,23 @@ export function SimulationScenariosPage() {
     id: string;
     name: string;
   } | null>(null);
+
   const deleteScenario = DeleteSimulationScenarioRequest();
   const { data, isPending, isFetching, isError, refetch } =
     FindAllSimulationScenariosRequest({ page, limit, search });
+
+  async function runSimulation(scenarioId: string) {
+    if (createRun.isPending || startingRun.current) return;
+    startingRun.current = true;
+    try {
+      const run = await createRun.mutateAsync(scenarioId);
+      void navigate(`/simulations/runs/${run.id}`);
+    } catch {
+      // The mutation reports API errors using the shared handler.
+    } finally {
+      startingRun.current = false;
+    }
+  }
 
   if (isPending) return <div>Loading simulation scenarios...</div>;
 
@@ -147,6 +169,33 @@ export function SimulationScenariosPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right">
+                      <DropdownMenuItem
+                        disabled={
+                          createRun.isPending || deleteScenario.isPending
+                        }
+                        aria-busy={
+                          createRun.isPending &&
+                          createRun.variables === scenario.id
+                        }
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          void runSimulation(scenario.id);
+                        }}
+                      >
+                        {createRun.isPending &&
+                        createRun.variables === scenario.id ? (
+                          <SpinnerGapIcon
+                            size={20}
+                            className="animate-spin motion-reduce:animate-none"
+                          />
+                        ) : (
+                          <PlayIcon size={20} />
+                        )}
+                        {createRun.isPending &&
+                        createRun.variables === scenario.id
+                          ? "Starting…"
+                          : "Run"}
+                      </DropdownMenuItem>
                       <SimulationScenarioFormDialog scenario={scenario}>
                         <DropdownMenuItem
                           onSelect={(event) => event.preventDefault()}
@@ -157,7 +206,9 @@ export function SimulationScenariosPage() {
                       </SimulationScenarioFormDialog>
                       <DropdownMenuItem
                         className="text-destructive"
-                        disabled={deleteScenario.isPending}
+                        disabled={
+                          deleteScenario.isPending || createRun.isPending
+                        }
                         onSelect={() =>
                           setPendingDelete({
                             id: scenario.id,

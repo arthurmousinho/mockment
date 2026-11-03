@@ -190,6 +190,7 @@ function ScenarioEditor({
 
   function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     setError("");
     const delay = interval.trim() ? Number(interval) : null;
     if (!name.trim()) {
