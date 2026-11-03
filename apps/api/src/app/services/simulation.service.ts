@@ -101,10 +101,33 @@ async function removeScenario(id: string) {
   await prismaSingleton.simulationScenario.delete({ where: { id } });
 }
 
+async function createScenarioRun(scenarioId: string) {
+  const scenario = await prismaSingleton.simulationScenario.findUnique({
+    where: { id: scenarioId },
+  });
+
+  if (!scenario) {
+    throw new NotFoundError(
+      `Simulation scenario with ID ${scenarioId} was not found.`,
+    );
+  }
+
+  return prismaSingleton.simulationRun.create({
+    data: {
+      id: createPrefixedId("run"),
+      scenarioId,
+      status: "PENDING",
+      currentStep: 0,
+      totalSteps: (scenario.steps as Prisma.JsonArray).length,
+    },
+  });
+}
+
 export const simulationService = {
   availableSteps,
   findAllScenarios,
   createScenario,
   updateScenario,
   removeScenario,
+  createScenarioRun,
 };

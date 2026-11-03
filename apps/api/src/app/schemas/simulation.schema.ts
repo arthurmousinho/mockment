@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SimulationRunStatus } from "../../../generated/prisma/enums.ts";
 import { searchablePaginationSchema } from "../../common/search.schema.ts";
 
 export const availableSimulationStepSchema = z.object({
@@ -121,6 +122,19 @@ export const simulationScenarioSchema = z.object({
   description: z.string().nullable(),
   stepIntervalMs: z.number().int().nullable(),
   steps: z.array(simulationScenarioStepSchema),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+
+export const simulationRunSchema = z.object({
+  id: z.string(),
+  scenarioId: z.string(),
+  status: z.enum(SimulationRunStatus),
+  currentStep: z.number().int().nonnegative(),
+  totalSteps: z.number().int().nonnegative(),
+  error: z.json().nullable(),
+  startedAt: z.iso.datetime().nullable(),
+  finishedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

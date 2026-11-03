@@ -8,11 +8,41 @@ import {
 import {
   availableSimulationStepsSchema,
   createSimulationScenarioSchema,
+  simulationRunSchema,
   simulationScenarioSchema,
   updateSimulationScenarioSchema,
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  createScenarioRun: {
+    summary: "Create a simulation scenario run",
+    description:
+      "Creates a pending run with the scenario's step count. Does not execute steps or create step run records yet.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    response: {
+      201: {
+        description: "The pending run was created.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(simulationRunSchema),
+          },
+        },
+      },
+      404: {
+        description: "The scenario was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation scenario with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   removeScenario: {
     summary: "Delete a simulation scenario",
     description: "Permanently deletes a scenario and all its runs and step runs.",
