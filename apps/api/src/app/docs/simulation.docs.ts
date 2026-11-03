@@ -15,7 +15,7 @@ import {
 export const simulationDocs = {
   removeScenario: {
     summary: "Delete a simulation scenario",
-    description: "Permanently deletes a scenario that has no runs.",
+    description: "Permanently deletes a scenario and all its runs and step runs.",
     tags: ["Simulations"],
     params: idParamsSchema,
     response: {
@@ -28,19 +28,6 @@ export const simulationDocs = {
               error: "NOT_FOUND",
               code: 404,
               message: "Simulation scenario with ID {id} was not found.",
-            }),
-          },
-        },
-      },
-      409: {
-        description: "The scenario has existing runs.",
-        content: {
-          "application/json": {
-            schema: httpErrorSchema({
-              error: "CONFLICT",
-              code: 409,
-              message:
-                "Simulation scenarios with existing runs cannot be deleted.",
             }),
           },
         },

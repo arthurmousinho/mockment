@@ -271,7 +271,7 @@ model SimulationRun {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
 
-  scenario SimulationScenario  @relation(fields: [scenarioId], references: [id])
+  scenario SimulationScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   steps    SimulationStepRun[]
 
   @@index([scenarioId])
@@ -294,7 +294,7 @@ model SimulationStepRun {
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
 
-  run SimulationRun @relation(fields: [runId], references: [id])
+  run SimulationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
 
   @@unique([runId, stepIndex])
   @@index([runId, status])

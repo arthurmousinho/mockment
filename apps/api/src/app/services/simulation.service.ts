@@ -73,6 +73,7 @@ async function updateScenario(
   const existingScenario = await prismaSingleton.simulationScenario.findUnique({
     where: { id },
   });
+
   if (!existingScenario) {
     throw new NotFoundError(`Simulation scenario with ID ${id} was not found.`);
   }
@@ -89,23 +90,15 @@ async function updateScenario(
 }
 
 async function removeScenario(id: string) {
-  try {
-    await prismaSingleton.simulationScenario.delete({ where: { id } });
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2025") {
-        throw new NotFoundError(
-          `Simulation scenario with ID ${id} was not found.`,
-        );
-      }
-      if (error.code === "P2003") {
-        throw new ConflictError(
-          "Simulation scenarios with existing runs cannot be deleted.",
-        );
-      }
-    }
-    throw error;
+  const existingScenario = await prismaSingleton.simulationScenario.findUnique({
+    where: { id },
+  });
+
+  if (!existingScenario) {
+    throw new NotFoundError(`Simulation scenario with ID ${id} was not found.`);
   }
+
+  await prismaSingleton.simulationScenario.delete({ where: { id } });
 }
 
 export const simulationService = {
