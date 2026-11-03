@@ -5,19 +5,7 @@ import {
   simulationScenarioListSchema,
   updateSimulationScenarioSchema,
 } from "../schemas/simulation.schema.ts";
-import { simulationScenarioService } from "../services/simulation-scenario.service.ts";
-import { STEPS } from "../simulation/steps.ts";
-import type { Step } from "../simulation/types.ts";
-
-function availableSteps(steps: readonly Step[]) {
-  return steps.map(({ id, name, description, input, output }) => ({
-    id,
-    name,
-    desc: description,
-    input,
-    output,
-  }));
-}
+import { simulationService } from "../services/simulation.service.ts";
 
 export async function simulationRoutes(app: FastifyInstance) {
   app.delete(
@@ -25,7 +13,7 @@ export async function simulationRoutes(app: FastifyInstance) {
     { schema: simulationDocs.removeScenario },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      await simulationScenarioService.remove(id);
+      await simulationService.removeScenario(id);
       return reply.status(204).send();
     },
   );
@@ -34,11 +22,8 @@ export async function simulationRoutes(app: FastifyInstance) {
     "/steps",
     { schema: simulationDocs.availableSteps },
     async (_, reply) => {
-      return reply.status(200).send({
-        payments: availableSteps(STEPS.payments),
-        subscriptions: availableSteps(STEPS.subscriptions),
-        checkouts: availableSteps(STEPS.checkouts),
-      });
+      const steps = simulationService.availableSteps();
+      return reply.status(200).send(steps);
     },
   );
 
@@ -47,7 +32,7 @@ export async function simulationRoutes(app: FastifyInstance) {
     { schema: simulationDocs.findAllScenarios },
     async (request, reply) => {
       const input = simulationScenarioListSchema.parse(request.query);
-      const scenarios = await simulationScenarioService.findAll(input);
+      const scenarios = await simulationService.findAllScenarios(input);
       return reply.status(200).send(scenarios);
     },
   );
@@ -57,7 +42,7 @@ export async function simulationRoutes(app: FastifyInstance) {
     { schema: simulationDocs.createScenario },
     async (request, reply) => {
       const input = createSimulationScenarioSchema.parse(request.body);
-      const scenario = await simulationScenarioService.create(input);
+      const scenario = await simulationService.createScenario(input);
       return reply.status(201).send(scenario);
     },
   );
@@ -68,7 +53,7 @@ export async function simulationRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const input = updateSimulationScenarioSchema.parse(request.body);
-      const scenario = await simulationScenarioService.update(id, input);
+      const scenario = await simulationService.updateScenario(id, input);
       return reply.status(200).send(scenario);
     },
   );

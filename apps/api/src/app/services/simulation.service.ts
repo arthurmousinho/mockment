@@ -12,8 +12,28 @@ import type {
   UpdateSimulationScenarioInput,
 } from "../schemas/simulation.schema.ts";
 import { buildSimulationScenarioSearchFilter } from "../filters/simulation-scenario.filters.ts";
+import { STEPS } from "../simulation/steps.ts";
+import type { Step } from "../simulation/types.ts";
 
-async function findAll(input: SimulationScenarioListInput) {
+function availableSteps() {
+  function mapSteps(steps: readonly Step[]) {
+    return steps.map(({ id, name, description, input, output }) => ({
+      id,
+      name,
+      desc: description,
+      input,
+      output,
+    }));
+  }
+
+  return {
+    payments: mapSteps(STEPS.payments),
+    subscriptions: mapSteps(STEPS.subscriptions),
+    checkouts: mapSteps(STEPS.checkouts),
+  };
+}
+
+async function findAllScenarios(input: SimulationScenarioListInput) {
   const { skip, take } = buildPrismaPaginationParams(input);
   const where = buildSimulationScenarioSearchFilter(input.search);
   const [scenarios, total] = await Promise.all([
@@ -34,7 +54,7 @@ async function findAll(input: SimulationScenarioListInput) {
   });
 }
 
-async function create(input: CreateSimulationScenarioInput) {
+async function createScenario(input: CreateSimulationScenarioInput) {
   return prismaSingleton.simulationScenario.create({
     data: {
       id: createPrefixedId("scn"),
@@ -46,7 +66,10 @@ async function create(input: CreateSimulationScenarioInput) {
   });
 }
 
-async function update(id: string, input: UpdateSimulationScenarioInput) {
+async function updateScenario(
+  id: string,
+  input: UpdateSimulationScenarioInput,
+) {
   const existingScenario = await prismaSingleton.simulationScenario.findUnique({
     where: { id },
   });
@@ -65,7 +88,7 @@ async function update(id: string, input: UpdateSimulationScenarioInput) {
   });
 }
 
-async function remove(id: string) {
+async function removeScenario(id: string) {
   try {
     await prismaSingleton.simulationScenario.delete({ where: { id } });
   } catch (error) {
@@ -85,4 +108,10 @@ async function remove(id: string) {
   }
 }
 
-export const simulationScenarioService = { findAll, create, update, remove };
+export const simulationService = {
+  availableSteps,
+  findAllScenarios,
+  createScenario,
+  updateScenario,
+  removeScenario,
+};
