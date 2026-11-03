@@ -8,6 +8,16 @@ import {
 import { simulationService } from "../services/simulation.service.ts";
 
 export async function simulationRoutes(app: FastifyInstance) {
+  app.get(
+    "/runs/:id",
+    { schema: simulationDocs.getScenarioRun },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const run = await simulationService.getScenarioRun(id);
+      return reply.status(200).send(run);
+    },
+  );
+
   app.post(
     "/scenarios/:id/runs",
     { schema: simulationDocs.createScenarioRun },

@@ -8,12 +8,42 @@ import {
 import {
   availableSimulationStepsSchema,
   createSimulationScenarioSchema,
+  simulationRunDetailsSchema,
   simulationRunSchema,
   simulationScenarioSchema,
   updateSimulationScenarioSchema,
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  getScenarioRun: {
+    summary: "Get a simulation scenario run",
+    description:
+      "Returns a run and its step runs ordered by step index. Newly created runs have an empty steps array.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "The simulation run and its step runs.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(simulationRunDetailsSchema),
+          },
+        },
+      },
+      404: {
+        description: "The simulation run was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation run with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   createScenarioRun: {
     summary: "Create a simulation scenario run",
     description:

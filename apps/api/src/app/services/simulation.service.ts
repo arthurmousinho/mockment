@@ -123,6 +123,21 @@ async function createScenarioRun(scenarioId: string) {
   });
 }
 
+async function getScenarioRun(id: string) {
+  const run = await prismaSingleton.simulationRun.findUnique({
+    where: { id },
+    include: {
+      steps: { orderBy: { stepIndex: "asc" } },
+    },
+  });
+
+  if (!run) {
+    throw new NotFoundError(`Simulation run with ID ${id} was not found.`);
+  }
+
+  return run;
+}
+
 export const simulationService = {
   availableSteps,
   findAllScenarios,
@@ -130,4 +145,5 @@ export const simulationService = {
   updateScenario,
   removeScenario,
   createScenarioRun,
+  getScenarioRun,
 };
