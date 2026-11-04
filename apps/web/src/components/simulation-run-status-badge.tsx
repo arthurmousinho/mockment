@@ -56,13 +56,7 @@ export function SimulationRunStatusBadge({
   const { label, icon: Icon, color } = STATUS_CONFIG[status];
   return (
     <Badge variant="outline" className={cn("gap-1.5", color)}>
-      <Icon
-        className={
-          status === "RUNNING"
-            ? "animate-spin motion-reduce:animate-none"
-            : undefined
-        }
-      />
+      <Icon className={status === "RUNNING" ? "animate-spin" : undefined} />
       {label}
     </Badge>
   );
