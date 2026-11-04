@@ -16,6 +16,34 @@ import {
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  getScenario: {
+    summary: "Get a simulation scenario",
+    description: "Returns a saved scenario with its ordered steps and settings.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "The saved scenario.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(simulationScenarioSchema),
+          },
+        },
+      },
+      404: {
+        description: "The scenario was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation scenario with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   findAllScenarioRuns: {
     summary: "List simulation scenario runs",
     description:
