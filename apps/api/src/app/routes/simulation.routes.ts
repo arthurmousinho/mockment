@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { paginationSchema } from "../../common/pagination.schema.ts";
 import { simulationDocs } from "../docs/simulation.docs.ts";
 import {
   createSimulationScenarioSchema,
@@ -8,6 +9,17 @@ import {
 import { simulationService } from "../services/simulation.service.ts";
 
 export async function simulationRoutes(app: FastifyInstance) {
+  app.get(
+    "/scenarios/:id/runs",
+    { schema: simulationDocs.findAllScenarioRuns },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const input = paginationSchema.parse(request.query);
+      const runs = await simulationService.findAllScenarioRuns(id, input);
+      return reply.status(200).send(runs);
+    },
+  );
+
   app.get(
     "/runs/:id",
     { schema: simulationDocs.getScenarioRun },

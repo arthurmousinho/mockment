@@ -3,6 +3,7 @@ import {
   idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
+  paginationParamsSchema,
   searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
@@ -15,6 +16,36 @@ import {
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  findAllScenarioRuns: {
+    summary: "List simulation scenario runs",
+    description:
+      "Returns paginated runs for a scenario in reverse chronological order, without step run details.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    querystring: paginationParamsSchema,
+    response: {
+      200: {
+        description: "The scenario's runs.",
+        content: {
+          "application/json": {
+            schema: paginatedResponseSchema(simulationRunSchema),
+          },
+        },
+      },
+      404: {
+        description: "The scenario was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation scenario with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   getScenarioRun: {
     summary: "Get a simulation scenario run",
     description:

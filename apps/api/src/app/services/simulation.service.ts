@@ -1,5 +1,6 @@
 import { Prisma } from "../../../generated/prisma/client.ts";
 import { ConflictError, NotFoundError } from "../../common/http-error.ts";
+import type { PaginationInput } from "../../common/pagination.schema.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import {
   buildPaginatedResponse,
@@ -101,6 +102,38 @@ async function removeScenario(id: string) {
   await prismaSingleton.simulationScenario.delete({ where: { id } });
 }
 
+async function findAllScenarioRuns(scenarioId: string, input: PaginationInput) {
+  const scenario = await prismaSingleton.simulationScenario.findUnique({
+    where: { id: scenarioId },
+  });
+
+  if (!scenario) {
+    throw new NotFoundError(
+      `Simulation scenario with ID ${scenarioId} was not found.`,
+    );
+  }
+
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = { scenarioId };
+
+  const [runs, total] = await Promise.all([
+    prismaSingleton.simulationRun.findMany({
+      where: { scenarioId },
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.simulationRun.count({ where }),
+  ]);
+
+  return buildPaginatedResponse({
+    data: runs,
+    page: input.page,
+    limit: input.limit,
+    total,
+  });
+}
+
 async function createScenarioRun(scenarioId: string) {
   const scenario = await prismaSingleton.simulationScenario.findUnique({
     where: { id: scenarioId },
@@ -144,6 +177,7 @@ export const simulationService = {
   createScenario,
   updateScenario,
   removeScenario,
+  findAllScenarioRuns,
   createScenarioRun,
   getScenarioRun,
 };
