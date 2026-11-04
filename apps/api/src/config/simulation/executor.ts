@@ -6,6 +6,7 @@ import { prismaSingleton } from "../prisma.ts";
 import { createPrefixedId } from "../../common/utils.ts";
 import { simulationScenarioStepSchema } from "../../app/schemas/simulation.schema.ts";
 import { apiKeyService } from "../../app/services/api-key.service.ts";
+import { notifyRunUpdated } from "./run-events.ts";
 import { STEPS } from "./steps.ts";
 import type { Step, StepHTTPExecutor } from "./types.ts";
 
@@ -170,6 +171,7 @@ async function executeStep(
     data: { status: "RUNNING", startedAt: new Date() },
   });
   context.activeStepId = record.id;
+  notifyRunUpdated(context.runId);
 
   const definition = findDefinition(saved.action);
   const { input, nodeId } = resolveInput(saved, definition, context);
@@ -177,6 +179,7 @@ async function executeStep(
     where: { id: record.id },
     data: { input: input as Prisma.InputJsonObject },
   });
+  notifyRunUpdated(context.runId);
   validateInput(input, definition);
 
   const output = await executeRequest(context, definition, input);
@@ -243,17 +246,21 @@ export async function executeSimulation(
   try {
     const steps = z.array(simulationScenarioStepSchema).parse(savedSteps);
     await startRun(runId, steps);
+    notifyRunUpdated(runId);
 
     for (const [index, saved] of steps.entries()) {
       if (index > 0 && interval) {
         await setTimeout(interval);
       }
       await executeStep(context, saved, index);
+      notifyRunUpdated(runId);
     }
 
     await completeRun(runId);
+    notifyRunUpdated(runId);
   } catch (cause) {
     await failRun(context, cause);
+    notifyRunUpdated(runId);
   } finally {
     if (context.temporaryKeyId) {
       await apiKeyService.revoke(context.temporaryKeyId);

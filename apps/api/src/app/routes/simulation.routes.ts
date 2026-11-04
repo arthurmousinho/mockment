@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { streamSimulationRun } from "../../config/simulation/sse.ts";
 import { paginationSchema } from "../../common/pagination.schema.ts";
 import { simulationDocs } from "../docs/simulation.docs.ts";
 import {
@@ -9,6 +10,15 @@ import {
 import { simulationService } from "../services/simulation.service.ts";
 
 export async function simulationRoutes(app: FastifyInstance) {
+  app.get(
+    "/runs/:id/stream",
+    { schema: simulationDocs.streamScenarioRun },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      await streamSimulationRun(id, reply);
+    },
+  );
+
   app.get(
     "/scenarios/:id/runs",
     { schema: simulationDocs.findAllScenarioRuns },

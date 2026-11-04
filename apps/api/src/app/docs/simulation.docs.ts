@@ -16,6 +16,31 @@ import {
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  streamScenarioRun: {
+    summary: "Stream simulation run updates",
+    description:
+      "Sends the current run and ordered step runs as SSE data messages, then pushes execution updates. Reconnecting sends the latest snapshot. Closes after a terminal status.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "Simulation run snapshots as server-sent events.",
+        content: { "text/event-stream": { schema: { type: "string" } } },
+      },
+      404: {
+        description: "The simulation run was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation run with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   findAllScenarioRuns: {
     summary: "List simulation scenario runs",
     description:

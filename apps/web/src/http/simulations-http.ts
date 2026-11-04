@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api, apiErrorHandler } from "@/lib/ky";
@@ -159,7 +160,7 @@ export function CreateSimulationRunRequest() {
 }
 
 export function FindSimulationRunRequest(id: string) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ["simulation-runs", id],
     enabled: Boolean(id),
     queryFn: async ({ signal }) => {
@@ -167,13 +168,30 @@ export function FindSimulationRunRequest(id: string) {
       return response.json<SimulationRunDetails>();
     },
     staleTime: 0,
-    refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === "PENDING" || status === "RUNNING" ? 2000 : false;
-    },
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
+  const status = query.data?.status;
+
+  useEffect(() => {
+    if (!id || (status !== "PENDING" && status !== "RUNNING")) return;
+
+    const baseUrl = import.meta.env.VITE_API_URL.replace(/\/?$/, "/");
+    const url = new URL(
+      `simulation/runs/${encodeURIComponent(id)}/stream`,
+      new URL(baseUrl, window.location.href),
+    );
+    const stream = new EventSource(url);
+    stream.onmessage = (event) => {
+      const run = JSON.parse(event.data) as SimulationRunDetails;
+      queryClient.setQueryData(["simulation-runs", id], run);
+      if (run.status !== "PENDING" && run.status !== "RUNNING") {
+        stream.close();
+      }
+    };
+    return () => stream.close();
+  }, [id, status]);
+
+  return query;
 }
 
 export function FindSimulationScenarioRunsRequest(
