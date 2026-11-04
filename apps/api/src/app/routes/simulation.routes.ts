@@ -35,7 +35,11 @@ export async function simulationRoutes(app: FastifyInstance) {
     { schema: simulationDocs.createScenarioRun },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const run = await simulationService.createScenarioRun(id);
+      const run = await simulationService.createScenarioRun(
+        id,
+        app,
+        request.headers.authorization,
+      );
       return reply.status(201).send(run);
     },
   );

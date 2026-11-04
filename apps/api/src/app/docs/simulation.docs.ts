@@ -78,7 +78,7 @@ export const simulationDocs = {
   createScenarioRun: {
     summary: "Create a simulation scenario run",
     description:
-      "Creates a pending run with the scenario's step count. Does not execute steps or create step run records yet.",
+      "Creates a pending run and starts sequential execution in the background. Connected inputs use prior step outputs. Execution stops on failure and skips remaining steps. A temporary API key is created and revoked when needed if no Authorization header is supplied.",
     tags: ["Simulations"],
     params: idParamsSchema,
     response: {

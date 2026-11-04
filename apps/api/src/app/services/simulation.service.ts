@@ -1,3 +1,5 @@
+import type { FastifyInstance } from "fastify";
+import { executeSimulation } from "../../config/simulation/executor.ts";
 import { Prisma } from "../../../generated/prisma/client.ts";
 import { ConflictError, NotFoundError } from "../../common/http-error.ts";
 import type { PaginationInput } from "../../common/pagination.schema.ts";
@@ -134,7 +136,11 @@ async function findAllScenarioRuns(scenarioId: string, input: PaginationInput) {
   });
 }
 
-async function createScenarioRun(scenarioId: string) {
+async function createScenarioRun(
+  scenarioId: string,
+  app: FastifyInstance,
+  authorization?: string,
+) {
   const scenario = await prismaSingleton.simulationScenario.findUnique({
     where: { id: scenarioId },
   });
@@ -145,7 +151,7 @@ async function createScenarioRun(scenarioId: string) {
     );
   }
 
-  return prismaSingleton.simulationRun.create({
+  const run = await prismaSingleton.simulationRun.create({
     data: {
       id: createPrefixedId("run"),
       scenarioId,
@@ -154,6 +160,20 @@ async function createScenarioRun(scenarioId: string) {
       totalSteps: (scenario.steps as Prisma.JsonArray).length,
     },
   });
+
+  setImmediate(() => {
+    void executeSimulation(
+      app,
+      run.id,
+      scenario.steps,
+      scenario.stepIntervalMs,
+      authorization,
+    ).catch((error: unknown) => {
+      app.log.error(error, "Simulation execution failed.");
+    });
+  });
+
+  return run;
 }
 
 async function getScenarioRun(id: string) {
