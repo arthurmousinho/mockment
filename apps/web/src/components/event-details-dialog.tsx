@@ -28,7 +28,7 @@ export function EventDetailsDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Event details</DialogTitle>
           <DialogDescription>
