@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 import {
   DotsThreeIcon,
   FlaskIcon,
+  EyeIcon,
   PencilSimpleIcon,
   PlayIcon,
   PlusIcon,
   SpinnerGapIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
+import { SimulationScenarioDetailsDialog } from "@/components/simulation-scenario-details-dialog";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
 import { RefetchButton } from "@/components/refetch-button";
@@ -169,6 +171,14 @@ export function SimulationScenariosPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right">
+                      <SimulationScenarioDetailsDialog scenarioId={scenario.id}>
+                        <DropdownMenuItem
+                          onSelect={(event) => event.preventDefault()}
+                        >
+                          <EyeIcon size={20} />
+                          Details
+                        </DropdownMenuItem>
+                      </SimulationScenarioDetailsDialog>
                       <DropdownMenuItem
                         disabled={
                           createRun.isPending || deleteScenario.isPending

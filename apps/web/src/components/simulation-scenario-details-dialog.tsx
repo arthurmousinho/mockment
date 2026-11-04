@@ -1,0 +1,186 @@
+import { useState, type ReactNode } from "react";
+import "@xyflow/react/dist/style.css";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { DetailRow } from "@/components/ui/detail-row";
+import { Paginator } from "@/components/paginator";
+import { SimulationRunStatusBadge } from "@/components/simulation-run-status-badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  FindSimulationScenarioRequest,
+  FindSimulationScenarioRunsRequest,
+} from "@/http/simulations-http";
+import { formatDateTime } from "@/lib/formatters";
+
+function ScenarioDetails({ scenarioId }: { scenarioId: string }) {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const scenario = FindSimulationScenarioRequest(scenarioId);
+  const runs = FindSimulationScenarioRunsRequest(scenarioId, { page, limit });
+
+  return (
+    <div className="min-w-0 space-y-6">
+      {scenario.isPending ? (
+        <p className="text-sm text-muted-foreground">Loading scenario...</p>
+      ) : scenario.isError ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Failed to load scenario.
+          </p>
+          <Button variant="outline" onClick={() => scenario.refetch()}>
+            Try again
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-2.5 wrap-break-word">
+          <DetailRow label="ID">{scenario.data.id}</DetailRow>
+          <DetailRow label="Name">{scenario.data.name}</DetailRow>
+          <DetailRow label="Description">
+            {scenario.data.description || "—"}
+          </DetailRow>
+          <DetailRow label="Step interval">
+            {scenario.data.stepIntervalMs
+              ? `${scenario.data.stepIntervalMs} ms`
+              : "—"}
+          </DetailRow>
+          <DetailRow label="Created at">
+            {formatDateTime(scenario.data.createdAt)}
+          </DetailRow>
+          <DetailRow label="Updated at">
+            {formatDateTime(scenario.data.updatedAt)}
+          </DetailRow>
+          <div className="space-y-2 pt-2">
+            <h3 className="text-sm font-medium">
+              Steps ({scenario.data.steps.length})
+            </h3>
+            <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+              {scenario.data.steps.map((step, index) => (
+                <li key={index}>
+                  {step.name} <span className="text-xs">({step.action})</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+      <section className="min-w-0 space-y-3">
+        <h3 className="text-sm font-medium">Runs</h3>
+        {runs.isPending ? (
+          <p className="text-sm text-muted-foreground">Loading runs...</p>
+        ) : runs.isError ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Failed to load runs.
+            </p>
+            <Button variant="outline" onClick={() => runs.refetch()}>
+              Try again
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader className="bg-muted/70">
+                <TableRow>
+                  <TableHead>Run</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Created at</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {runs.data.data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      No runs found for this scenario.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  runs.data.data.map((run) => (
+                    <TableRow key={run.id}>
+                      <TableCell>
+                        <DialogClose asChild>
+                          <Link
+                            to={`/simulations/runs/${run.id}`}
+                            className="underline underline-offset-4"
+                          >
+                            {run.id}
+                          </Link>
+                        </DialogClose>
+                      </TableCell>
+                      <TableCell>
+                        <SimulationRunStatusBadge status={run.status} />
+                      </TableCell>
+                      <TableCell>
+                        {run.currentStep} / {run.totalSteps}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {formatDateTime(run.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            <Paginator
+              pagination={runs.data.pagination}
+              onPageChange={setPage}
+              onLimitChange={(value) => {
+                setLimit(value);
+                setPage(1);
+              }}
+            />
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
+export function SimulationScenarioDetailsDialog({
+  scenarioId,
+  children,
+}: {
+  scenarioId: string;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Scenario details</DialogTitle>
+          <DialogDescription>
+            Scenario information and run history.
+          </DialogDescription>
+        </DialogHeader>
+        {open && <ScenarioDetails scenarioId={scenarioId} />}
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">
+              Done
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
