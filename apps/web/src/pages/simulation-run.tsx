@@ -14,7 +14,11 @@ import { DetailRow } from "@/components/ui/detail-row";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { JsonViewer } from "@/components/ui/json-viewer";
-import { FindSimulationRunRequest } from "@/http/simulations-http";
+import { SimulationTimelineProgress } from "@/components/simulation-timeline-progress";
+import {
+  FindSimulationScenarioTimingRequest,
+  FindSimulationRunRequest,
+} from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
 
 function duration(start: string | null, end: string | null) {
@@ -35,6 +39,7 @@ export function SimulationRunPage() {
   const { id = "" } = useParams();
   const query = FindSimulationRunRequest(id);
   const run = query.data;
+  const timing = FindSimulationScenarioTimingRequest(run?.scenarioId ?? "");
 
   if (query.isPending)
     return <div role="status">Loading simulation run...</div>;
@@ -166,27 +171,42 @@ export function SimulationRunPage() {
                 : "No step execution records found."}
             </p>
           ) : (
-            <Accordion type="multiple" className="ml-1.25 border-l pl-5">
-              {run.steps.map((step) => (
+            <Accordion type="multiple" className="ml-2.5 pl-10">
+              {run.steps.map((step, index) => (
                 <AccordionItem
                   key={step.id}
                   value={step.id}
-                  className="relative"
+                  className="relative border-0"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-3 -left-[26px] size-2.75 rounded-full border-2 border-card bg-muted-foreground"
+                  <SimulationTimelineProgress
+                    step={step}
+                    nextStep={run.steps[index + 1]}
+                    runStatus={run.status}
+                    delay={timing.data}
                   />
-                  <AccordionTrigger className="gap-3 py-2 hover:no-underline">
+                  <AccordionTrigger className="min-h-11 gap-3 py-2.5 hover:no-underline">
                     <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
                       <span className="space-y-1">
                         <span className="block">Step {step.stepIndex + 1}</span>
+                        {run.status === "RUNNING" &&
+                          step.status === "COMPLETED" &&
+                          run.steps[index + 1]?.status === "PENDING" && (
+                            <span
+                              className="block text-xs font-normal text-muted-foreground"
+                              role="status"
+                            >
+                              Waiting for next step…
+                            </span>
+                          )}
                       </span>
                       <span className="flex items-center gap-3">
                         <span className="text-xs text-muted-foreground">
                           {duration(step.startedAt, step.finishedAt)}
                         </span>
-                        <SimulationRunStatusBadge status={step.status} />
+                        <SimulationRunStatusBadge
+                          status={step.status}
+                          animate={active}
+                        />
                       </span>
                     </span>
                   </AccordionTrigger>
@@ -197,7 +217,10 @@ export function SimulationRunPage() {
                       </DetailRow>
                       <DetailRow label="Step type">Not provided</DetailRow>
                       <DetailRow label="Status">
-                        <SimulationRunStatusBadge status={step.status} />
+                        <SimulationRunStatusBadge
+                          status={step.status}
+                          animate={active}
+                        />
                       </DetailRow>
                       <DetailRow label="Started">
                         {step.startedAt
