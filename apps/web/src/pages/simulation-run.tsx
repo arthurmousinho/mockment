@@ -1,9 +1,4 @@
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  CopyIcon,
-  FlaskIcon,
-} from "@phosphor-icons/react";
+import { ArrowLeftIcon, FlaskIcon } from "@phosphor-icons/react";
 import { Link, useParams } from "react-router-dom";
 import { HTTPError } from "ky";
 import { SimulationRunStatusBadge } from "@/components/simulation-run-status-badge";
@@ -18,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { DetailRow } from "@/components/ui/detail-row";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { JsonViewer } from "@/components/ui/json-viewer";
 import { FindSimulationRunRequest } from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
 
@@ -34,37 +29,6 @@ function duration(start: string | null, end: string | null) {
 
   const minutes = Math.floor(seconds / 60);
   return `${Math.floor(minutes / 60) ? `${Math.floor(minutes / 60)} h ` : ""}${minutes % 60} m ${Math.floor(seconds % 60)} s`;
-}
-
-function JsonBlock({ label, value }: { label: string; value: unknown }) {
-  const { copied, copy } = useCopyToClipboard();
-  const content = JSON.stringify(value, null, 2);
-  return (
-    <section className="min-w-0 space-y-2">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm text-foreground">{label}</h3>
-        {value != null && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-6"
-            aria-label={`Copy ${label}`}
-            onClick={() => copy(content)}
-          >
-            {copied ? <CheckIcon /> : <CopyIcon />}
-          </Button>
-        )}
-      </div>
-      {value == null ? (
-        <p className="text-sm text-muted-foreground">Not available.</p>
-      ) : (
-        <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
-          <code>{content}</code>
-        </pre>
-      )}
-    </section>
-  );
 }
 
 export function SimulationRunPage() {
@@ -188,7 +152,7 @@ export function SimulationRunPage() {
         </CardContent>
       </Card>
 
-      {run.error != null && <JsonBlock label="Run error" value={run.error} />}
+      {run.error != null && <JsonViewer label="Run error" value={run.error} />}
 
       <Card aria-label="Execution timeline">
         <CardHeader>
@@ -256,11 +220,11 @@ export function SimulationRunPage() {
                       </DetailRow>
                     </div>
                     <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-                      <JsonBlock label="Inputs" value={step.input} />
-                      <JsonBlock label="Outputs" value={step.output} />
+                      <JsonViewer label="Inputs" value={step.input} />
+                      <JsonViewer label="Outputs" value={step.output} />
                     </div>
                     {step.error != null && (
-                      <JsonBlock label="Step error" value={step.error} />
+                      <JsonViewer label="Step error" value={step.error} />
                     )}
                   </AccordionContent>
                 </AccordionItem>

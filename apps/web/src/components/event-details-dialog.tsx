@@ -1,3 +1,4 @@
+import { JsonViewer } from "@/components/ui/json-viewer";
 import { Button } from "@/components/ui/button";
 import { type ReactNode } from "react";
 import {
@@ -53,12 +54,7 @@ export function EventDetailsDialog({
               {formatDateTime(event.createdAt)}
             </DetailRow>
           </div>
-          <div>
-            <span className="text-sm text-foreground mb-2">Payload</span>
-            <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
-              <code>{JSON.stringify(event.payload, null, 2)}</code>
-            </pre>
-          </div>
+          <JsonViewer label="Payload" value={event.payload} />
         </div>
         <DialogFooter>
           <DialogClose asChild>
