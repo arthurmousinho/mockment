@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  type SimulationScenario,
   DeleteSimulationScenarioRequest,
   FindAllSimulationScenariosRequest,
 } from "@/http/simulations-http";
@@ -56,12 +57,12 @@ export function SimulationScenariosPage() {
   const { data, isPending, isFetching, isError, refetch } =
     FindAllSimulationScenariosRequest({ page, limit, search });
 
-  async function runSimulation(scenarioId: string) {
+  async function runSimulation(scenario: SimulationScenario) {
     if (createRun.isPending || startingRun.current) return;
     startingRun.current = true;
     try {
-      const run = await createRun.mutateAsync(scenarioId);
-      void navigate(`/simulations/runs/${run.id}`);
+      const run = await createRun.mutateAsync(scenario.id);
+      void navigate(`/simulations/runs/${run.id}`, { state: { scenario } });
     } catch {
       // The mutation reports API errors using the shared handler.
     } finally {
@@ -189,7 +190,7 @@ export function SimulationScenariosPage() {
                         }
                         onSelect={(event) => {
                           event.preventDefault();
-                          void runSimulation(scenario.id);
+                          void runSimulation(scenario);
                         }}
                       >
                         {createRun.isPending &&

@@ -100,6 +100,7 @@ function ScenarioDetails({ scenario }: { scenario: SimulationScenario }) {
                         <DialogClose asChild>
                           <Link
                             to={`/simulations/runs/${run.id}`}
+                            state={{ scenario }}
                             className="underline underline-offset-4"
                           >
                             {run.id}

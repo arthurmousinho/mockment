@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, FlaskIcon } from "@phosphor-icons/react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { HTTPError } from "ky";
 import { SimulationRunStatusBadge } from "@/components/simulation-run-status-badge";
 import { RefetchButton } from "@/components/refetch-button";
@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { JsonViewer } from "@/components/ui/json-viewer";
 import { SimulationTimelineProgress } from "@/components/simulation-timeline-progress";
 import {
-  FindSimulationScenarioTimingRequest,
+  type SimulationScenario,
   FindSimulationRunRequest,
 } from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
@@ -39,7 +39,12 @@ export function SimulationRunPage() {
   const { id = "" } = useParams();
   const query = FindSimulationRunRequest(id);
   const run = query.data;
-  const timing = FindSimulationScenarioTimingRequest(run?.scenarioId ?? "");
+  const location = useLocation();
+  const { scenario } = (location.state ?? {}) as {
+    scenario?: SimulationScenario;
+  };
+  const delay =
+    scenario?.id === run?.scenarioId ? scenario?.stepIntervalMs : undefined;
 
   if (query.isPending)
     return <div role="status">Loading simulation run...</div>;
@@ -182,7 +187,7 @@ export function SimulationRunPage() {
                     step={step}
                     nextStep={run.steps[index + 1]}
                     runStatus={run.status}
-                    delay={timing.data}
+                    delay={delay}
                   />
                   <AccordionTrigger className="min-h-11 gap-3 py-2.5 hover:no-underline">
                     <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
