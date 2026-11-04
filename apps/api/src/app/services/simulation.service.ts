@@ -55,18 +55,6 @@ async function findAllScenarios(input: SimulationScenarioListInput) {
   });
 }
 
-async function getScenario(id: string) {
-  const scenario = await prismaSingleton.simulationScenario.findUnique({
-    where: { id },
-  });
-
-  if (!scenario) {
-    throw new NotFoundError(`Simulation scenario with ID ${id} was not found.`);
-  }
-
-  return scenario;
-}
-
 async function createScenario(input: CreateSimulationScenarioInput) {
   return prismaSingleton.simulationScenario.create({
     data: {
@@ -186,7 +174,6 @@ async function getScenarioRun(id: string) {
 export const simulationService = {
   availableSteps,
   findAllScenarios,
-  getScenario,
   createScenario,
   updateScenario,
   removeScenario,

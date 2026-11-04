@@ -171,7 +171,7 @@ export function SimulationScenariosPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right">
-                      <SimulationScenarioDetailsDialog scenarioId={scenario.id}>
+                      <SimulationScenarioDetailsDialog scenario={scenario}>
                         <DropdownMenuItem
                           onSelect={(event) => event.preventDefault()}
                         >

@@ -176,16 +176,6 @@ export function FindSimulationRunRequest(id: string) {
   });
 }
 
-export function FindSimulationScenarioRequest(id: string) {
-  return useQuery({
-    queryKey: ["simulation-scenarios", id],
-    queryFn: async ({ signal }) => {
-      const response = await api.get(`simulation/scenarios/${id}`, { signal });
-      return response.json<SimulationScenario>();
-    },
-  });
-}
-
 export function FindSimulationScenarioRunsRequest(
   id: string,
   pagination: PaginatedRequest,

@@ -24,62 +24,44 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  FindSimulationScenarioRequest,
+  type SimulationScenario,
   FindSimulationScenarioRunsRequest,
 } from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
 
-function ScenarioDetails({ scenarioId }: { scenarioId: string }) {
+function ScenarioDetails({ scenario }: { scenario: SimulationScenario }) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
-  const scenario = FindSimulationScenarioRequest(scenarioId);
-  const runs = FindSimulationScenarioRunsRequest(scenarioId, { page, limit });
+  const runs = FindSimulationScenarioRunsRequest(scenario.id, { page, limit });
 
   return (
     <div className="min-w-0 space-y-6">
-      {scenario.isPending ? (
-        <p className="text-sm text-muted-foreground">Loading scenario...</p>
-      ) : scenario.isError ? (
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Failed to load scenario.
-          </p>
-          <Button variant="outline" onClick={() => scenario.refetch()}>
-            Try again
-          </Button>
+      <div className="space-y-2.5 wrap-break-word">
+        <DetailRow label="ID">{scenario.id}</DetailRow>
+        <DetailRow label="Name">{scenario.name}</DetailRow>
+        <DetailRow label="Description">{scenario.description || "—"}</DetailRow>
+        <DetailRow label="Step interval">
+          {scenario.stepIntervalMs ? `${scenario.stepIntervalMs} ms` : "—"}
+        </DetailRow>
+        <DetailRow label="Created at">
+          {formatDateTime(scenario.createdAt)}
+        </DetailRow>
+        <DetailRow label="Updated at">
+          {formatDateTime(scenario.updatedAt)}
+        </DetailRow>
+        <div className="space-y-2 pt-2">
+          <h3 className="text-sm font-medium">
+            Steps ({scenario.steps.length})
+          </h3>
+          <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+            {scenario.steps.map((step, index) => (
+              <li key={index}>
+                {step.name} <span className="text-xs">({step.action})</span>
+              </li>
+            ))}
+          </ol>
         </div>
-      ) : (
-        <div className="space-y-2.5 wrap-break-word">
-          <DetailRow label="ID">{scenario.data.id}</DetailRow>
-          <DetailRow label="Name">{scenario.data.name}</DetailRow>
-          <DetailRow label="Description">
-            {scenario.data.description || "—"}
-          </DetailRow>
-          <DetailRow label="Step interval">
-            {scenario.data.stepIntervalMs
-              ? `${scenario.data.stepIntervalMs} ms`
-              : "—"}
-          </DetailRow>
-          <DetailRow label="Created at">
-            {formatDateTime(scenario.data.createdAt)}
-          </DetailRow>
-          <DetailRow label="Updated at">
-            {formatDateTime(scenario.data.updatedAt)}
-          </DetailRow>
-          <div className="space-y-2 pt-2">
-            <h3 className="text-sm font-medium">
-              Steps ({scenario.data.steps.length})
-            </h3>
-            <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-              {scenario.data.steps.map((step, index) => (
-                <li key={index}>
-                  {step.name} <span className="text-xs">({step.action})</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      )}
+      </div>
       <section className="min-w-0 space-y-3">
         <h3 className="text-sm font-medium">Runs</h3>
         {runs.isPending ? (
@@ -154,10 +136,10 @@ function ScenarioDetails({ scenarioId }: { scenarioId: string }) {
 }
 
 export function SimulationScenarioDetailsDialog({
-  scenarioId,
+  scenario,
   children,
 }: {
-  scenarioId: string;
+  scenario: SimulationScenario;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -172,7 +154,7 @@ export function SimulationScenarioDetailsDialog({
             Scenario information and run history.
           </DialogDescription>
         </DialogHeader>
-        {open && <ScenarioDetails scenarioId={scenarioId} />}
+        {open && <ScenarioDetails scenario={scenario} />}
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="outline">
