@@ -224,6 +224,62 @@ export const paymentDocs = {
       },
     },
   },
+  refund: {
+    summary: "Refund a payment",
+    description:
+      "Fully refunds an approved payment. Refunded payments cannot be refunded again.",
+    tags: ["Payments"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the payment is refunded successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(paymentSchema),
+          },
+        },
+      },
+      409: {
+        description:
+          "When the payment status changes before the refund is applied.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "CONFLICT",
+              code: 409,
+              message: "Payment is no longer available for a refund.",
+            }),
+          },
+        },
+      },
+      404: {
+        description: "When the payment with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Payment with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      400: {
+        description:
+          "When the payment status cannot be changed from its current state.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "BAD_REQUEST",
+              code: 400,
+              message:
+                "Cannot change payment status from {currentStatus} to REFUNDED.",
+            }),
+          },
+        },
+      },
+    },
+  },
   process: {
     summary: "Process a payment",
     description: "Moves an existing payment to the processing state.",

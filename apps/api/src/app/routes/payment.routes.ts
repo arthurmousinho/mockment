@@ -68,6 +68,16 @@ export async function paymentRoutes(app: FastifyInstance) {
   );
 
   app.patch(
+    "/:id/refund",
+    { schema: paymentDocs.refund },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const payment = await paymentService.changeStatus(id, "REFUNDED");
+      return reply.status(200).send(payment);
+    },
+  );
+
+  app.patch(
     "/:id/process",
     { schema: paymentDocs.process },
     async (request, reply) => {
