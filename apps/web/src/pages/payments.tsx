@@ -28,6 +28,7 @@ import {
   DeclinePaymentRequest,
   FindAllPaymentsRequest,
   ProcessPaymentRequest,
+  RefundPaymentRequest,
   type PaymentStatus,
 } from "@/http/payments-http";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
@@ -35,6 +36,7 @@ import { canChangePaymentStatus } from "@/lib/utils";
 import {
   CheckIcon,
   ArrowClockwiseIcon,
+  ArrowUUpLeftIcon,
   ProhibitIcon,
   DotsThreeIcon,
   CurrencyCircleDollarIcon,
@@ -66,6 +68,8 @@ export function PaymentsPage() {
     DeclinePaymentRequest();
   const { mutate: cancelRequest, isPending: isCanceling } =
     CancelPaymentRequest();
+  const { mutate: refundRequest, isPending: isRefunding } =
+    RefundPaymentRequest();
 
   if (isPending) {
     return <ListingPageSkeleton columns={7} rows={limit} />;
@@ -89,6 +93,7 @@ export function PaymentsPage() {
       APPROVED: () => approveRequest(id),
       DECLINED: () => declineRequest(id),
       CANCELED: () => cancelRequest(id),
+      REFUNDED: () => refundRequest(id),
     };
 
     requests[status]();
@@ -223,6 +228,16 @@ export function PaymentsPage() {
                     >
                       <XIcon size={32} />
                       Cancel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={
+                        !canChangePaymentStatus(item.status, "REFUNDED") ||
+                        isRefunding
+                      }
+                      onClick={() => handleChangeStatus(item.id, "REFUNDED")}
+                    >
+                      <ArrowUUpLeftIcon size={32} />
+                      Refund
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

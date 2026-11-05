@@ -14,9 +14,10 @@ export function canChangePaymentStatus(
   const validTransitions: Record<PaymentStatus, PaymentStatus[]> = {
     CREATED: ["PROCESSING", "CANCELED"],
     PROCESSING: ["APPROVED", "DECLINED"],
-    APPROVED: ["CANCELED"],
+    APPROVED: ["CANCELED", "REFUNDED"],
     DECLINED: [],
     CANCELED: [],
+    REFUNDED: [],
   };
   const allowed = validTransitions[currentStatus];
   return allowed.includes(newStatus);

@@ -8,6 +8,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ProhibitIcon,
+  ArrowUUpLeftIcon,
 } from "@phosphor-icons/react";
 
 type PaymentStatusBadgeProps = {
@@ -42,6 +43,12 @@ export const PAYMENT_STATUS_CONFIG: Record<
     icon: XCircleIcon,
     className:
       "bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-900",
+  },
+  REFUNDED: {
+    label: "Refunded",
+    icon: ArrowUUpLeftIcon,
+    className:
+      "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-900",
   },
   CANCELED: {
     label: "Canceled",

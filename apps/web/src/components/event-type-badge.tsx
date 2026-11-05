@@ -19,6 +19,9 @@ const EVENT_TYPE_CONFIG: Record<EventType, { className: string }> = {
   PAYMENT_DECLINED: {
     className: "text-red-800 dark:text-red-300",
   },
+  PAYMENT_REFUNDED: {
+    className: "text-purple-800 dark:text-purple-300",
+  },
   PAYMENT_CANCELED: {
     className: "text-zinc-600 dark:text-zinc-400",
   },

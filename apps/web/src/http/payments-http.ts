@@ -8,7 +8,7 @@ import type { EventType } from "./events-http";
 export type PaymentCurrency = "BRL" | "USD" | "EUR";
 export type PaymentMethod = "CARD" | "PIX" | "BANK_SLIP";
 export type PaymentStatus =
-  "CREATED" | "PROCESSING" | "APPROVED" | "DECLINED" | "CANCELED";
+  "CREATED" | "PROCESSING" | "APPROVED" | "DECLINED" | "CANCELED" | "REFUNDED";
 
 export type Payment = {
   id: string;
@@ -134,6 +134,20 @@ export function CancelPaymentRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       toast.success("Payment canceled successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
+export function RefundPaymentRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const request = await api.patch(`payments/${id}/refund`);
+      return await request.json<Payment>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      toast.success("Payment refunded successfully.");
     },
     onError: apiErrorHandler,
   });
