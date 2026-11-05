@@ -38,10 +38,10 @@ async function create(
     });
 
     if (paymentWithIdempotencyKey) {
-      const checkoutLink = await checkoutService.getGeneratedLinkByPaymentId(
+      const checkout = await checkoutService.getGeneratedCheckoutByPaymentId(
         paymentWithIdempotencyKey.id,
       );
-      return { ...paymentWithIdempotencyKey, checkoutLink };
+      return { ...paymentWithIdempotencyKey, ...checkout };
     }
   }
 
@@ -76,7 +76,7 @@ async function create(
     },
   });
 
-  const checkoutLink = await checkoutService.generateLink({
+  const checkout = await checkoutService.generateLink({
     apiKeyId: validatedApiKey.id,
     paymentId: payment.id,
     ...(input.successUrl && { successUrl: input.successUrl }),
@@ -84,7 +84,7 @@ async function create(
     ...(subscriptionId && { subscriptionId }),
   });
 
-  const paymentPayload = { ...payment, checkoutLink };
+  const paymentPayload = { ...payment, ...checkout };
 
   await eventService.emit({
     paymentId: payment.id,

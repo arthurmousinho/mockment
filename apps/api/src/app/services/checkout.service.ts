@@ -39,14 +39,20 @@ async function generateLink(input: GenerateCheckoutLinkInput) {
     },
   });
 
-  return buildCheckoutLink(checkout.id);
+  return {
+    checkoutId: checkout.id,
+    checkoutLink: buildCheckoutLink(checkout.id),
+  };
 }
 
-async function getGeneratedLinkByPaymentId(paymentId: string) {
+async function getGeneratedCheckoutByPaymentId(paymentId: string) {
   const checkout = await prismaSingleton.checkout.findFirst({
     where: { paymentId },
   });
-  return checkout ? buildCheckoutLink(checkout.id) : null;
+  return {
+    checkoutId: checkout?.id ?? null,
+    checkoutLink: checkout ? buildCheckoutLink(checkout.id) : null,
+  };
 }
 
 async function findAll(paginationInput: CheckoutListInput) {
@@ -127,7 +133,7 @@ async function complete(id: string, status: CheckoutCompletionStatus) {
 
 export const checkoutService = {
   generateLink,
-  getGeneratedLinkByPaymentId,
+  getGeneratedCheckoutByPaymentId,
   findAll,
   getDetails,
   complete,

@@ -37,6 +37,7 @@ export type CreatePaymentRequestData = {
 };
 
 export type CreatePaymentResponse = Omit<Payment, "apiKeyId"> & {
+  checkoutId: string | null;
   checkoutLink: string;
 };
 
