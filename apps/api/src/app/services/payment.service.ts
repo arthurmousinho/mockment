@@ -182,28 +182,15 @@ async function changeStatus(id: string, newStatus: PaymentStatus) {
   const payment = await findById(id);
   validateStatusTransition(payment.status, newStatus);
 
-  if (newStatus === "REFUNDED") {
-    const result = await prismaSingleton.payment.updateMany({
-      where: { id: payment.id, status: "APPROVED" },
-      data: { status: "REFUNDED" },
-    });
-
-    if (result.count === 0) {
-      throw new ConflictError("Payment is no longer available for a refund.");
-    }
-  }
-
-  const updatedPayment = newStatus === "REFUNDED"
-    ? await findById(payment.id)
-    : await prismaSingleton.payment.update({
-        where: { id: payment.id },
-        data: { status: newStatus },
-      });
+  const updatedPayment = await prismaSingleton.payment.update({
+    where: { id: payment.id },
+    data: { status: newStatus },
+  });
 
   await eventService.emit({
     paymentId: payment.id,
     type: `PAYMENT_${newStatus}`,
-    payload: newStatus === "REFUNDED" ? updatedPayment : payment,
+    payload: updatedPayment,
   });
 
   return updatedPayment;

@@ -226,29 +226,15 @@ export const paymentDocs = {
   },
   refund: {
     summary: "Refund a payment",
-    description:
-      "Fully refunds an approved payment. Refunded payments cannot be refunded again.",
+    description: "Refunds an approved payment.",
     tags: ["Payments"],
     params: idParamsSchema,
     response: {
       200: {
-        description: "When the payment is refunded successfully.",
+        description: "Returns the updated payment with status REFUNDED.",
         content: {
           "application/json": {
             schema: openApiSchema(paymentSchema),
-          },
-        },
-      },
-      409: {
-        description:
-          "When the payment status changes before the refund is applied.",
-        content: {
-          "application/json": {
-            schema: httpErrorSchema({
-              error: "CONFLICT",
-              code: 409,
-              message: "Payment is no longer available for a refund.",
-            }),
           },
         },
       },
@@ -266,7 +252,7 @@ export const paymentDocs = {
       },
       400: {
         description:
-          "When the payment status cannot be changed from its current state.",
+          "When the payment is not APPROVED, including payments already REFUNDED.",
         content: {
           "application/json": {
             schema: httpErrorSchema({
