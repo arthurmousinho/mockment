@@ -75,6 +75,7 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
 
   return {
     ...pendingSubscription,
+    checkoutId: initPayment.checkoutId,
     checkoutLink: initPayment.checkoutLink,
     initPaymentId: initPayment.id,
   };

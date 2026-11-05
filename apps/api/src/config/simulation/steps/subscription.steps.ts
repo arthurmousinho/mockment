@@ -60,6 +60,7 @@ export const createSubscriptionStep = {
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
     { name: "apiKeyId", type: "string" },
+    { name: "checkoutId", type: "string" },
     { name: "checkoutLink", type: "string" },
     { name: "initPaymentId", type: "string" },
   ],

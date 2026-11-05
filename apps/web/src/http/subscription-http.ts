@@ -29,6 +29,7 @@ export type DetailedSubscription = Subscription & {
 };
 
 export type CreateSubscriptionResponse = Subscription & {
+  checkoutId: string;
   checkoutLink: string;
   initPaymentId: string;
 };
