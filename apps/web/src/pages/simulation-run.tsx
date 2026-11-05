@@ -19,11 +19,18 @@ import {
 import { formatDateTime, formatDuration } from "@/lib/formatters";
 import { ArrowLeftIcon, FlaskIcon } from "@phosphor-icons/react";
 import { HTTPError } from "ky";
-import { Link, Navigate, useLocation, useParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
 export function SimulationRunPage() {
   const { id = "" } = useParams();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { scenario } = (location.state ?? {}) as {
     scenario?: SimulationScenario;
   };
@@ -63,8 +70,14 @@ export function SimulationRunPage() {
     return <Navigate to="/404" replace />;
   }
 
+  const stepIntervalMs = searchParams.get("stepIntervalMs");
+  const interval = stepIntervalMs === null ? NaN : Number(stepIntervalMs);
   const delay =
-    scenario?.id === run.scenarioId ? scenario.stepIntervalMs : undefined;
+    scenario?.id === run.scenarioId
+      ? scenario.stepIntervalMs
+      : Number.isFinite(interval) && interval >= 0
+        ? interval
+        : undefined;
   const active = run.status === "PENDING" || run.status === "RUNNING";
   const executed = run.steps.filter(
     (step) => step.status === "COMPLETED" || step.status === "FAILED",

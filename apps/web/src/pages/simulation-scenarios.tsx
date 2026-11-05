@@ -1,7 +1,7 @@
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   DotsThreeIcon,
   FlaskIcon,
@@ -41,7 +41,6 @@ import { formatDateTime } from "@/lib/formatters";
 import { CreateSimulationRunRequest } from "@/http/simulations-http";
 
 export function SimulationScenariosPage() {
-  const navigate = useNavigate();
   const createRun = CreateSimulationRunRequest();
   const startingRun = useRef(false);
 
@@ -60,12 +59,28 @@ export function SimulationScenariosPage() {
 
   async function runSimulation(scenario: SimulationScenario) {
     if (createRun.isPending || startingRun.current) return;
+    
+    const runTab = window.open("about:blank", "_blank");
+    if (!runTab) {
+      toast.error("Allow pop-ups to open the simulation run in a new tab.");
+      return;
+    }
+
+    runTab.opener = null;
+    runTab.document.title = "Starting simulation…";
+    runTab.document.body.textContent = "Starting simulation…";
     startingRun.current = true;
+    
     try {
       const run = await createRun.mutateAsync(scenario.id);
-      void navigate(`/simulations/runs/${run.id}`, { state: { scenario } });
+      if (runTab.closed) return;
+
+      const search = new URLSearchParams({
+        stepIntervalMs: String(scenario.stepIntervalMs ?? 0),
+      });
+      runTab.location.replace(`/simulations/runs/${run.id}?${search}`);
     } catch {
-      // The mutation reports API errors using the shared handler.
+      runTab.close();
     } finally {
       startingRun.current = false;
     }
