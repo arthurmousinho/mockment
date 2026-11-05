@@ -15,7 +15,7 @@ import { paymentService } from "./payment.service.ts";
 import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 
-function buildCheckoutLink(checkoutId: string) {
+export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
 }
 

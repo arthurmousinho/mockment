@@ -16,7 +16,7 @@ import type {
   PaymentListInput,
 } from "../schemas/payment.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
-import { checkoutService } from "./checkout.service.ts";
+import { buildCheckoutLink, checkoutService } from "./checkout.service.ts";
 import { eventService } from "./event.service.ts";
 import { buildPaymentSearchFilter } from "../filters/payment.filters.ts";
 
@@ -131,6 +131,7 @@ async function getDetails(id: string) {
   const payment = await prismaSingleton.payment.findUnique({
     where: { id },
     include: {
+      checkout: { select: { id: true } },
       events: {
         select: {
           id: true,
@@ -148,9 +149,13 @@ async function getDetails(id: string) {
     throw new NotFoundError(`Payment with ID ${id} was not found.`);
   }
 
-  const checkout = await checkoutService.getGeneratedCheckoutByPaymentId(id);
+  const { checkout, ...paymentDetails } = payment;
 
-  return { ...payment, ...checkout };
+  return {
+    ...paymentDetails,
+    checkoutId: checkout?.id ?? null,
+    checkoutLink: checkout ? buildCheckoutLink(checkout.id) : null,
+  };
 }
 
 function validateStatusTransition(
