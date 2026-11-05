@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { SubscriptionDetailsDialog } from "@/components/subscription-details-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
@@ -67,7 +68,7 @@ export function SubscriptionsPage() {
     CancelSubscriptionRequest();
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <ListingPageSkeleton columns={7} rows={limit} />;
   }
 
   if (isError) {

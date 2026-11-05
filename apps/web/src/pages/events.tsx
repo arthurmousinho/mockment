@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { RefetchButton } from "@/components/refetch-button";
 import { EventDetailsDialog } from "@/components/event-details-dialog";
 import { EventTypeBadge } from "@/components/event-type-badge";
@@ -38,7 +39,7 @@ export function EventsPage() {
   } = FindAllEventsRequest({ page, limit, search });
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <ListingPageSkeleton columns={4} rows={limit} />;
   }
 
   if (isError) {

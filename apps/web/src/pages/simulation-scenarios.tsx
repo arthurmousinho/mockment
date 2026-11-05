@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -70,7 +71,7 @@ export function SimulationScenariosPage() {
     }
   }
 
-  if (isPending) return <div>Loading simulation scenarios...</div>;
+  if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
 
   if (isError || !data) {
     return (

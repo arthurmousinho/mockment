@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
@@ -67,7 +68,7 @@ export function PaymentsPage() {
     CancelPaymentRequest();
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <ListingPageSkeleton columns={7} rows={limit} />;
   }
 
   if (isError) {

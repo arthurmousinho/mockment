@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { useState } from "react";
 import { ArrowSquareOutIcon, LinkSimpleIcon } from "@phosphor-icons/react";
 import { ListingSearch } from "@/components/listing-search";
@@ -23,7 +24,7 @@ export function CheckoutsPage() {
   const { data, isPending, isFetching, isError, refetch } =
     FindAllCheckoutsRequest({ page, limit, search });
 
-  if (isPending) return <div>Loading checkouts...</div>;
+  if (isPending) return <ListingPageSkeleton columns={5} rows={limit} />;
 
   if (isError || !data) {
     return (

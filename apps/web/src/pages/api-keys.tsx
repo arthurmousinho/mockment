@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { ApiKeyFormDialog } from "@/components/api-key-form-dialog";
@@ -64,7 +65,7 @@ export function ApiKeysPage() {
     RotateApiKeyRequest();
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <ListingPageSkeleton columns={5} rows={limit} />;
   }
 
   if (isError) {

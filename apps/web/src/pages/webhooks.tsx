@@ -1,3 +1,4 @@
+import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { EventTypeBadge } from "@/components/event-type-badge";
@@ -74,7 +75,7 @@ export function WebhooksPage() {
     DeleteWebhookEndpointRequest();
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <ListingPageSkeleton columns={6} rows={limit} />;
   }
 
   if (isError) {
