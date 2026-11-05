@@ -235,6 +235,37 @@ export const cancelPaymentStep = {
   },
 } satisfies Step;
 
+export const refundPaymentStep = {
+  id: "payment.refund",
+  name: "Refund payment",
+  description: "Fully refund an approved payment.",
+  input: [
+    {
+      name: "id",
+      label: "Payment ID",
+      type: "string",
+      required: true,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "method", type: "string" },
+    { name: "status", type: "string" },
+    { name: "description", type: "string" },
+    { name: "externalId", type: "string" },
+    { name: "idempotencyKey", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "PATCH",
+    endpoint: "/payments/:id/refund",
+  },
+} satisfies Step;
+
 export const PAYMENT_STEPS = [
   createPaymentStep,
   getPaymentStep,
@@ -242,4 +273,5 @@ export const PAYMENT_STEPS = [
   approvePaymentStep,
   declinePaymentStep,
   cancelPaymentStep,
+  refundPaymentStep,
 ] as const;
