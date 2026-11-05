@@ -199,6 +199,7 @@ async function changeStatus(id: string, newStatus: PaymentStatus) {
 async function createRecurringPayment(subscription: Subscription) {
   const payment = await prismaSingleton.payment.create({
     data: {
+      id: createPrefixedId("pay"),
       amountInCents: subscription.amountInCents,
       currency: subscription.currency,
       method: subscription.method,
