@@ -37,3 +37,17 @@ export function formatCurrencyFromCents(
     currency,
   }).format(amount);
 }
+
+export function formatDuration(start: string | null, end: string | null) {
+  if (!start || !end) return "—";
+  const milliseconds = new Date(end).getTime() - new Date(start).getTime();
+
+  if (!Number.isFinite(milliseconds) || milliseconds < 0) return "—";
+  if (milliseconds < 1000) return `${milliseconds} ms`;
+
+  const seconds = milliseconds / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)} s`;
+
+  const minutes = Math.floor(seconds / 60);
+  return `${Math.floor(minutes / 60) ? `${Math.floor(minutes / 60)} h ` : ""}${minutes % 60} m ${Math.floor(seconds % 60)} s`;
+}

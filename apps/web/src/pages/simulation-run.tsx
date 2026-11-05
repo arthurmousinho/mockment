@@ -1,6 +1,3 @@
-import { ArrowLeftIcon, FlaskIcon } from "@phosphor-icons/react";
-import { Link, useLocation, useParams } from "react-router-dom";
-import { HTTPError } from "ky";
 import { SimulationRunStatusBadge } from "@/components/simulation-run-status-badge";
 import { RefetchButton } from "@/components/refetch-button";
 import {
@@ -19,67 +16,55 @@ import {
   type SimulationScenario,
   FindSimulationRunRequest,
 } from "@/http/simulations-http";
-import { formatDateTime } from "@/lib/formatters";
-
-function duration(start: string | null, end: string | null) {
-  if (!start || !end) return "—";
-  const milliseconds = new Date(end).getTime() - new Date(start).getTime();
-
-  if (!Number.isFinite(milliseconds) || milliseconds < 0) return "—";
-  if (milliseconds < 1000) return `${milliseconds} ms`;
-
-  const seconds = milliseconds / 1000;
-  if (seconds < 60) return `${seconds.toFixed(1)} s`;
-
-  const minutes = Math.floor(seconds / 60);
-  return `${Math.floor(minutes / 60) ? `${Math.floor(minutes / 60)} h ` : ""}${minutes % 60} m ${Math.floor(seconds % 60)} s`;
-}
+import { formatDateTime, formatDuration } from "@/lib/formatters";
+import { ArrowLeftIcon, FlaskIcon } from "@phosphor-icons/react";
+import { HTTPError } from "ky";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 
 export function SimulationRunPage() {
   const { id = "" } = useParams();
-  const query = FindSimulationRunRequest(id);
-  const run = query.data;
   const location = useLocation();
   const { scenario } = (location.state ?? {}) as {
     scenario?: SimulationScenario;
   };
-  const delay =
-    scenario?.id === run?.scenarioId ? scenario?.stepIntervalMs : undefined;
 
-  if (query.isPending)
-    return <div role="status">Loading simulation run...</div>;
+  const {
+    data: run,
+    isPending,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = FindSimulationRunRequest(id);
 
-  if (!run) {
-    const notFound =
-      query.error instanceof HTTPError && query.error.response.status === 404;
+  if (isPending) {
+    return <div role="status">Loading...</div>;
+  }
+
+  if (error instanceof HTTPError && error.response.status === 404) {
+    return <Navigate to="/404" replace />;
+  }
+
+  if (isError && !run) {
     return (
-      <div
-        role="alert"
-        className="flex flex-col items-center gap-4 py-10 text-center"
-      >
-        <h1 className="text-sm text-muted-foreground">
-          {notFound ? "Simulation run not found" : "Unable to load this run"}
-        </h1>
-        <p className="max-w-md text-sm text-muted-foreground">
-          {notFound
-            ? "The run may have been deleted along with its scenario."
-            : "Check your connection and try again."}
+      <div role="alert" className="flex flex-col items-center gap-4 py-10">
+        <p className="text-sm text-muted-foreground">
+          Failed to load simulation run.
         </p>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link to="/simulations">Back to scenarios</Link>
-          </Button>
-          <Button
-            disabled={query.isFetching}
-            onClick={() => void query.refetch()}
-          >
-            Try again
-          </Button>
-        </div>
+
+        <Button disabled={isFetching} onClick={() => refetch()}>
+          Try again
+        </Button>
       </div>
     );
   }
 
+  if (!run) {
+    return <Navigate to="/404" replace />;
+  }
+
+  const delay =
+    scenario?.id === run.scenarioId ? scenario.stepIntervalMs : undefined;
   const active = run.status === "PENDING" || run.status === "RUNNING";
   const executed = run.steps.filter(
     (step) => step.status === "COMPLETED" || step.status === "FAILED",
@@ -88,17 +73,22 @@ export function SimulationRunPage() {
 
   return (
     <div className="min-w-0 space-y-4">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <FlaskIcon size={24} className="shrink-0 font-medium" />
-          <h1 className="text-xl font-medium tracking-tight">Simulation run</h1>
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="min-w-0 space-y-2">
+          <div className="flex items-center gap-2">
+            <FlaskIcon size={24} className="font-medium" />
+            <h1 className="text-xl font-medium tracking-tight">
+              Simulation run
+            </h1>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            Review execution status, step details, and results.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Review execution status, step details, and results.
-        </p>
       </header>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span role="status" className="text-sm text-muted-foreground">
           Last updated: {formatDateTime(run.updatedAt)}
         </span>
@@ -109,14 +99,11 @@ export function SimulationRunPage() {
               Back to scenarios
             </Link>
           </Button>
-          <RefetchButton
-            isFetching={query.isFetching}
-            onRefetch={() => void query.refetch()}
-          />
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
         </div>
-      </div>
+      </header>
 
-      {query.isError && (
+      {isError && (
         <div role="alert" className="text-sm text-destructive">
           Could not refresh this run. Showing the last received data. Use Reload
           to try again.
@@ -128,7 +115,7 @@ export function SimulationRunPage() {
           <h2 className="text-sm font-medium">Execution details</h2>
         </CardHeader>
         <CardContent className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-          <div className="min-w-0 space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:break-words">
+          <div className="min-w-0 space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:wrap-break-word">
             <DetailRow label="Scenario ID">{run.scenarioId}</DetailRow>
             <DetailRow label="Run ID">
               <span className="break-all">{run.id}</span>
@@ -145,12 +132,12 @@ export function SimulationRunPage() {
             </DetailRow>
           </div>
           <Separator orientation="vertical" className="hidden lg:block" />
-          <div className="min-w-0 space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:break-words">
+          <div className="min-w-0 space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:wrap-break-word">
             <DetailRow label="Status">
               <SimulationRunStatusBadge status={run.status} />
             </DetailRow>
             <DetailRow label="Duration">
-              {duration(run.startedAt, run.finishedAt)}
+              {formatDuration(run.startedAt, run.finishedAt)}
             </DetailRow>
             <DetailRow label="Finished at">
               {run.finishedAt ? formatDateTime(run.finishedAt) : "—"}
@@ -206,7 +193,7 @@ export function SimulationRunPage() {
                       </span>
                       <span className="flex items-center gap-3">
                         <span className="text-xs text-muted-foreground">
-                          {duration(step.startedAt, step.finishedAt)}
+                          {formatDuration(step.startedAt, step.finishedAt)}
                         </span>
                         <SimulationRunStatusBadge
                           status={step.status}
@@ -216,7 +203,7 @@ export function SimulationRunPage() {
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="space-y-4 pb-6">
-                    <div className="grid gap-x-8 gap-y-2.5 lg:grid-cols-2 [&>div]:min-w-0 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:break-words">
+                    <div className="grid gap-x-8 gap-y-2.5 lg:grid-cols-2 [&>div]:min-w-0 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:wrap-break-word">
                       <DetailRow label="Step run ID">
                         <span className="break-all">{step.id}</span>
                       </DetailRow>
@@ -238,7 +225,7 @@ export function SimulationRunPage() {
                           : "—"}
                       </DetailRow>
                       <DetailRow label="Duration">
-                        {duration(step.startedAt, step.finishedAt)}
+                        {formatDuration(step.startedAt, step.finishedAt)}
                       </DetailRow>
                       <DetailRow label="Created">
                         {formatDateTime(step.createdAt)}
