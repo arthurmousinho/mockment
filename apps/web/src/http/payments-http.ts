@@ -74,6 +74,8 @@ export function FindAllPaymentsRequest(
 }
 
 export type DetailedPayment = Payment & {
+  checkoutId: string | null;
+  checkoutLink: string | null;
   events: {
     id: string;
     type: EventType;

@@ -1,3 +1,4 @@
+import { ArrowSquareOutIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useState, type ReactNode } from "react";
 import {
@@ -124,6 +125,25 @@ export function PaymentDetailsDialog({
               )}
             </div>
             <Separator />
+            <div className="space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div>span]:break-all">
+              {paymentDetails.checkoutId && (
+                <CopyableField
+                  label="Checkout ID"
+                  value={paymentDetails.checkoutId}
+                />
+              )}
+              {paymentDetails.checkoutLink ? (
+                <CopyableField
+                  label="Checkout link"
+                  value={paymentDetails.checkoutLink}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No checkout available.
+                </p>
+              )}
+            </div>
+            <Separator />
             <div className="space-y-2.5">
               <DetailRow label="Created at">
                 {formatDateTime(paymentDetails.createdAt)}
@@ -164,6 +184,18 @@ export function PaymentDetailsDialog({
           </div>
         )}
         <DialogFooter>
+          {paymentDetails?.checkoutLink && (
+            <Button asChild>
+              <a
+                href={paymentDetails.checkoutLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ArrowSquareOutIcon size={16} />
+                Open checkout
+              </a>
+            </Button>
+          )}
           <DialogClose asChild>
             <Button type="button" variant="outline">
               Done

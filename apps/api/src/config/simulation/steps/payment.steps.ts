@@ -101,6 +101,8 @@ export const getPaymentStep = {
     { name: "idempotencyKey", type: "string" },
     { name: "createdAt", type: "string" },
     { name: "updatedAt", type: "string" },
+    { name: "checkoutId", type: "string" },
+    { name: "checkoutLink", type: "string" },
   ],
   executor: {
     type: "http",

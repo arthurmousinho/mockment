@@ -63,6 +63,8 @@ export const createPaymentResponseSchema = paymentSchema.safeExtend({
 export type CreatePaymentOutput = z.infer<typeof createPaymentResponseSchema>;
 
 export const detailedPaymentSchema = paymentSchema.safeExtend({
+  checkoutId: z.string().nullable(),
+  checkoutLink: z.url().nullable(),
   events: z.array(
     z.object({
       id: z.string(),

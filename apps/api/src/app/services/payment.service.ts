@@ -148,7 +148,9 @@ async function getDetails(id: string) {
     throw new NotFoundError(`Payment with ID ${id} was not found.`);
   }
 
-  return payment;
+  const checkout = await checkoutService.getGeneratedCheckoutByPaymentId(id);
+
+  return { ...payment, ...checkout };
 }
 
 function validateStatusTransition(
