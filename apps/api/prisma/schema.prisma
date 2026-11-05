@@ -114,9 +114,9 @@ model Payment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  apiKey    ApiKey     @relation(fields: [apiKeyId], references: [id])
-  events    Event[]
-  checkouts Checkout[]
+  apiKey   ApiKey    @relation(fields: [apiKeyId], references: [id])
+  events   Event[]
+  checkout Checkout?
 
   @@unique([apiKeyId, externalId])
   @@unique([apiKeyId, idempotencyKey])
@@ -191,7 +191,7 @@ model Checkout {
   cancelUrl  String @map("cancel_url")
 
   apiKeyId       String  @map("api_key_id")
-  paymentId      String  @map("payment_id")
+  paymentId      String  @unique @map("payment_id")
   subscriptionId String? @map("subscription_id")
 
   createdAt DateTime @default(now()) @map("created_at")

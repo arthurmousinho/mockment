@@ -46,7 +46,7 @@ async function generateLink(input: GenerateCheckoutLinkInput) {
 }
 
 async function getGeneratedCheckoutByPaymentId(paymentId: string) {
-  const checkout = await prismaSingleton.checkout.findFirst({
+  const checkout = await prismaSingleton.checkout.findUnique({
     where: { paymentId },
   });
   return {
