@@ -27,8 +27,8 @@ export async function checkoutRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const { status } = completeCheckoutSchema.parse(request.body);
-      await checkoutService.complete(id, status);
-      return reply.status(200).send();
+      const checkout = await checkoutService.complete(id, status);
+      return reply.status(200).send(checkout);
     },
   );
 }

@@ -7,6 +7,7 @@ import {
 } from "../../common/openapi.ts";
 import {
   completeCheckoutSchema,
+  completeCheckoutResponseSchema,
   detailedCheckoutSchema,
   findAllCheckoutsSchema,
 } from "../schemas/checkout.schema.ts";
@@ -66,6 +67,11 @@ export const checkoutDocs = {
     response: {
       200: {
         description: "When the checkout is completed successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(completeCheckoutResponseSchema),
+          },
+        },
       },
       404: {
         description: "When the checkout with the specified ID is not found.",

@@ -48,7 +48,15 @@ export const completeCheckoutStep = {
       options: completeCheckoutSchema.shape.status.options,
     },
   ],
-  output: [],
+  output: [
+    { name: "id", type: "string" },
+    { name: "apiKeyId", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "successUrl", type: "string" },
+    { name: "cancelUrl", type: "string" },
+    { name: "paymentId", type: "string" },
+    { name: "subscriptionId", type: "string" },
+  ],
   executor: {
     type: "http",
     method: "POST",

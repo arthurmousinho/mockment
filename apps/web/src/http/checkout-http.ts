@@ -51,9 +51,10 @@ export function FindAllCheckoutsRequest(
 export function CompleteCheckoutRequest(id: string) {
   return useMutation({
     mutationFn: async (status: CheckoutCompletionStatus) => {
-      await api.post(`checkouts/${id}/complete`, {
+      const request = await api.post(`checkouts/${id}/complete`, {
         json: { status },
       });
+      return await request.json<Checkout>();
     },
   });
 }

@@ -47,3 +47,8 @@ export const detailedCheckoutSchema = z.object({
   payment: paymentSchema,
   subscription: z.any().nullable(),
 });
+
+export const completeCheckoutResponseSchema = detailedCheckoutSchema.omit({
+  payment: true,
+  subscription: true,
+});

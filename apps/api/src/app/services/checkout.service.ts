@@ -129,6 +129,8 @@ async function complete(id: string, status: CheckoutCompletionStatus) {
       await paymentService.changeStatus(checkout.paymentId, "CANCELED");
       break;
   }
+
+  return checkout;
 }
 
 export const checkoutService = {
