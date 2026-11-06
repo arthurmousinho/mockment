@@ -93,6 +93,16 @@ export async function simulationRoutes(app: FastifyInstance) {
     },
   );
 
+  app.post(
+    "/scenarios/:id/duplicate",
+    { schema: simulationDocs.duplicateScenario },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const scenario = await simulationService.duplicateScenario(id);
+      return reply.status(201).send(scenario);
+    },
+  );
+
   app.patch(
     "/scenarios/:id",
     { schema: simulationDocs.updateScenario },

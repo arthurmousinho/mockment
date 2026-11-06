@@ -228,4 +228,32 @@ export const simulationDocs = {
       },
     },
   },
+  duplicateScenario: {
+    summary: "Duplicate a simulation scenario",
+    description: "Creates a copy of a scenario without its run history.",
+    tags: ["Simulations"],
+    params: idParamsSchema,
+    response: {
+      201: {
+        description: "The duplicated scenario was created.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(simulationScenarioSchema),
+          },
+        },
+      },
+      404: {
+        description: "The scenario was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Simulation scenario with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
 };

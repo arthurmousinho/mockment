@@ -66,6 +66,23 @@ export function CreateSimulationScenarioRequest() {
   });
 }
 
+export function DuplicateSimulationScenarioRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`simulation/scenarios/${id}/duplicate`, {
+        retry: 0,
+      });
+      return response.json<SimulationScenario>();
+    },
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["simulation-scenarios"] });
+      toast.success("Simulation scenario duplicated.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function UpdateSimulationScenarioRequest() {
   return useMutation({
     mutationFn: async ({

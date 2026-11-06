@@ -3,6 +3,7 @@ import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialo
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+  CopyIcon,
   DotsThreeIcon,
   FlaskIcon,
   EyeIcon,
@@ -35,6 +36,7 @@ import {
 import {
   type SimulationScenario,
   DeleteSimulationScenarioRequest,
+  DuplicateSimulationScenarioRequest,
   FindAllSimulationScenariosRequest,
 } from "@/http/simulations-http";
 import { formatDateTime } from "@/lib/formatters";
@@ -54,6 +56,7 @@ export function SimulationScenariosPage() {
   } | null>(null);
 
   const deleteScenario = DeleteSimulationScenarioRequest();
+  const duplicateScenario = DuplicateSimulationScenarioRequest();
   const { data, isPending, isFetching, isError, refetch } =
     FindAllSimulationScenariosRequest({ page, limit, search });
 
@@ -231,6 +234,31 @@ export function SimulationScenariosPage() {
                           Edit
                         </DropdownMenuItem>
                       </SimulationScenarioFormDialog>
+                      <DropdownMenuItem
+                        disabled={
+                          duplicateScenario.isPending || deleteScenario.isPending
+                        }
+                        aria-busy={
+                          duplicateScenario.isPending &&
+                          duplicateScenario.variables === scenario.id
+                        }
+                        onSelect={() => {
+                          if (duplicateScenario.isPending) return;
+                          duplicateScenario.mutate(scenario.id, {
+                            onSuccess: () => {
+                              setSearchInput("");
+                              setSearch("");
+                              setPage(1);
+                            },
+                          });
+                        }}
+                      >
+                        <CopyIcon size={20} />
+                        {duplicateScenario.isPending &&
+                        duplicateScenario.variables === scenario.id
+                          ? "Duplicating…"
+                          : "Duplicate"}
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
                         disabled={

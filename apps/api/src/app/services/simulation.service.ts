@@ -69,6 +69,27 @@ async function createScenario(input: CreateSimulationScenarioInput) {
   });
 }
 
+async function duplicateScenario(id: string) {
+  const scenario = await prismaSingleton.simulationScenario.findUnique({
+    where: { id },
+  });
+
+  if (!scenario) {
+    throw new NotFoundError(`Simulation scenario with ID ${id} was not found.`);
+  }
+
+  const suffix = " (copy)";
+  return prismaSingleton.simulationScenario.create({
+    data: {
+      id: createPrefixedId("scn"),
+      name: `${scenario.name.slice(0, 100 - suffix.length).trimEnd()}${suffix}`,
+      description: scenario.description,
+      stepIntervalMs: scenario.stepIntervalMs,
+      steps: scenario.steps as Prisma.InputJsonArray,
+    },
+  });
+}
+
 async function updateScenario(
   id: string,
   input: UpdateSimulationScenarioInput,
@@ -195,6 +216,7 @@ export const simulationService = {
   availableSteps,
   findAllScenarios,
   createScenario,
+  duplicateScenario,
   updateScenario,
   removeScenario,
   findAllScenarioRuns,
