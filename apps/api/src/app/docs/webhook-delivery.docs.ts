@@ -1,7 +1,7 @@
 import {
   httpErrorSchema,
   paginatedResponseSchema,
-  paginationParamsSchema,
+  searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
   findAllWebhookDeliveriesSchema,
@@ -11,9 +11,10 @@ import {
 export const webhookDeliveryDocs = {
   findAll: {
     summary: "List webhook deliveries",
-    description: "Returns a paginated list of webhook deliveries.",
+    description:
+      "Returns a paginated list of webhook deliveries. Search matches partial delivery, event, and endpoint IDs, endpoint URLs, error messages, or delivery statuses. Status matching is case-insensitive.",
     tags: ["Webhook Deliveries"],
-    querystring: paginationParamsSchema,
+    querystring: searchablePaginationParamsSchema,
     response: {
       200: {
         description: "When the webhook deliveries are retrieved successfully.",

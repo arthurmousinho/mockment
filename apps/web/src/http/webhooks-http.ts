@@ -131,7 +131,7 @@ export type WebhookDeliveriesResponseData = WebhookDelivery & {
 };
 
 export function FindAllWebhookDeliveriesRequest(
-  paginationData: PaginatedRequest,
+  paginationData: PaginatedRequest & { search?: string },
   options?: {
     enabled?: boolean;
   },

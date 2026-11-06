@@ -23,6 +23,8 @@ import { Fragment, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { StatusCodeBadge } from "./status-code-badge";
 import { Paginator } from "./paginator";
+import { ListingSearch } from "./listing-search";
+import { RefetchButton } from "./refetch-button";
 
 type WebhookDeliveriesSheetProps = {
   children: ReactNode;
@@ -32,16 +34,22 @@ export function WebhookDeliveriesSheet({
   children,
 }: WebhookDeliveriesSheetProps) {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const {
     data: response,
     isPending,
+    isFetching,
     isError,
     refetch,
-  } = FindAllWebhookDeliveriesRequest({ page, limit }, { enabled: open });
+  } = FindAllWebhookDeliveriesRequest(
+    { page, limit, search },
+    { enabled: open },
+  );
 
   function toggleExpanded(id: string) {
     setExpandedId((current) => (current === id ? null : id));
@@ -59,6 +67,27 @@ export function WebhookDeliveriesSheet({
         </SheetHeader>
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col px-3 pb-4 sm:px-4">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 pb-4">
+            <ListingSearch
+              className="min-w-0 flex-1"
+              value={searchInput}
+              appliedValue={search}
+              onValueChange={setSearchInput}
+              onSearch={(value) => {
+                setSearch(value);
+                setPage(1);
+                setExpandedId(null);
+              }}
+              label="Search webhook deliveries"
+              inputLabel="Delivery, event, or endpoint ID, endpoint URL, error, or status"
+              placeholder="Search by ID, URL, error, or status..."
+            />
+            <RefetchButton
+              isFetching={isFetching}
+              onRefetch={() => refetch()}
+            />
+          </div>
+
           {isPending && (
             <div className="py-10 text-center text-sm text-muted-foreground">
               Loading...
@@ -194,7 +223,9 @@ export function WebhookDeliveriesSheet({
                         colSpan={5}
                         className="py-10 text-center text-muted-foreground"
                       >
-                        No deliveries found.
+                        {search
+                          ? "No deliveries match your search."
+                          : "No deliveries found."}
                       </TableCell>
                     </TableRow>
                   )}
@@ -207,7 +238,10 @@ export function WebhookDeliveriesSheet({
               <Paginator
                 pagination={response.pagination}
                 onPageChange={setPage}
-                onLimitChange={setLimit}
+                onLimitChange={(nextLimit) => {
+                  setLimit(nextLimit);
+                  setPage(1);
+                }}
               />
             </footer>
           )}

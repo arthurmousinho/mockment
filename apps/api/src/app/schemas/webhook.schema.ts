@@ -10,6 +10,11 @@ export type WebhookEndpointListInput = z.infer<
   typeof webhookEndpointListSchema
 >;
 
+export const webhookDeliveryListSchema = searchablePaginationSchema;
+export type WebhookDeliveryListInput = z.infer<
+  typeof webhookDeliveryListSchema
+>;
+
 const paymentEventsSchema = z
   .array(z.enum(EventType), {
     message: "Events must be a valid list.",
