@@ -235,9 +235,12 @@ export function FindSimulationRunRequest(id: string) {
 export function FindSimulationScenarioRunsRequest(
   id: string,
   pagination: PaginatedRequest,
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ["simulation-runs", "scenario", id, pagination],
+    enabled: options?.enabled,
+    placeholderData: keepPreviousData,
     queryFn: async ({ signal }) => {
       const response = await api.get(`simulation/scenarios/${id}/runs`, {
         searchParams: pagination,

@@ -16,6 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import { SimulationScenarioDetailsDialog } from "@/components/simulation-scenario-details-dialog";
 import { SimulationRunsSheet } from "@/components/simulation-runs-sheet";
+import { SimulationScenarioRunsSheet } from "@/components/simulation-scenario-runs-sheet";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
 import { RefetchButton } from "@/components/refetch-button";
@@ -207,6 +208,14 @@ export function SimulationScenariosPage() {
                           Details
                         </DropdownMenuItem>
                       </SimulationScenarioDetailsDialog>
+                      <SimulationScenarioRunsSheet scenario={scenario}>
+                        <DropdownMenuItem
+                          onSelect={(event) => event.preventDefault()}
+                        >
+                          <ClockCounterClockwiseIcon size={20} />
+                          Runs
+                        </DropdownMenuItem>
+                      </SimulationScenarioRunsSheet>
                       <DropdownMenuItem
                         disabled={
                           createRun.isPending || deleteScenario.isPending
