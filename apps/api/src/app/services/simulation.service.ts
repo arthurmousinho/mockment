@@ -15,8 +15,10 @@ import type {
   SimulationScenarioListInput,
   UpdateSimulationScenarioInput,
 } from "../schemas/simulation.schema.ts";
-import { buildSimulationScenarioSearchFilter } from "../filters/simulation-scenario.filters.ts";
-import { buildSimulationRunSearchFilter } from "../filters/simulation-run.filters.ts";
+import {
+  buildSimulationScenarioSearchFilter,
+  buildSimulationRunSearchFilter,
+} from "../filters/simulation.filters.ts";
 import { STEPS } from "../../config/simulation/steps.ts";
 import type { Step } from "../../config/simulation/types.ts";
 
