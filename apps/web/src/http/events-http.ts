@@ -1,5 +1,7 @@
-import { api } from "@/lib/ky";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { api, apiErrorHandler } from "@/lib/ky";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/query-client";
+import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type EventType =
@@ -37,5 +39,19 @@ export function FindAllEventsRequest(
     },
     enabled: options?.enabled,
     placeholderData: keepPreviousData,
+  });
+}
+
+export function ReplayEventRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`events/${id}/replay`);
+      return await response.json<Event>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["webhooks", "deliveries"] });
+      toast.success("Event replay completed. Check webhook deliveries for results.");
+    },
+    onError: apiErrorHandler,
   });
 }

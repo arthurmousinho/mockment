@@ -19,9 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllEventsRequest } from "@/http/events-http";
+import { FindAllEventsRequest, ReplayEventRequest } from "@/http/events-http";
 import { formatDateTime } from "@/lib/formatters";
-import { DotsThreeIcon, EyeIcon, ReceiptIcon } from "@phosphor-icons/react";
+import {
+  ArrowClockwiseIcon,
+  DotsThreeIcon,
+  EyeIcon,
+  ReceiptIcon,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function EventsPage() {
@@ -37,6 +42,12 @@ export function EventsPage() {
     isError,
     refetch,
   } = FindAllEventsRequest({ page, limit, search });
+
+  const {
+    mutate: replayEvent,
+    isPending: isReplaying,
+    variables: replayingEventId,
+  } = ReplayEventRequest();
 
   if (isPending) {
     return <ListingPageSkeleton columns={4} rows={limit} />;
@@ -130,6 +141,15 @@ export function EventsPage() {
                         Details
                       </DropdownMenuItem>
                     </EventDetailsDialog>
+                    <DropdownMenuItem
+                      disabled={isReplaying}
+                      onClick={() => replayEvent(item.id)}
+                    >
+                      <ArrowClockwiseIcon size={32} />
+                      {isReplaying && replayingEventId === item.id
+                        ? "Replaying..."
+                        : "Replay"}
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

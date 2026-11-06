@@ -46,7 +46,7 @@ async function findAll(input: EventListInput) {
   });
 }
 
-async function getDetails(id: string) {
+async function findById(id: string) {
   const event = await prismaSingleton.event.findUnique({
     where: { id },
   });
@@ -58,8 +58,15 @@ async function getDetails(id: string) {
   return event;
 }
 
+async function replay(id: string) {
+  const event = await findById(id);
+  await webhookDeliveryService.dispatch(event);
+  return event;
+}
+
 export const eventService = {
   emit,
   findAll,
-  getDetails,
+  findById,
+  replay,
 };
