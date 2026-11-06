@@ -162,6 +162,27 @@ export type SimulationRunDetails = SimulationRun & {
   steps: SimulationStepRun[];
 };
 
+export type SimulationRunListItem = SimulationRun & {
+  scenario: { name: string };
+};
+
+export function FindAllSimulationRunsRequest(
+  pagination: PaginatedRequest & { search?: string },
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: ["simulation-runs", "all", pagination],
+    queryFn: async () => {
+      const response = await api.get("simulation/runs", {
+        searchParams: pagination,
+      });
+      return response.json<PaginatedAPIResponse<SimulationRunListItem>>();
+    },
+    enabled: options?.enabled,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function CreateSimulationRunRequest() {
   return useMutation({
     mutationFn: async (scenarioId: string) => {

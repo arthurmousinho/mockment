@@ -6,6 +6,7 @@ import {
   CopyIcon,
   DotsThreeIcon,
   FlaskIcon,
+  ClockCounterClockwiseIcon,
   EyeIcon,
   PencilSimpleIcon,
   PlayIcon,
@@ -14,6 +15,7 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react";
 import { SimulationScenarioDetailsDialog } from "@/components/simulation-scenario-details-dialog";
+import { SimulationRunsSheet } from "@/components/simulation-runs-sheet";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
 import { RefetchButton } from "@/components/refetch-button";
@@ -62,7 +64,7 @@ export function SimulationScenariosPage() {
 
   async function runSimulation(scenario: SimulationScenario) {
     if (createRun.isPending || startingRun.current) return;
-    
+
     const runTab = window.open("about:blank", "_blank");
     if (!runTab) {
       toast.error("Allow pop-ups to open the simulation run in a new tab.");
@@ -73,7 +75,7 @@ export function SimulationScenariosPage() {
     runTab.document.title = "Starting simulation…";
     runTab.document.body.textContent = "Starting simulation…";
     startingRun.current = true;
-    
+
     try {
       const run = await createRun.mutateAsync(scenario.id);
       if (runTab.closed) return;
@@ -132,6 +134,12 @@ export function SimulationScenariosPage() {
         />
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <SimulationRunsSheet>
+            <Button variant="secondary">
+              <ClockCounterClockwiseIcon size={18} />
+              View All Runs
+            </Button>
+          </SimulationRunsSheet>
           <SimulationScenarioFormDialog>
             <Button>
               <PlusIcon size={18} />
@@ -236,7 +244,8 @@ export function SimulationScenariosPage() {
                       </SimulationScenarioFormDialog>
                       <DropdownMenuItem
                         disabled={
-                          duplicateScenario.isPending || deleteScenario.isPending
+                          duplicateScenario.isPending ||
+                          deleteScenario.isPending
                         }
                         aria-busy={
                           duplicateScenario.isPending &&

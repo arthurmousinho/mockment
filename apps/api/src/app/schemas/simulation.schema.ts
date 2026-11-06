@@ -58,6 +58,9 @@ export type SimulationScenarioListInput = z.infer<
   typeof simulationScenarioListSchema
 >;
 
+export const simulationRunListSchema = searchablePaginationSchema;
+export type SimulationRunListInput = z.infer<typeof simulationRunListSchema>;
+
 export const createSimulationScenarioSchema = z.object(
   {
     name: z
@@ -140,6 +143,10 @@ export const simulationRunSchema = z.object({
   finishedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+});
+
+export const simulationRunListItemSchema = simulationRunSchema.extend({
+  scenario: z.object({ name: z.string() }),
 });
 
 export const simulationStepRunSchema = z.object({

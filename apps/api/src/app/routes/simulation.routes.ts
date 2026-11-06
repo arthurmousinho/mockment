@@ -4,12 +4,23 @@ import { paginationSchema } from "../../common/pagination.schema.ts";
 import { simulationDocs } from "../docs/simulation.docs.ts";
 import {
   createSimulationScenarioSchema,
+  simulationRunListSchema,
   simulationScenarioListSchema,
   updateSimulationScenarioSchema,
 } from "../schemas/simulation.schema.ts";
 import { simulationService } from "../services/simulation.service.ts";
 
 export async function simulationRoutes(app: FastifyInstance) {
+  app.get(
+    "/runs",
+    { schema: simulationDocs.findAllRuns },
+    async (request, reply) => {
+      const input = simulationRunListSchema.parse(request.query);
+      const runs = await simulationService.findAllRuns(input);
+      return reply.status(200).send(runs);
+    },
+  );
+
   app.get(
     "/runs/:id/stream",
     { schema: simulationDocs.streamScenarioRun },

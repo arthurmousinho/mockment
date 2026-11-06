@@ -10,12 +10,30 @@ import {
   availableSimulationStepsSchema,
   createSimulationScenarioSchema,
   simulationRunDetailsSchema,
+  simulationRunListItemSchema,
   simulationRunSchema,
   simulationScenarioSchema,
   updateSimulationScenarioSchema,
 } from "../schemas/simulation.schema.ts";
 
 export const simulationDocs = {
+  findAllRuns: {
+    summary: "List simulation runs",
+    description:
+      "Returns paginated runs across all scenarios, newest first. Search matches run IDs, scenario IDs, scenario names, or statuses. Status matching is case-insensitive.",
+    tags: ["Simulations"],
+    querystring: searchablePaginationParamsSchema,
+    response: {
+      200: {
+        description: "The simulation runs with scenario names.",
+        content: {
+          "application/json": {
+            schema: paginatedResponseSchema(simulationRunListItemSchema),
+          },
+        },
+      },
+    },
+  },
   streamScenarioRun: {
     summary: "Stream simulation run updates",
     description:

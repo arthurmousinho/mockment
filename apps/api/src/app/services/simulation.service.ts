@@ -11,10 +11,12 @@ import {
 } from "../../common/utils.ts";
 import type {
   CreateSimulationScenarioInput,
+  SimulationRunListInput,
   SimulationScenarioListInput,
   UpdateSimulationScenarioInput,
 } from "../schemas/simulation.schema.ts";
 import { buildSimulationScenarioSearchFilter } from "../filters/simulation-scenario.filters.ts";
+import { buildSimulationRunSearchFilter } from "../filters/simulation-run.filters.ts";
 import { STEPS } from "../../config/simulation/steps.ts";
 import type { Step } from "../../config/simulation/types.ts";
 
@@ -125,6 +127,28 @@ async function removeScenario(id: string) {
   await prismaSingleton.simulationScenario.delete({ where: { id } });
 }
 
+async function findAllRuns(input: SimulationRunListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildSimulationRunSearchFilter(input.search);
+  const [runs, total] = await Promise.all([
+    prismaSingleton.simulationRun.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      include: { scenario: { select: { name: true } } },
+    }),
+    prismaSingleton.simulationRun.count({ where }),
+  ]);
+
+  return buildPaginatedResponse({
+    data: runs,
+    page: input.page,
+    limit: input.limit,
+    total,
+  });
+}
+
 async function findAllScenarioRuns(scenarioId: string, input: PaginationInput) {
   const scenario = await prismaSingleton.simulationScenario.findUnique({
     where: { id: scenarioId },
@@ -220,6 +244,7 @@ export const simulationService = {
   updateScenario,
   removeScenario,
   findAllScenarioRuns,
+  findAllRuns,
   createScenarioRun,
   getScenarioRun,
 };
