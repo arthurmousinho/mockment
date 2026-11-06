@@ -1,4 +1,7 @@
-import { createSubscriptionSchema } from "../../../app/schemas/subscription.schema.ts";
+import {
+  createSubscriptionSchema,
+  updateSubscriptionSchema,
+} from "../../../app/schemas/subscription.schema.ts";
 import type { Step } from "../types.ts";
 
 export const createSubscriptionStep = {
@@ -100,6 +103,78 @@ export const getSubscriptionStep = {
   executor: {
     type: "http",
     method: "GET",
+    endpoint: "/subscriptions/:id",
+  },
+} satisfies Step;
+
+export const updateSubscriptionStep = {
+  id: "subscription.update",
+  name: "Update subscription",
+  description: "Update an existing subscription.",
+  input: [
+    {
+      name: "id",
+      label: "Subscription ID",
+      type: "string",
+      required: true,
+    },
+    {
+      name: "amountInCents",
+      label: "Amount in cents",
+      type: "number",
+      required: false,
+    },
+    {
+      name: "currency",
+      label: "Currency",
+      type: "select",
+      required: false,
+      options: updateSubscriptionSchema.shape.currency.unwrap().options,
+    },
+    {
+      name: "method",
+      label: "Payment method",
+      type: "select",
+      required: false,
+      options: updateSubscriptionSchema.shape.method.unwrap().options,
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "string",
+      required: false,
+    },
+    {
+      name: "interval",
+      label: "Billing interval",
+      type: "select",
+      required: false,
+      options: updateSubscriptionSchema.shape.interval.unwrap().options,
+    },
+    {
+      name: "intervalCount",
+      label: "Interval count",
+      type: "number",
+      required: false,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "description", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "method", type: "string" },
+    { name: "interval", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+    { name: "intervalCount", type: "number" },
+    { name: "status", type: "string" },
+    { name: "nextBillingAt", type: "string" },
+    { name: "apiKeyId", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "PATCH",
     endpoint: "/subscriptions/:id",
   },
 } satisfies Step;
@@ -206,6 +281,7 @@ export const pauseSubscriptionStep = {
 export const SUBSCRIPTION_STEPS = [
   createSubscriptionStep,
   getSubscriptionStep,
+  updateSubscriptionStep,
   cancelSubscriptionStep,
   resumeSubscriptionStep,
   pauseSubscriptionStep,
