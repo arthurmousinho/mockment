@@ -9,4 +9,14 @@ export async function eventRoutes(app: FastifyInstance) {
     const events = await eventService.findAll(input);
     return reply.status(200).send(events);
   });
+
+  app.get(
+    "/:id",
+    { schema: eventDocs.getDetails },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const event = await eventService.getDetails(id);
+      return reply.status(200).send(event);
+    },
+  );
 }

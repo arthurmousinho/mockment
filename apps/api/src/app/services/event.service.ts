@@ -1,4 +1,5 @@
 import { buildEventSearchFilter } from "../filters/event.filters.ts";
+import { NotFoundError } from "../../common/http-error.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -45,7 +46,20 @@ async function findAll(input: EventListInput) {
   });
 }
 
+async function getDetails(id: string) {
+  const event = await prismaSingleton.event.findUnique({
+    where: { id },
+  });
+
+  if (!event) {
+    throw new NotFoundError(`Event with ID ${id} was not found.`);
+  }
+
+  return event;
+}
+
 export const eventService = {
   emit,
   findAll,
+  getDetails,
 };
