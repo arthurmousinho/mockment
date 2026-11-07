@@ -281,7 +281,8 @@ model SimulationRun {
 }
 
 model SimulationStepRun {
-  id String @id
+  id   String  @id
+  name String?
 
   runId     String                  @map("run_id")
   stepIndex Int                     @map("step_index")

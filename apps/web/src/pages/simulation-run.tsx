@@ -193,7 +193,9 @@ export function SimulationRunPage() {
                   <AccordionTrigger className="min-h-11 gap-3 py-2.5 hover:no-underline">
                     <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
                       <span className="space-y-1">
-                        <span className="block">Step {step.stepIndex + 1}</span>
+                        <span className="block wrap-break-word">
+                          {step.name || `Step ${step.stepIndex + 1}`}
+                        </span>
                         {run.status === "RUNNING" &&
                           step.status === "COMPLETED" &&
                           run.steps[index + 1]?.status === "PENDING" && (

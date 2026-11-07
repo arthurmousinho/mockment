@@ -151,6 +151,7 @@ export const simulationRunListItemSchema = simulationRunSchema.extend({
 
 export const simulationStepRunSchema = z.object({
   id: z.string(),
+  name: z.string().nullable(),
   runId: z.string(),
   stepIndex: z.number().int().nonnegative(),
   status: z.enum(SimulationStepRunStatus),

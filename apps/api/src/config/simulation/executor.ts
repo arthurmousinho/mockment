@@ -151,8 +151,9 @@ async function startRun(runId: string, steps: SavedStep[]) {
       status: "RUNNING",
       startedAt: new Date(),
       steps: {
-        create: steps.map((_, stepIndex) => ({
+        create: steps.map((step, stepIndex) => ({
           id: createPrefixedId("stp"),
+          name: step.name,
           stepIndex,
           status: "PENDING",
         })),

@@ -146,6 +146,7 @@ export type SimulationRun = {
 
 export type SimulationStepRun = {
   id: string;
+  name: string | null;
   runId: string;
   stepIndex: number;
   status: SimulationStepRunStatus;
