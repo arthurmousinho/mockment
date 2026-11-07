@@ -15,6 +15,8 @@ import {
   createPrefixedId,
 } from "../../common/utils.ts";
 
+const WEBHOOK_REQUEST_TIMEOUT_MS = 10_000;
+
 async function findAll(paginationInput: WebhookDeliveryListInput) {
   const { skip, take } = buildPrismaPaginationParams(paginationInput);
   const where = buildWebhookDeliverySearchFilter(paginationInput.search);
@@ -92,6 +94,7 @@ async function send(endpoint: WebhookEndpoint, event: Event) {
         "X-Signature": signature,
       },
       body,
+      signal: AbortSignal.timeout(WEBHOOK_REQUEST_TIMEOUT_MS),
     });
 
     await prismaSingleton.webhookDelivery.update({
@@ -111,7 +114,12 @@ async function send(endpoint: WebhookEndpoint, event: Event) {
       data: {
         status: "FAILED",
         deliveredAt: new Date(),
-        error: err instanceof Error ? err.message : "Unknown error",
+        error:
+          err instanceof Error && err.name === "TimeoutError"
+            ? `Webhook request timed out after ${WEBHOOK_REQUEST_TIMEOUT_MS} ms.`
+            : err instanceof Error
+              ? err.message
+              : "Unknown error",
       },
     });
   }
