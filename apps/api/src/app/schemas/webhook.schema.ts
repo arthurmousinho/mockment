@@ -49,11 +49,11 @@ export type UpdateWebhookEndpointInput = z.infer<
 export const webhookDeliverySchema = z.object({
   id: z.string(),
   status: z.enum(WebhookDeliveryStatus),
-  statusCode: z.number().int().positive(),
+  statusCode: z.number().int().positive().nullable(),
   error: z.string().nullable(),
   endpointId: z.string(),
   eventId: z.string(),
-  deliveredAt: z.iso.datetime(),
+  deliveredAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
 });
 

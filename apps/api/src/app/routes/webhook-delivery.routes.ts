@@ -5,6 +5,16 @@ import { webhookDeliveryDocs } from "../docs/webhook-delivery.docs.ts";
 import { webhookDeliveryListSchema } from "../schemas/webhook.schema.ts";
 
 export async function webhookDeliveryRoutes(app: FastifyInstance) {
+  app.post(
+    "/:id/retry",
+    { schema: webhookDeliveryDocs.retry },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const delivery = await webhookDeliveryService.retry(id);
+      return reply.status(201).send(delivery);
+    },
+  );
+
   app.get(
     "/",
     { schema: webhookDeliveryDocs.findAll },

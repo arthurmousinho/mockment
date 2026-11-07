@@ -16,7 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllWebhookDeliveriesRequest } from "@/http/webhooks-http";
+import {
+  FindAllWebhookDeliveriesRequest,
+  RetryWebhookDeliveryRequest,
+} from "@/http/webhooks-http";
 import { formatDateTime } from "@/lib/formatters";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import { Fragment, useState, type ReactNode } from "react";
@@ -38,6 +41,7 @@ export function WebhookDeliveriesSheet({
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const retryDelivery = RetryWebhookDeliveryRequest();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const {
@@ -113,6 +117,7 @@ export function WebhookDeliveriesSheet({
                     <TableHead>Status</TableHead>
                     <TableHead>Status Code</TableHead>
                     <TableHead className="text-right">Delivered At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -149,7 +154,9 @@ export function WebhookDeliveriesSheet({
                             >
                               {delivery.status === "SUCCESS"
                                 ? "Success"
-                                : "Failed"}
+                                : delivery.status === "PENDING"
+                                  ? "Pending"
+                                  : "Failed"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -160,12 +167,32 @@ export function WebhookDeliveriesSheet({
                               ? formatDateTime(delivery.deliveredAt)
                               : "—"}
                           </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={
+                                retryDelivery.isPending ||
+                                delivery.status === "PENDING"
+                              }
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                if (retryDelivery.isPending) return;
+                                retryDelivery.mutate(delivery.id);
+                              }}
+                            >
+                              {retryDelivery.isPending &&
+                              retryDelivery.variables === delivery.id
+                                ? "Retrying..."
+                                : "Retry"}
+                            </Button>
+                          </TableCell>
                         </TableRow>
 
                         {isExpanded && (
                           <TableRow key={`${delivery.id}-details`}>
                             <TableCell
-                              colSpan={5}
+                              colSpan={6}
                               className="bg-muted/40 p-0 whitespace-normal"
                             >
                               <dl className="grid grid-cols-1 gap-x-6 gap-y-3 px-3 py-4 text-sm sm:grid-cols-2 sm:px-6">
@@ -220,7 +247,7 @@ export function WebhookDeliveriesSheet({
                   {response.data?.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className="py-10 text-center text-muted-foreground"
                       >
                         {search

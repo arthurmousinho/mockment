@@ -117,7 +117,7 @@ export function UpdateWebhookEndpointRequest() {
 
 export type WebhookDelivery = {
   id: string;
-  status: "SUCCESS" | "FAILED";
+  status: "PENDING" | "SUCCESS" | "FAILED";
   statusCode: number | null;
   error: string | null;
   endpointId: string;
@@ -129,6 +129,28 @@ export type WebhookDelivery = {
 export type WebhookDeliveriesResponseData = WebhookDelivery & {
   endpoint: { url: string };
 };
+
+export function RetryWebhookDeliveryRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`webhooks/deliveries/${id}/retry`, {
+        retry: 0,
+        timeout: 20_000,
+      });
+      return response.json<WebhookDelivery>();
+    },
+    retry: false,
+    onSuccess: (delivery) => {
+      queryClient.invalidateQueries({ queryKey: ["webhooks", "deliveries"] });
+      if (delivery.status === "SUCCESS") {
+        toast.success("Webhook delivery retried successfully.");
+      } else {
+        toast.error(delivery.error ?? "Webhook delivery retry failed.");
+      }
+    },
+    onError: apiErrorHandler,
+  });
+}
 
 export function FindAllWebhookDeliveriesRequest(
   paginationData: PaginatedRequest & { search?: string },

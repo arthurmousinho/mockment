@@ -16,7 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllWebhookEndpointDeliveriesRequest } from "@/http/webhooks-http";
+import {
+  FindAllWebhookEndpointDeliveriesRequest,
+  RetryWebhookDeliveryRequest,
+} from "@/http/webhooks-http";
 import { formatDateTime } from "@/lib/formatters";
 import { useState, type ReactNode } from "react";
 import { StatusCodeBadge } from "./status-code-badge";
@@ -31,6 +34,7 @@ export function WebhookEndpointDeliveriesSheet({
   children,
 }: WebhookEndpointDeliveriesSheetProps) {
   const [open, setOpen] = useState(false);
+  const retryDelivery = RetryWebhookDeliveryRequest();
 
   const {
     data: response,
@@ -77,6 +81,7 @@ export function WebhookEndpointDeliveriesSheet({
                     <TableHead>Status Code</TableHead>
                     <TableHead>Error</TableHead>
                     <TableHead className="text-right">Delivered At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -94,7 +99,9 @@ export function WebhookEndpointDeliveriesSheet({
                           >
                             {delivery.status === "SUCCESS"
                               ? "Success"
-                              : "Failed"}
+                              : delivery.status === "PENDING"
+                                ? "Pending"
+                                : "Failed"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -110,6 +117,26 @@ export function WebhookEndpointDeliveriesSheet({
                             ? formatDateTime(delivery.deliveredAt)
                             : "—"}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              retryDelivery.isPending ||
+                              delivery.status === "PENDING"
+                            }
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (retryDelivery.isPending) return;
+                              retryDelivery.mutate(delivery.id);
+                            }}
+                          >
+                            {retryDelivery.isPending &&
+                            retryDelivery.variables === delivery.id
+                              ? "Retrying..."
+                              : "Retry"}
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -117,7 +144,7 @@ export function WebhookEndpointDeliveriesSheet({
                   {response?.data.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={5}
                         className="py-10 text-center text-muted-foreground"
                       >
                         No deliveries found.

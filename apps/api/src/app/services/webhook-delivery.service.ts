@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { NotFoundError } from "../../common/http-error.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   Event,
@@ -97,7 +98,7 @@ async function send(endpoint: WebhookEndpoint, event: Event) {
       signal: AbortSignal.timeout(WEBHOOK_REQUEST_TIMEOUT_MS),
     });
 
-    await prismaSingleton.webhookDelivery.update({
+    return await prismaSingleton.webhookDelivery.update({
       where: { id: delivery.id },
       data: {
         status: response.ok ? "SUCCESS" : "FAILED",
@@ -109,7 +110,7 @@ async function send(endpoint: WebhookEndpoint, event: Event) {
       },
     });
   } catch (err) {
-    await prismaSingleton.webhookDelivery.update({
+    return await prismaSingleton.webhookDelivery.update({
       where: { id: delivery.id },
       data: {
         status: "FAILED",
@@ -125,6 +126,19 @@ async function send(endpoint: WebhookEndpoint, event: Event) {
   }
 }
 
+async function retry(id: string) {
+  const delivery = await prismaSingleton.webhookDelivery.findUnique({
+    where: { id },
+    include: { endpoint: true, event: true },
+  });
+
+  if (!delivery) {
+    throw new NotFoundError(`Webhook delivery with ID ${id} was not found.`);
+  }
+
+  return send(delivery.endpoint, delivery.event);
+}
+
 async function dispatch(event: Event) {
   const subscribedEndpoints =
     await webhookEndpointService.findAllSubscribedToEvent(event.type);
@@ -138,6 +152,7 @@ async function dispatch(event: Event) {
 
 export const webhookDeliveryService = {
   send,
+  retry,
   dispatch,
   findAll,
   findAllByEndpointId,

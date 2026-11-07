@@ -1,5 +1,7 @@
 import {
   httpErrorSchema,
+  idParamsSchema,
+  openApiSchema,
   paginatedResponseSchema,
   searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
@@ -9,6 +11,33 @@ import {
 } from "../schemas/webhook.schema.ts";
 
 export const webhookDeliveryDocs = {
+  retry: {
+    summary: "Retry a webhook delivery",
+    description:
+      "Resends the original event to its original endpoint, creating a new delivery attempt.",
+    tags: ["Webhook Deliveries"],
+    params: idParamsSchema,
+    response: {
+      201: {
+        description: "The new delivery attempt, including its success or failure status.",
+        content: {
+          "application/json": { schema: openApiSchema(webhookDeliverySchema) },
+        },
+      },
+      404: {
+        description: "The webhook delivery was not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Webhook delivery with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   findAll: {
     summary: "List webhook deliveries",
     description:
