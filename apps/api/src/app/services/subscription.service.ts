@@ -155,13 +155,25 @@ function validateStatusTransition(
   }
 }
 
-async function changeStatus(id: string, newStatus: SubscriptionStatus) {
+async function changeStatus(
+  id: string,
+  newStatus: Exclude<SubscriptionStatus, "PENDING">,
+) {
   const subscription = await findById(id);
   validateStatusTransition(subscription.status, newStatus);
-  return await prismaSingleton.subscription.update({
+
+  const updatedSubscription = await prismaSingleton.subscription.update({
     where: { id: subscription.id },
     data: { status: newStatus },
   });
+
+  await eventService.emit({
+    subscriptionId: subscription.id,
+    type: `SUBSCRIPTION_${newStatus === "ACTIVE" ? "RESUMED" : newStatus}`,
+    payload: updatedSubscription,
+  });
+
+  return updatedSubscription;
 }
 
 async function activate(id: string) {
