@@ -228,6 +228,7 @@ async function getScenarioRun(id: string) {
     where: { id },
     include: {
       steps: { orderBy: { stepIndex: "asc" } },
+      scenario: { select: { name: true } },
     },
   });
 

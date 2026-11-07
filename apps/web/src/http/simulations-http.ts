@@ -159,6 +159,7 @@ export type SimulationStepRun = {
 };
 
 export type SimulationRunDetails = SimulationRun & {
+  scenario: { name: string };
   steps: SimulationStepRun[];
 };
 

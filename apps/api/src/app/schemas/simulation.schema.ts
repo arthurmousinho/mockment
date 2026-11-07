@@ -163,6 +163,6 @@ export const simulationStepRunSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 
-export const simulationRunDetailsSchema = simulationRunSchema.extend({
+export const simulationRunDetailsSchema = simulationRunListItemSchema.extend({
   steps: z.array(simulationStepRunSchema),
 });

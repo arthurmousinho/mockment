@@ -89,9 +89,9 @@ export function SimulationRunPage() {
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
         <div className="min-w-0 space-y-2">
           <div className="flex items-center gap-2">
-            <FlaskIcon size={24} className="font-medium" />
-            <h1 className="text-xl font-medium tracking-tight">
-              Simulation run
+            <FlaskIcon size={24} className="shrink-0 font-medium" />
+            <h1 className="min-w-0 text-xl font-medium tracking-tight wrap-break-word">
+              Simulation run: {run.scenario.name}
             </h1>
           </div>
 
@@ -129,6 +129,7 @@ export function SimulationRunPage() {
         </CardHeader>
         <CardContent className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           <div className="min-w-0 space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div]:wrap-break-word">
+            <DetailRow label="Scenario name">{run.scenario.name}</DetailRow>
             <DetailRow label="Scenario ID">{run.scenarioId}</DetailRow>
             <DetailRow label="Run ID">
               <span className="break-all">{run.id}</span>
