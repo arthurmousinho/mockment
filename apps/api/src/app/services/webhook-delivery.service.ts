@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { NotFoundError } from "../../common/http-error.ts";
+import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   Event,
@@ -67,6 +67,10 @@ async function findAllByEndpointId(
 }
 
 async function send(endpoint: WebhookEndpoint, event: Event) {
+  if (!endpoint.enabled) {
+    throw new BadRequestError("Webhook endpoint is disabled.");
+  }
+
   const delivery = await prismaSingleton.webhookDelivery.create({
     data: {
       id: createPrefixedId("wdel"),

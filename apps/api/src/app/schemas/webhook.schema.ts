@@ -64,6 +64,7 @@ export const findAllWebhookDeliveriesSchema = webhookDeliverySchema.safeExtend({
 });
 
 export const webhookEndpointSchema = z.object({
+  enabled: z.boolean(),
   id: z.string(),
   url: z.url(),
   apiKeyId: z.string(),
@@ -83,4 +84,8 @@ export const createWebhookEndpointResponseSchema =
 
 export const rotateWebhookEndpointSecretResponseSchema = z.object({
   secret: z.string(),
+});
+
+export const toggleWebhookEndpointSchema = z.object({
+  enabled: z.boolean(),
 });

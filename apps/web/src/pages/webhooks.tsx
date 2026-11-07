@@ -1,3 +1,4 @@
+import { Switch } from "@/components/ui/switch";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { RefetchButton } from "@/components/refetch-button";
@@ -34,8 +35,8 @@ import {
   DeleteWebhookEndpointRequest,
   FindAllWebhookEndpointsRequest,
   RotateWebhookEndpointRequest,
+  ToggleWebhookEndpointRequest,
 } from "@/http/webhooks-http";
-import { formatDateTime } from "@/lib/formatters";
 import {
   PencilIcon,
   ArrowClockwiseIcon,
@@ -74,8 +75,11 @@ export function WebhooksPage() {
   const { mutate: deleteRequest, isPending: isDeleting } =
     DeleteWebhookEndpointRequest();
 
+  const { mutate: toggleRequest, isPending: isToggling } =
+    ToggleWebhookEndpointRequest();
+
   if (isPending) {
-    return <ListingPageSkeleton columns={6} rows={limit} />;
+    return <ListingPageSkeleton columns={7} rows={limit} />;
   }
 
   if (isError) {
@@ -164,9 +168,8 @@ export function WebhooksPage() {
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead className="text-right">URL</TableHead>
-            <TableHead className="text-right">Created At</TableHead>
-            <TableHead className="text-right">Updated At</TableHead>
             <TableHead className="text-right">Events</TableHead>
+            <TableHead className="text-right">Enabled</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -177,12 +180,6 @@ export function WebhooksPage() {
               <TableCell>{item.id}</TableCell>
               <TableCell className="min-w-48 max-w-80 text-right whitespace-normal break-all">
                 {item.url}
-              </TableCell>
-              <TableCell className="text-right">
-                {formatDateTime(item.createdAt)}
-              </TableCell>
-              <TableCell className="text-right">
-                {formatDateTime(item.updatedAt)}
               </TableCell>
               <TableCell className="text-right">
                 <HoverCard>
@@ -206,6 +203,16 @@ export function WebhooksPage() {
                     )}
                   </HoverCardContent>
                 </HoverCard>
+              </TableCell>
+              <TableCell className="text-right">
+                <Switch
+                  checked={item.enabled}
+                  disabled={isToggling}
+                  aria-label={`Enable webhook ${item.url}`}
+                  onCheckedChange={(enabled) =>
+                    toggleRequest({ id: item.id, enabled })
+                  }
+                />
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
@@ -253,7 +260,7 @@ export function WebhooksPage() {
           {response.data?.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
                 {search

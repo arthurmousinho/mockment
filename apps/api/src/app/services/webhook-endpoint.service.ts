@@ -84,6 +84,15 @@ async function update(endpointId: string, input: UpdateWebhookEndpointInput) {
   });
 }
 
+async function toggle(endpointId: string, enabled: boolean) {
+  const endpoint = await findById(endpointId);
+  return prismaSingleton.webhookEndpoint.update({
+    where: { id: endpoint.id },
+    data: { enabled },
+    omit: { secret: true },
+  });
+}
+
 async function remove(endpointId: string) {
   const endpoint = await findById(endpointId);
   await prismaSingleton.webhookEndpoint.delete({
@@ -105,7 +114,7 @@ async function findAllSubscribedToEvent(event: EventType) {
   return await prismaSingleton.$queryRaw<WebhookEndpoint[]>`
     SELECT *
     FROM webhook_endpoints
-    WHERE JSON_CONTAINS(events, JSON_ARRAY(${event}))
+    WHERE enabled = true AND JSON_CONTAINS(events, JSON_ARRAY(${event}))
   `;
 }
 
@@ -114,6 +123,7 @@ export const webhookEndpointService = {
   findAll,
   findById,
   update,
+  toggle,
   remove,
   rotateSecret,
   findAllSubscribedToEvent,

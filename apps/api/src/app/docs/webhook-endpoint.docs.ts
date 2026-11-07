@@ -1,3 +1,4 @@
+import { toggleWebhookEndpointSchema } from "../schemas/webhook.schema.ts";
 import {
   httpErrorSchema,
   idParamsSchema,
@@ -14,6 +15,18 @@ import {
 } from "../schemas/webhook.schema.ts";
 
 export const webhookEndpointDocs = {
+  toggle: {
+    summary: "Enable or disable a webhook endpoint",
+    description: "Sets whether the endpoint receives webhook deliveries.",
+    tags: ["Webhook Endpoints"],
+    params: idParamsSchema,
+    body: openApiSchema(toggleWebhookEndpointSchema),
+    response: {
+      200: { description: "The updated endpoint.", content: {
+        "application/json": { schema: openApiSchema(findAllWebhookEndpointsSchema) },
+      } },
+    },
+  },
   findAll: {
     summary: "List webhook endpoints",
     description:

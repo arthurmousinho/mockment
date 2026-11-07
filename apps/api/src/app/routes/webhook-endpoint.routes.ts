@@ -2,6 +2,7 @@ import { UnauthorizedError } from "../../common/http-error.ts";
 import type { FastifyInstance } from "fastify";
 import {
   createWebhookEndpointSchema,
+  toggleWebhookEndpointSchema,
   webhookEndpointListSchema,
   updateWebhookEndpointSchema,
 } from "../schemas/webhook.schema.ts";
@@ -9,6 +10,17 @@ import { webhookEndpointService } from "../services/webhook-endpoint.service.ts"
 import { webhookEndpointDocs } from "../docs/webhook-endpoint.docs.ts";
 
 export async function webhookEndpointRoutes(app: FastifyInstance) {
+  app.patch(
+    "/:id/toggle",
+    { schema: webhookEndpointDocs.toggle },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { enabled } = toggleWebhookEndpointSchema.parse(request.body);
+      const endpoint = await webhookEndpointService.toggle(id, enabled);
+      return reply.status(200).send(endpoint);
+    },
+  );
+
   app.get(
     "/",
     { schema: webhookEndpointDocs.findAll },

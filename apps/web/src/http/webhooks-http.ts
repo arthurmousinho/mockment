@@ -6,6 +6,7 @@ import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 import type { EventType } from "./events-http";
 
 export type WebhookEndpoint = {
+  enabled: boolean;
   id: string;
   url: string;
   events: EventType[];
@@ -186,5 +187,18 @@ export function FindAllWebhookEndpointDeliveriesRequest(
       return await response.json<PaginatedAPIResponse<WebhookDelivery>>();
     },
     enabled: options?.enabled,
+  });
+}
+
+export function ToggleWebhookEndpointRequest() {
+  return useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      await api.patch(`webhooks/endpoints/${id}/toggle`, { json: { enabled } });
+    },
+    onSuccess: (_, { enabled }) => {
+      queryClient.invalidateQueries({ queryKey: ["webhooks", "endpoints"] });
+      toast.success(enabled ? "Webhook endpoint enabled." : "Webhook endpoint disabled.");
+    },
+    onError: apiErrorHandler,
   });
 }

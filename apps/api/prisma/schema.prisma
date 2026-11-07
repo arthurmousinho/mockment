@@ -148,6 +148,7 @@ model Event {
 }
 
 model WebhookEndpoint {
+  enabled Boolean @default(true)
   id String @id
 
   url      String
