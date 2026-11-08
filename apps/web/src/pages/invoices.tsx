@@ -17,13 +17,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllInvoicesRequest } from "@/http/invoices-http";
+import {
+  FindAllInvoicesRequest,
+  ProcessInvoiceRequest,
+} from "@/http/invoices-http";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { InvoiceFormDialog } from "@/components/invoice-form-dialog";
 import { InvoiceDetailsDialog } from "@/components/invoice-details-dialog";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import {
   DotsThreeIcon,
+  ArrowClockwiseIcon,
   EyeIcon,
   PlusIcon,
   ReceiptIcon,
@@ -42,6 +46,8 @@ export function InvoicesPage() {
     isError,
     refetch,
   } = FindAllInvoicesRequest({ page, limit, search });
+  const { mutate: processInvoice, isPending: isProcessing } =
+    ProcessInvoiceRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
   if (isError)
@@ -136,6 +142,13 @@ export function InvoicesPage() {
                         Details
                       </DropdownMenuItem>
                     </InvoiceDetailsDialog>
+                    <DropdownMenuItem
+                      disabled={invoice.status !== "CREATED" || isProcessing}
+                      onClick={() => processInvoice(invoice.id)}
+                    >
+                      <ArrowClockwiseIcon size={32} />
+                      Process
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

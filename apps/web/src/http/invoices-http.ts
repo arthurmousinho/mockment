@@ -4,7 +4,8 @@ import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
-export type InvoiceStatus = "CREATED" | "PROCESSING" | "ISSUED" | "REJECTED" | "CANCELED";
+export type InvoiceStatus =
+  "CREATED" | "PROCESSING" | "ISSUED" | "REJECTED" | "CANCELED";
 export type Invoice = {
   id: string;
   status: InvoiceStatus;
@@ -42,13 +43,30 @@ export function CreateInvoiceRequest() {
   });
 }
 
+export function ProcessInvoiceRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`invoices/${id}/process`);
+      return response.json<Invoice>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      toast.success("Invoice marked as processing.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function FindAllInvoicesRequest(
   paginationData: PaginatedRequest & { search?: string },
 ) {
   return useQuery({
     queryKey: ["invoices", paginationData],
     queryFn: async () => {
-      const request = await api.get("invoices", { searchParams: paginationData });
+      const request = await api.get("invoices", {
+        searchParams: paginationData,
+      });
       return await request.json<PaginatedAPIResponse<Invoice>>();
     },
     placeholderData: keepPreviousData,
