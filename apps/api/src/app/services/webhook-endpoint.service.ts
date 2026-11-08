@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import type {
   CreateWebhookEndpointInput,
   WebhookEndpointListInput,
@@ -6,7 +6,11 @@ import type {
 } from "../schemas/webhook.schema.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import { apiKeyService } from "./api-key.service.ts";
-import { NotFoundError } from "../../common/http-error.ts";
+import {
+  BadRequestError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../../common/http-error.ts";
 import type {
   EventType,
   WebhookEndpoint,
@@ -18,8 +22,63 @@ import {
   createPrefixedId,
 } from "../../common/utils.ts";
 
+const WEBHOOK_TEST_TIMEOUT_MS = 10_000;
+
 function generateSecret() {
   return `whsec_${randomBytes(32).toString("hex")}`;
+}
+
+function createSignature(secret: string, body: string) {
+  return createHmac("sha256", secret).update(body).digest("hex");
+}
+
+async function test(id: string) {
+  const endpoint = await findById(id);
+
+  if (!endpoint.enabled) {
+    throw new UnprocessableEntityError(
+      `Webhook endpoint with ID ${id} is disabled.`,
+    );
+  }
+
+  const body = JSON.stringify({
+    id: createPrefixedId("test"),
+    type: "WEBHOOK_TEST",
+    createdAt: new Date().toISOString(),
+    data: { message: "Webhook endpoint test.", endpointId: endpoint.id },
+  });
+
+  try {
+    const response = await fetch(endpoint.url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Signature": createSignature(endpoint.secret, body),
+      },
+      body,
+      redirect: "manual",
+      signal: AbortSignal.timeout(WEBHOOK_TEST_TIMEOUT_MS),
+    });
+
+    await response.body?.cancel();
+
+    return {
+      success: response.ok,
+      statusCode: response.status,
+      error: response.ok ? null : `Request returned status ${response.status}`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      statusCode: null,
+      error:
+        error instanceof Error && error.name === "TimeoutError"
+          ? `Webhook connectivity test timed out after ${WEBHOOK_TEST_TIMEOUT_MS} ms.`
+          : error instanceof Error
+            ? error.message
+            : "Unknown error",
+    };
+  }
 }
 
 async function create(apiKey: string, input: CreateWebhookEndpointInput) {
@@ -119,6 +178,7 @@ async function findAllSubscribedToEvent(event: EventType) {
 }
 
 export const webhookEndpointService = {
+  test,
   create,
   findAll,
   findById,
@@ -127,4 +187,5 @@ export const webhookEndpointService = {
   remove,
   rotateSecret,
   findAllSubscribedToEvent,
+  createSignature,
 };

@@ -40,3 +40,9 @@ export class BadRequestError extends HttpError {
     super(400, message, "BAD_REQUEST");
   }
 }
+
+export class UnprocessableEntityError extends HttpError {
+  constructor(message: string) {
+    super(422, message, "UNPROCESSABLE_ENTITY");
+  }
+}

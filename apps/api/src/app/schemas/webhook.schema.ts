@@ -89,3 +89,9 @@ export const rotateWebhookEndpointSecretResponseSchema = z.object({
 export const toggleWebhookEndpointSchema = z.object({
   enabled: z.boolean(),
 });
+
+export const webhookTestResponseSchema = z.object({
+  success: z.boolean(),
+  statusCode: z.number().int().positive().nullable(),
+  error: z.string().nullable(),
+});

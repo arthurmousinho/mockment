@@ -12,9 +12,36 @@ import {
   findAllWebhookEndpointsSchema,
   rotateWebhookEndpointSecretResponseSchema,
   updateWebhookEndpointSchema,
+  webhookTestResponseSchema,
 } from "../schemas/webhook.schema.ts";
 
 export const webhookEndpointDocs = {
+  test: {
+    summary: "Test a webhook endpoint",
+    description: "Sends a signed test request to a webhook endpoint.",
+    tags: ["Webhook Endpoints"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "The test result, including unsuccessful delivery attempts.",
+        content: {
+          "application/json": { schema: openApiSchema(webhookTestResponseSchema) },
+        },
+      },
+      400: {
+        description: "The webhook endpoint is disabled.",
+        content: {
+          "application/json": { schema: httpErrorSchema({ error: "BAD_REQUEST", code: 400, message: "Webhook endpoint with ID {id} is disabled." }) },
+        },
+      },
+      404: {
+        description: "The webhook endpoint was not found.",
+        content: {
+          "application/json": { schema: httpErrorSchema({ error: "NOT_FOUND", code: 404, message: "Webhook endpoint with ID {id} was not found." }) },
+        },
+      },
+    },
+  },
   toggle: {
     summary: "Enable or disable a webhook endpoint",
     description: "Sets whether the endpoint receives webhook deliveries.",

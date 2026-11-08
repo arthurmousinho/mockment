@@ -10,6 +10,16 @@ import { webhookEndpointService } from "../services/webhook-endpoint.service.ts"
 import { webhookEndpointDocs } from "../docs/webhook-endpoint.docs.ts";
 
 export async function webhookEndpointRoutes(app: FastifyInstance) {
+  app.post(
+    "/:id/test",
+    { schema: webhookEndpointDocs.test },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const result = await webhookEndpointService.test(id);
+      return reply.status(200).send(result);
+    },
+  );
+
   app.patch(
     "/:id/toggle",
     { schema: webhookEndpointDocs.toggle },

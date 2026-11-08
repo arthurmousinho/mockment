@@ -87,18 +87,17 @@ async function send(endpoint: WebhookEndpoint, event: Event) {
     data: event.payload,
   });
 
-  const signature = createHmac("sha256", endpoint.secret)
-    .update(body)
-    .digest("hex");
-
   try {
     const response = await fetch(endpoint.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Signature": signature,
+        "X-Signature": webhookEndpointService.createSignature(
+          endpoint.secret,
+          body,
+        ),
       },
-      body,
+      body: body,
       signal: AbortSignal.timeout(WEBHOOK_REQUEST_TIMEOUT_MS),
     });
 
