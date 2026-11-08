@@ -78,6 +78,26 @@ export function IssueInvoiceRequest() {
   });
 }
 
+export function DownloadInvoicePdfRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.get(`invoices/${encodeURIComponent(id)}/pdf`);
+      return response.blob();
+    },
+    onSuccess: (pdf, id) => {
+      const url = URL.createObjectURL(pdf);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function FindAllInvoicesRequest(
   paginationData: PaginatedRequest & { search?: string },
 ) {

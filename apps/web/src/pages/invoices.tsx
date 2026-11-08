@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  DownloadInvoicePdfRequest,
   FindAllInvoicesRequest,
   IssueInvoiceRequest,
   ProcessInvoiceRequest,
@@ -30,6 +31,7 @@ import {
   DotsThreeIcon,
   ArrowClockwiseIcon,
   CheckIcon,
+  DownloadSimpleIcon,
   EyeIcon,
   PlusIcon,
   ReceiptIcon,
@@ -51,6 +53,8 @@ export function InvoicesPage() {
   const { mutate: processInvoice, isPending: isProcessing } =
     ProcessInvoiceRequest();
   const { mutate: issueInvoice, isPending: isIssuing } = IssueInvoiceRequest();
+  const { mutate: downloadInvoicePdf, isPending: isDownloading } =
+    DownloadInvoicePdfRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
   if (isError)
@@ -158,6 +162,13 @@ export function InvoicesPage() {
                     >
                       <CheckIcon size={32} />
                       Issue
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={invoice.status !== "ISSUED" || isDownloading}
+                      onClick={() => downloadInvoicePdf(invoice.id)}
+                    >
+                      <DownloadSimpleIcon size={32} />
+                      Download PDF
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
