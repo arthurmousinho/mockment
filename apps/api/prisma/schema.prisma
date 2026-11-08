@@ -28,6 +28,14 @@ enum PaymentMethod {
   BANK_SLIP
 }
 
+enum InvoiceStatus {
+  CREATED
+  PROCESSING
+  ISSUED
+  REJECTED
+  CANCELED
+}
+
 enum EventType {
   PAYMENT_CREATED
   PAYMENT_PROCESSING
@@ -119,10 +127,32 @@ model Payment {
   apiKey   ApiKey    @relation(fields: [apiKeyId], references: [id])
   events   Event[]
   checkout Checkout?
+  invoices Invoice[]
 
   @@unique([apiKeyId, externalId])
   @@unique([apiKeyId, idempotencyKey])
   @@map("payments")
+}
+
+model Invoice {
+  id String @id
+
+  status        InvoiceStatus   @default(CREATED)
+  customerName  String          @map("customer_name")
+  customerTaxId String?         @map("customer_tax_id")
+  amountInCents Int             @map("amount_in_cents")
+  currency      PaymentCurrency
+
+  paymentId String @map("payment_id")
+
+  issuedAt  DateTime? @map("issued_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+
+  @@index([paymentId, customerTaxId])
+  @@map("invoices")
 }
 
 model Event {
@@ -149,7 +179,7 @@ model Event {
 
 model WebhookEndpoint {
   enabled Boolean @default(true)
-  id String @id
+  id      String  @id
 
   url      String
   secret   String
