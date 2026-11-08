@@ -30,6 +30,12 @@ import {
 import { RevealedSecretDialog } from "@/components/revealed-secret-dialog";
 import { EventTypeBadge } from "./event-type-badge";
 import type { EventType } from "@/http/events-http";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const PAYMENT_EVENT_TYPES: EventType[] = [
   "PAYMENT_CREATED",
@@ -49,10 +55,27 @@ const SUBSCRIPTION_EVENT_TYPES: EventType[] = [
   "SUBSCRIPTION_CANCELED",
 ];
 
-const ALL_EVENT_TYPES = [
-  ...PAYMENT_EVENT_TYPES,
-  ...SUBSCRIPTION_EVENT_TYPES,
-] as [EventType, ...EventType[]];
+const INVOICE_EVENT_TYPES: EventType[] = [
+  "INVOICE_CREATED",
+  "INVOICE_ISSUED",
+  "INVOICE_REJECTED",
+  "INVOICE_CANCELED",
+];
+
+const EVENT_GROUPS = [
+  { label: "Payment Events", value: "payments", types: PAYMENT_EVENT_TYPES },
+  {
+    label: "Subscription Events",
+    value: "subscriptions",
+    types: SUBSCRIPTION_EVENT_TYPES,
+  },
+  { label: "Invoice Events", value: "invoices", types: INVOICE_EVENT_TYPES },
+] as const;
+
+const ALL_EVENT_TYPES = EVENT_GROUPS.flatMap((group) => group.types) as [
+  EventType,
+  ...EventType[],
+];
 
 function buildSchema(isEditing: boolean) {
   return z.object({
@@ -214,81 +237,55 @@ export function WebhookEndpointFormDialog({
                   render={() => (
                     <FormItem>
                       <FormLabel>Events</FormLabel>
-                      <div className="flex flex-row gap-4">
-                        <div>
-                          {PAYMENT_EVENT_TYPES.map((type, index) => (
-                            <FormField
-                              key={index}
-                              control={form.control}
-                              name="events"
-                              render={({ field }) => {
-                                const checked = field.value?.includes(type);
-                                return (
-                                  <FormItem className="flex flex-row items-center gap-2">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={checked}
-                                        onCheckedChange={(isChecked) => {
-                                          if (isChecked) {
-                                            field.onChange([
-                                              ...field.value,
-                                              type,
-                                            ]);
-                                          } else {
-                                            field.onChange(
-                                              field.value.filter(
-                                                (value) => value !== type,
-                                              ),
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <EventTypeBadge type={type} />
-                                  </FormItem>
-                                );
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <div>
-                          {SUBSCRIPTION_EVENT_TYPES.map((type, index) => (
-                            <FormField
-                              key={index}
-                              control={form.control}
-                              name="events"
-                              render={({ field }) => {
-                                const checked = field.value?.includes(type);
-                                return (
-                                  <FormItem className="flex flex-row items-center gap-2">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={checked}
-                                        onCheckedChange={(isChecked) => {
-                                          if (isChecked) {
-                                            field.onChange([
-                                              ...field.value,
-                                              type,
-                                            ]);
-                                          } else {
-                                            field.onChange(
-                                              field.value.filter(
-                                                (value) => value !== type,
-                                              ),
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <EventTypeBadge type={type} />
-                                  </FormItem>
-                                );
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <FormMessage />
-                      </div>
+                      <Accordion
+                        type="single"
+                        collapsible
+                        className="border px-2"
+                      >
+                        {EVENT_GROUPS.map((group) => (
+                          <AccordionItem key={group.value} value={group.value}>
+                            <AccordionTrigger className="text-xs font-medium">
+                              {group.label}
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                {group.types.map((type) => (
+                                  <FormField
+                                    key={type}
+                                    control={form.control}
+                                    name="events"
+                                    render={({ field }) => {
+                                      const checked =
+                                        field.value?.includes(type);
+                                      return (
+                                        <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={checked}
+                                              onCheckedChange={(isChecked) => {
+                                                field.onChange(
+                                                  isChecked
+                                                    ? [...field.value, type]
+                                                    : field.value.filter(
+                                                        (value) =>
+                                                          value !== type,
+                                                      ),
+                                                );
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <EventTypeBadge type={type} />
+                                        </FormItem>
+                                      );
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
