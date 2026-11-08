@@ -1,7 +1,15 @@
 import { NotFoundError } from "../../common/http-error.ts";
-import { createPrefixedId } from "../../common/utils.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+  createPrefixedId,
+} from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
-import type { CreateInvoiceInput } from "../schemas/invoice.schema.ts";
+import { buildInvoiceSearchFilter } from "../filters/invoice.filters.ts";
+import type {
+  CreateInvoiceInput,
+  InvoiceListInput,
+} from "../schemas/invoice.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
 
 async function create(apiKey: string, input: CreateInvoiceInput) {
@@ -29,4 +37,25 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
   });
 }
 
-export const invoiceService = { create };
+async function findAll(input: InvoiceListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildInvoiceSearchFilter(input.search);
+  const [invoices, total] = await Promise.all([
+    prismaSingleton.invoice.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.invoice.count({ where }),
+  ]);
+
+  return buildPaginatedResponse({
+    data: invoices,
+    page: input.page,
+    limit: input.limit,
+    total,
+  });
+}
+
+export const invoiceService = { create, findAll };

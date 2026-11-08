@@ -1,8 +1,12 @@
 import { z } from "zod";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
 import {
   InvoiceStatus,
   PaymentCurrency,
 } from "../../../generated/prisma/enums.ts";
+
+export const invoiceListSchema = searchablePaginationSchema;
+export type InvoiceListInput = z.infer<typeof invoiceListSchema>;
 
 export const createInvoiceSchema = z.object({
   paymentId: z.string().trim().min(1).max(191),

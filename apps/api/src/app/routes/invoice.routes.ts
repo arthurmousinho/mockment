@@ -1,10 +1,19 @@
 import { UnauthorizedError } from "../../common/http-error.ts";
 import { invoiceDocs } from "../docs/invoice.docs.ts";
-import { createInvoiceSchema } from "../schemas/invoice.schema.ts";
+import {
+  createInvoiceSchema,
+  invoiceListSchema,
+} from "../schemas/invoice.schema.ts";
 import { invoiceService } from "../services/invoice.service.ts";
 import type { FastifyInstance } from "fastify";
 
 export async function invoiceRoutes(app: FastifyInstance) {
+  app.get("/", { schema: invoiceDocs.findAll }, async (request, reply) => {
+    const input = invoiceListSchema.parse(request.query);
+    const invoices = await invoiceService.findAll(input);
+    return reply.status(200).send(invoices);
+  });
+
   app.post("/", { schema: invoiceDocs.create }, async (request, reply) => {
     const authorization = request.headers.authorization;
     if (!authorization?.startsWith("Bearer ")) {

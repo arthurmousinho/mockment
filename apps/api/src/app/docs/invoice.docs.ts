@@ -1,11 +1,33 @@
 import { z } from "zod";
-import { httpErrorSchema, openApiSchema } from "../../common/openapi.ts";
+import {
+  httpErrorSchema,
+  openApiSchema,
+  paginatedResponseSchema,
+  searchablePaginationParamsSchema,
+} from "../../common/openapi.ts";
 import {
   createInvoiceSchema,
   invoiceSchema,
 } from "../schemas/invoice.schema.ts";
 
 export const invoiceDocs = {
+  findAll: {
+    summary: "List invoices",
+    description:
+      "Returns a paginated list of invoices ordered newest first. Search matches partial invoice IDs, payment IDs, customer names, and customer tax IDs.",
+    tags: ["Invoices"],
+    querystring: searchablePaginationParamsSchema,
+    response: {
+      200: {
+        description: "When the invoices are retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: paginatedResponseSchema(invoiceSchema),
+          },
+        },
+      },
+    },
+  },
   create: {
     summary: "Create an invoice",
     description: "Creates an new invoice for a payment.",
