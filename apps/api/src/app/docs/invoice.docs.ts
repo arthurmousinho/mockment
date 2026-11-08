@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   httpErrorSchema,
+  idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
   searchablePaginationParamsSchema,
@@ -23,6 +24,34 @@ export const invoiceDocs = {
         content: {
           "application/json": {
             schema: paginatedResponseSchema(invoiceSchema),
+          },
+        },
+      },
+    },
+  },
+  findById: {
+    summary: "Get an invoice",
+    description: "Returns an invoice by its ID.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the invoice is retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(invoiceSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the invoice with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Invoice with ID {id} was not found.",
+            }),
           },
         },
       },

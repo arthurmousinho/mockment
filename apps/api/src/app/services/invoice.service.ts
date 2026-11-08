@@ -58,4 +58,16 @@ async function findAll(input: InvoiceListInput) {
   });
 }
 
-export const invoiceService = { create, findAll };
+async function findById(id: string) {
+  const invoice = await prismaSingleton.invoice.findUnique({
+    where: { id },
+  });
+
+  if (!invoice) {
+    throw new NotFoundError(`Invoice with ID ${id} was not found.`);
+  }
+
+  return invoice;
+}
+
+export const invoiceService = { create, findAll, findById };
