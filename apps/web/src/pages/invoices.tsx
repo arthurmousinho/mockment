@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -19,8 +20,14 @@ import {
 import { FindAllInvoicesRequest } from "@/http/invoices-http";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { InvoiceFormDialog } from "@/components/invoice-form-dialog";
+import { InvoiceDetailsDialog } from "@/components/invoice-details-dialog";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
-import { DotsThreeIcon, PlusIcon, ReceiptIcon } from "@phosphor-icons/react";
+import {
+  DotsThreeIcon,
+  EyeIcon,
+  PlusIcon,
+  ReceiptIcon,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function InvoicesPage() {
@@ -120,7 +127,16 @@ export function InvoicesPage() {
                       <DotsThreeIcon size={32} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right" />
+                  <DropdownMenuContent side="right">
+                    <InvoiceDetailsDialog id={invoice.id}>
+                      <DropdownMenuItem
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        <EyeIcon size={32} />
+                        Details
+                      </DropdownMenuItem>
+                    </InvoiceDetailsDialog>
+                  </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
             </TableRow>

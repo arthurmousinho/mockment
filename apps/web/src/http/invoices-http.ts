@@ -54,3 +54,17 @@ export function FindAllInvoicesRequest(
     placeholderData: keepPreviousData,
   });
 }
+
+export function GetInvoiceDetailsRequest(
+  id: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: ["invoices", id],
+    queryFn: async () => {
+      const response = await api.get(`invoices/${id}`);
+      return response.json<Invoice>();
+    },
+    enabled: options?.enabled ?? true,
+  });
+}
