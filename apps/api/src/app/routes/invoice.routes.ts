@@ -8,16 +8,6 @@ import { invoiceService } from "../services/invoice.service.ts";
 import type { FastifyInstance } from "fastify";
 
 export async function invoiceRoutes(app: FastifyInstance) {
-  app.post(
-    "/:id/issue",
-    { schema: invoiceDocs.issue },
-    async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const invoice = await invoiceService.issue(id);
-      return reply.status(200).send(invoice);
-    },
-  );
-
   app.get("/", { schema: invoiceDocs.findAll }, async (request, reply) => {
     const input = invoiceListSchema.parse(request.query);
     const invoices = await invoiceService.findAll(input);
@@ -46,4 +36,24 @@ export async function invoiceRoutes(app: FastifyInstance) {
 
     return reply.status(201).send(invoice);
   });
+
+  app.post(
+    "/:id/process",
+    { schema: invoiceDocs.process },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const invoice = await invoiceService.process(id);
+      return reply.status(200).send(invoice);
+    },
+  );
+
+  app.post(
+    "/:id/issue",
+    { schema: invoiceDocs.issue },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const invoice = await invoiceService.issue(id);
+      return reply.status(200).send(invoice);
+    },
+  );
 }

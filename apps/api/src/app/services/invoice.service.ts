@@ -119,6 +119,25 @@ function validateStatusTransition(
   }
 }
 
+async function process(id: string) {
+  const invoice = await findById(id);
+  validateStatusTransition(invoice.status, "PROCESSING");
+
+  const processedInvoice = await prismaSingleton.invoice.update({
+    where: { id: invoice.id },
+    data: { status: "PROCESSING" },
+  });
+
+  await eventService.emit({
+    paymentId: invoice.paymentId,
+    invoiceId: invoice.id,
+    type: "INVOICE_PROCESSING",
+    payload: processedInvoice,
+  });
+
+  return processedInvoice;
+}
+
 async function issue(id: string) {
   const invoice = await findById(id);
   validateStatusTransition(invoice.status, "ISSUED");
@@ -143,4 +162,11 @@ async function issue(id: string) {
   return issuedInvoice;
 }
 
-export const invoiceService = { create, findAll, findById, getDetails, issue };
+export const invoiceService = {
+  create,
+  findAll,
+  findById,
+  getDetails,
+  process,
+  issue,
+};

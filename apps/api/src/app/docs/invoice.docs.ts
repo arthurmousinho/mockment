@@ -13,6 +13,34 @@ import {
 } from "../schemas/invoice.schema.ts";
 
 export const invoiceDocs = {
+  process: {
+    summary: "Process an invoice",
+    description: "Moves a created invoice to the processing state.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the invoice is moved to processing successfully.",
+        content: { "application/json": { schema: openApiSchema(invoiceSchema) } },
+      },
+      400: {
+        description: "When the invoice cannot transition to PROCESSING.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({ error: "BAD_REQUEST", code: 400, message: "Cannot change invoice status from {currentStatus} to PROCESSING." }),
+          },
+        },
+      },
+      404: {
+        description: "When the invoice is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({ error: "NOT_FOUND", code: 404, message: "Invoice with ID {id} was not found." }),
+          },
+        },
+      },
+    },
+  },
   findAll: {
     summary: "List invoices",
     description:
