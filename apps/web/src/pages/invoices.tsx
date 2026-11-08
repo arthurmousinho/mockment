@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { FindAllInvoicesRequest } from "@/http/invoices-http";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
+import { InvoiceFormDialog } from "@/components/invoice-form-dialog";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { DotsThreeIcon, PlusIcon, ReceiptIcon } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -76,10 +77,12 @@ export function InvoicesPage() {
         />
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-          <Button>
-            <PlusIcon size={18} />
-            New Invoice
-          </Button>
+          <InvoiceFormDialog>
+            <Button>
+              <PlusIcon size={18} />
+              New Invoice
+            </Button>
+          </InvoiceFormDialog>
         </div>
       </header>
       <Table>

@@ -1,5 +1,7 @@
-import { api } from "@/lib/ky";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { api, apiErrorHandler } from "@/lib/ky";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/query-client";
+import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type InvoiceStatus = "CREATED" | "PROCESSING" | "ISSUED" | "REJECTED" | "CANCELED";
@@ -15,6 +17,30 @@ export type Invoice = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type CreateInvoiceRequestData = {
+  apiKey: string;
+  paymentId: string;
+  customerName: string;
+  customerTaxId?: string;
+};
+
+export function CreateInvoiceRequest() {
+  return useMutation({
+    mutationFn: async ({ apiKey, ...body }: CreateInvoiceRequestData) => {
+      const response = await api.post("invoices", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        json: body,
+      });
+      return response.json<Invoice>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Invoice created successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
 
 export function FindAllInvoicesRequest(
   paginationData: PaginatedRequest & { search?: string },
