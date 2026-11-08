@@ -3,6 +3,7 @@ import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
+import type { EventType } from "./events-http";
 
 export type InvoiceStatus =
   "CREATED" | "PROCESSING" | "ISSUED" | "REJECTED" | "CANCELED";
@@ -17,6 +18,10 @@ export type Invoice = {
   issuedAt: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type DetailedInvoice = Invoice & {
+  events: { id: string; type: EventType; createdAt: string }[];
 };
 
 export type CreateInvoiceRequestData = {
@@ -96,7 +101,7 @@ export function GetInvoiceDetailsRequest(
     queryKey: ["invoices", id],
     queryFn: async () => {
       const response = await api.get(`invoices/${id}`);
-      return response.json<Invoice>();
+      return response.json<DetailedInvoice>();
     },
     enabled: options?.enabled ?? true,
   });

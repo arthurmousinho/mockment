@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { GetInvoiceDetailsRequest } from "@/http/invoices-http";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
+import { EventTypeBadge } from "@/components/event-type-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,7 +38,7 @@ export function InvoiceDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Invoice details</DialogTitle>
           <DialogDescription>
@@ -104,6 +105,31 @@ export function InvoiceDetailsDialog({
               <DetailRow label="Updated at">
                 {formatDateTime(invoice.updatedAt)}
               </DetailRow>
+            </div>
+            <Separator />
+            <div className="space-y-3">
+              <span className="text-sm text-muted-foreground">Events</span>
+              {invoice.events.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No events found.</p>
+              ) : (
+                <ol className="space-y-0 mt-2">
+                  {invoice.events.map((event, index) => {
+                    const isLast = index === invoice.events.length - 1;
+                    return (
+                      <li key={event.id} className="relative flex items-center gap-3 pb-4 last:pb-0">
+                        {!isLast && (
+                          <span className="absolute left-1.25 top-4 h-full w-px bg-border" aria-hidden />
+                        )}
+                        <span className="z-10 size-2.75 shrink-0 rounded-full border-2 border-background bg-muted-foreground" />
+                        <div className="flex flex-row gap-1 items-center text-muted-foreground">
+                          <EventTypeBadge type={event.type} />
+                          <span className="text-xs text-muted-foreground">• {formatDateTime(event.createdAt)}</span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
             </div>
           </div>
         )}
