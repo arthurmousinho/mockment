@@ -46,6 +46,9 @@ const EVENT_TYPE_CONFIG: Record<EventType, { className: string }> = {
   INVOICE_CREATED: {
     className: "text-slate-800 dark:text-slate-300",
   },
+  INVOICE_PROCESSING: {
+    className: "text-blue-800 dark:text-blue-300",
+  },
   INVOICE_ISSUED: {
     className: "text-green-800 dark:text-green-300",
   },
