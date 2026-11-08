@@ -43,6 +43,18 @@ const EVENT_TYPE_CONFIG: Record<EventType, { className: string }> = {
   SUBSCRIPTION_CANCELED: {
     className: "text-zinc-600 dark:text-zinc-400",
   },
+  INVOICE_CREATED: {
+    className: "text-slate-800 dark:text-slate-300",
+  },
+  INVOICE_ISSUED: {
+    className: "text-green-800 dark:text-green-300",
+  },
+  INVOICE_REJECTED: {
+    className: "text-red-800 dark:text-red-300",
+  },
+  INVOICE_CANCELED: {
+    className: "text-zinc-600 dark:text-zinc-400",
+  },
 };
 
 export function EventTypeBadge({ type, className }: EventTypeBadgeProps) {
