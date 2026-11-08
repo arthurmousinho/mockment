@@ -9,6 +9,7 @@ export const emitEventSchema = z.object({
   type: z.enum(EventType),
   paymentId: z.string().optional(),
   subscriptionId: z.string().optional(),
+  invoiceId: z.string().optional(),
   payload: z.any().optional(),
 });
 

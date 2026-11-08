@@ -24,11 +24,15 @@ export async function invoiceRoutes(app: FastifyInstance) {
     return reply.status(200).send(invoices);
   });
 
-  app.get("/:id", { schema: invoiceDocs.findById }, async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const invoice = await invoiceService.findById(id);
-    return reply.status(200).send(invoice);
-  });
+  app.get(
+    "/:id",
+    { schema: invoiceDocs.getDetails },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const invoice = await invoiceService.getDetails(id);
+      return reply.status(200).send(invoice);
+    },
+  );
 
   app.post("/", { schema: invoiceDocs.create }, async (request, reply) => {
     const authorization = request.headers.authorization;

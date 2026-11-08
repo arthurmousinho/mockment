@@ -19,6 +19,7 @@ async function emit(input: EmitEventInput) {
       type: input.type,
       paymentId: input.paymentId ?? null,
       subscriptionId: input.subscriptionId ?? null,
+      invoiceId: input.invoiceId ?? null,
       payload: input.payload,
     },
   });

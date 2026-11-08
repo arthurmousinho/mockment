@@ -2,6 +2,7 @@ import { z } from "zod";
 import { searchablePaginationSchema } from "../../common/search.schema.ts";
 import {
   InvoiceStatus,
+  EventType,
   PaymentCurrency,
 } from "../../../generated/prisma/enums.ts";
 
@@ -27,4 +28,12 @@ export const invoiceSchema = z.object({
   issuedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+});
+
+export const detailedInvoiceSchema = invoiceSchema.safeExtend({
+  events: z.array(z.object({
+    id: z.string(),
+    type: z.enum(EventType),
+    createdAt: z.iso.datetime(),
+  })),
 });

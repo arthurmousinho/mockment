@@ -8,6 +8,7 @@ import {
 } from "../../common/openapi.ts";
 import {
   createInvoiceSchema,
+  detailedInvoiceSchema,
   invoiceSchema,
 } from "../schemas/invoice.schema.ts";
 
@@ -29,9 +30,9 @@ export const invoiceDocs = {
       },
     },
   },
-  findById: {
-    summary: "Get an invoice",
-    description: "Returns an invoice by its ID.",
+  getDetails: {
+    summary: "Get invoice details",
+    description: "Returns the details of an invoice, including its events.",
     tags: ["Invoices"],
     params: idParamsSchema,
     response: {
@@ -39,7 +40,7 @@ export const invoiceDocs = {
         description: "When the invoice is retrieved successfully.",
         content: {
           "application/json": {
-            schema: openApiSchema(invoiceSchema),
+            schema: openApiSchema(detailedInvoiceSchema),
           },
         },
       },

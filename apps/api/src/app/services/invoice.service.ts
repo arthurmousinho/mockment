@@ -42,6 +42,7 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
   await eventService.emit({
     paymentId: payment.id,
     type: "INVOICE_CREATED",
+    invoiceId: invoice.id,
     payload: invoice,
   });
 
@@ -72,6 +73,24 @@ async function findAll(input: InvoiceListInput) {
 async function findById(id: string) {
   const invoice = await prismaSingleton.invoice.findUnique({
     where: { id },
+  });
+
+  if (!invoice) {
+    throw new NotFoundError(`Invoice with ID ${id} was not found.`);
+  }
+
+  return invoice;
+}
+
+async function getDetails(id: string) {
+  const invoice = await prismaSingleton.invoice.findUnique({
+    where: { id },
+    include: {
+      events: {
+        select: { id: true, type: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+      },
+    },
   });
 
   if (!invoice) {
@@ -117,10 +136,11 @@ async function issue(id: string) {
   await eventService.emit({
     paymentId: invoice.paymentId,
     type: "INVOICE_ISSUED",
+    invoiceId: invoice.id,
     payload: issuedInvoice,
   });
 
   return issuedInvoice;
 }
 
-export const invoiceService = { create, findAll, findById, issue };
+export const invoiceService = { create, findAll, findById, getDetails, issue };
