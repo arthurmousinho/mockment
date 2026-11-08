@@ -1,4 +1,5 @@
-import { NotFoundError } from "../../common/http-error.ts";
+import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
+import type { InvoiceStatus } from "../../../generated/prisma/enums.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -12,6 +13,7 @@ import type {
 } from "../schemas/invoice.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { eventService } from "./event.service.ts";
+import { generateInvoicePdf } from "../../config/invoice-pdf.ts";
 
 async function create(apiKey: string, input: CreateInvoiceInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
@@ -79,4 +81,46 @@ async function findById(id: string) {
   return invoice;
 }
 
-export const invoiceService = { create, findAll, findById };
+function validateStatusTransition(
+  currentStatus: InvoiceStatus,
+  newStatus: InvoiceStatus,
+) {
+  const validTransitions: Record<InvoiceStatus, InvoiceStatus[]> = {
+    CREATED: ["PROCESSING", "CANCELED"],
+    PROCESSING: ["ISSUED", "REJECTED", "CANCELED"],
+    ISSUED: ["CANCELED"],
+    REJECTED: [],
+    CANCELED: [],
+  };
+
+  if (!validTransitions[currentStatus].includes(newStatus)) {
+    throw new BadRequestError(
+      `Cannot change invoice status from ${currentStatus} to ${newStatus}.`,
+    );
+  }
+}
+
+async function issue(id: string) {
+  const invoice = await findById(id);
+  validateStatusTransition(invoice.status, "ISSUED");
+
+  const issuedInvoice = await prismaSingleton.invoice.update({
+    where: { id: invoice.id },
+    data: {
+      status: "ISSUED",
+      issuedAt: new Date(),
+    },
+  });
+
+  await generateInvoicePdf(issuedInvoice);
+
+  await eventService.emit({
+    paymentId: invoice.paymentId,
+    type: "INVOICE_ISSUED",
+    payload: issuedInvoice,
+  });
+
+  return issuedInvoice;
+}
+
+export const invoiceService = { create, findAll, findById, issue };

@@ -4,6 +4,7 @@ node_modules
 build
 
 generated
+apps/api/storage/
 
 # Logs
 logs

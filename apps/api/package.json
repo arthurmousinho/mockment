@@ -12,6 +12,7 @@
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "fastify": "^5.10.0",
+    "pdfkit": "^0.20.2",
     "toad-scheduler": "^4.1.0",
     "zod": "^4.4.3",
     "zod-to-json-schema": "^3.25.2"
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@clack/prompts": "^1.8.1",
     "@types/node": "^26.1.1",
+    "@types/pdfkit": "^0.17.7",
     "prisma": "^7.9.0",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2"

@@ -109,4 +109,46 @@ export const invoiceDocs = {
       },
     },
   },
+  issue: {
+    summary: "Issue an invoice",
+    description:
+      "Issues an invoice when its current status can transition to ISSUED. The invoice PDF is saved under the API storage directory.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the invoice is issued successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(invoiceSchema),
+          },
+        },
+      },
+      400: {
+        description: "When the invoice cannot transition to ISSUED.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "BAD_REQUEST",
+              code: 400,
+              message:
+                "Cannot change invoice status from {currentStatus} to ISSUED.",
+            }),
+          },
+        },
+      },
+      404: {
+        description: "When the invoice is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Invoice with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
 };
