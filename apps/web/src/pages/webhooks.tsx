@@ -36,6 +36,7 @@ import {
   FindAllWebhookEndpointsRequest,
   RotateWebhookEndpointRequest,
   ToggleWebhookEndpointRequest,
+  TestWebhookEndpointRequest,
 } from "@/http/webhooks-http";
 import {
   PencilIcon,
@@ -45,6 +46,8 @@ import {
   PlusIcon,
   TrashIcon,
   CellTowerIcon,
+  WifiHighIcon,
+  SpinnerGapIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
 
@@ -70,13 +73,21 @@ export function WebhooksPage() {
     limit,
     search,
   });
+
   const { mutate: rotateRequest, isPending: isRotating } =
     RotateWebhookEndpointRequest();
+
   const { mutate: deleteRequest, isPending: isDeleting } =
     DeleteWebhookEndpointRequest();
 
   const { mutate: toggleRequest, isPending: isToggling } =
     ToggleWebhookEndpointRequest();
+
+  const {
+    mutate: testRequest,
+    isPending: isTesting,
+    variables: testVariables,
+  } = TestWebhookEndpointRequest();
 
   if (isPending) {
     return <ListingPageSkeleton columns={7} rows={limit} />;
@@ -107,6 +118,12 @@ export function WebhooksPage() {
     deleteRequest(pendingDelete.id, {
       onSuccess: () => setPendingDelete(null),
     });
+  }
+
+  function handleTest(id: string, event: Event) {
+    event.preventDefault();
+    if (isTesting) return;
+    testRequest(id);
   }
 
   return (
@@ -222,6 +239,22 @@ export function WebhooksPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
+                    <DropdownMenuItem
+                      disabled={!item.enabled || isTesting || isToggling}
+                      onSelect={(event) => handleTest(item.id, event)}
+                    >
+                      {isTesting && testVariables === item.id ? (
+                        <SpinnerGapIcon
+                          size={32}
+                          className="animate-spin motion-reduce:animate-none"
+                        />
+                      ) : (
+                        <WifiHighIcon size={32} />
+                      )}
+                      {isTesting && testVariables === item.id
+                        ? "Testing..."
+                        : "Test"}
+                    </DropdownMenuItem>
                     <WebhookEndpointDeliveriesSheet endpointId={item.id}>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                         <CellTowerIcon size={32} />

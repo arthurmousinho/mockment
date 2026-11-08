@@ -190,6 +190,33 @@ export function FindAllWebhookEndpointDeliveriesRequest(
   });
 }
 
+export type TestWebhookEndpointResponse = {
+  success: boolean;
+  statusCode: number | null;
+  error: string | null;
+};
+
+export function TestWebhookEndpointRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`webhooks/endpoints/${id}/test`, {
+        retry: 0,
+        timeout: 20_000,
+      });
+      return response.json<TestWebhookEndpointResponse>();
+    },
+    retry: false,
+    onSuccess: (result) => {
+      if (result.success) {
+        toast.success(`Webhook test succeeded (HTTP ${result.statusCode}).`);
+      } else {
+        toast.error(result.error ?? "Webhook endpoint test failed.");
+      }
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function ToggleWebhookEndpointRequest() {
   return useMutation({
     mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
@@ -197,7 +224,9 @@ export function ToggleWebhookEndpointRequest() {
     },
     onSuccess: (_, { enabled }) => {
       queryClient.invalidateQueries({ queryKey: ["webhooks", "endpoints"] });
-      toast.success(enabled ? "Webhook endpoint enabled." : "Webhook endpoint disabled.");
+      toast.success(
+        enabled ? "Webhook endpoint enabled." : "Webhook endpoint disabled.",
+      );
     },
     onError: apiErrorHandler,
   });
