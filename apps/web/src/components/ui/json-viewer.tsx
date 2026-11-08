@@ -132,7 +132,7 @@ export function JsonViewer({
   return (
     <section
       className={cn(
-        "min-w-0 overflow-hidden border bg-card font-mono text-card-foreground [--font-mono:JetBrains_Mono_Variable,monospace]",
+        "min-w-0 max-w-full overflow-hidden border bg-card [contain:inline-size] font-mono text-card-foreground [--font-mono:JetBrains_Mono_Variable,monospace]",
         className,
       )}
       aria-label={label}
@@ -169,7 +169,7 @@ export function JsonViewer({
         </div>
       </div>
       <div
-        className="max-h-80 overflow-auto p-3 text-xs leading-6"
+        className="max-h-80 min-w-0 max-w-full overflow-x-auto overflow-y-auto p-3 text-xs leading-6"
         tabIndex={0}
         role="region"
         aria-label={`${label} content`}
@@ -177,7 +177,7 @@ export function JsonViewer({
         {error || content === undefined ? (
           <p className="text-muted-foreground">{error || "Not available."}</p>
         ) : raw ? (
-          <pre className="font-mono">
+          <pre className="w-max min-w-full whitespace-pre font-mono">
             <code>{content}</code>
           </pre>
         ) : (
