@@ -11,6 +11,7 @@ import type {
   InvoiceListInput,
 } from "../schemas/invoice.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
+import { eventService } from "./event.service.ts";
 
 async function create(apiKey: string, input: CreateInvoiceInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
@@ -24,7 +25,7 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
     );
   }
 
-  return prismaSingleton.invoice.create({
+  const invoice = await prismaSingleton.invoice.create({
     data: {
       id: createPrefixedId("inv"),
       status: "CREATED",
@@ -35,6 +36,14 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
       paymentId: payment.id,
     },
   });
+
+  await eventService.emit({
+    paymentId: payment.id,
+    type: "INVOICE_CREATED",
+    payload: invoice,
+  });
+
+  return invoice;
 }
 
 async function findAll(input: InvoiceListInput) {
