@@ -13,6 +13,13 @@ const C = {
   green: "#15803D",
 };
 
+export function getInvoicePdfPath(id: string) {
+  const directory = fileURLToPath(
+    new URL("../../storage/invoices/", import.meta.url),
+  );
+  return path.join(directory, `${id}.pdf`);
+}
+
 export async function generateInvoicePdf(invoice: Invoice) {
   const doc = new PDFDocument({
     size: "A4",
@@ -190,5 +197,5 @@ export async function generateInvoicePdf(invoice: Invoice) {
 
   await mkdir(directory, { recursive: true });
 
-  await writeFile(path.join(directory, `${invoice.id}.pdf`), pdf);
+  await writeFile(getInvoicePdfPath(invoice.id), pdf);
 }

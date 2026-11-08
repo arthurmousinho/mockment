@@ -13,6 +13,32 @@ import {
 } from "../schemas/invoice.schema.ts";
 
 export const invoiceDocs = {
+  downloadPdf: {
+    summary: "Download an invoice PDF",
+    description: "Downloads the PDF generated when the invoice was issued.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the invoice PDF is retrieved successfully.",
+        content: {
+          "application/pdf": { schema: { type: "string", format: "binary" } },
+        },
+      },
+      404: {
+        description: "When the invoice or its PDF is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "PDF for invoice with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   process: {
     summary: "Process an invoice",
     description: "Moves a created invoice to the processing state.",

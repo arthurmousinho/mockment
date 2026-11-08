@@ -1,4 +1,5 @@
 import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
+import { readFile } from "node:fs/promises";
 import type { InvoiceStatus } from "../../../generated/prisma/enums.ts";
 import {
   buildPaginatedResponse,
@@ -13,7 +14,10 @@ import type {
 } from "../schemas/invoice.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { eventService } from "./event.service.ts";
-import { generateInvoicePdf } from "../../config/invoice-pdf.ts";
+import {
+  generateInvoicePdf,
+  getInvoicePdfPath,
+} from "../../config/invoice-pdf.ts";
 
 async function create(apiKey: string, input: CreateInvoiceInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
@@ -100,6 +104,19 @@ async function getDetails(id: string) {
   return invoice;
 }
 
+async function getPdf(id: string) {
+  const invoice = await findById(id);
+
+  try {
+    return await readFile(getInvoicePdfPath(invoice.id));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new NotFoundError(`PDF for invoice with ID ${id} was not found.`);
+    }
+    throw error;
+  }
+}
+
 function validateStatusTransition(
   currentStatus: InvoiceStatus,
   newStatus: InvoiceStatus,
@@ -167,6 +184,7 @@ export const invoiceService = {
   findAll,
   findById,
   getDetails,
+  getPdf,
   process,
   issue,
 };

@@ -8,6 +8,23 @@ import { invoiceService } from "../services/invoice.service.ts";
 import type { FastifyInstance } from "fastify";
 
 export async function invoiceRoutes(app: FastifyInstance) {
+  app.get(
+    "/:id/pdf",
+    { schema: invoiceDocs.downloadPdf },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const pdf = await invoiceService.getPdf(id);
+      return reply
+        .type("application/pdf")
+        .header(
+          "Content-Disposition",
+          `attachment; filename="${encodeURIComponent(id)}.pdf"`,
+        )
+        .status(200)
+        .send(pdf);
+    },
+  );
+
   app.get("/", { schema: invoiceDocs.findAll }, async (request, reply) => {
     const input = invoiceListSchema.parse(request.query);
     const invoices = await invoiceService.findAll(input);
