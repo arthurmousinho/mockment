@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import {
   FindAllInvoicesRequest,
+  IssueInvoiceRequest,
   ProcessInvoiceRequest,
 } from "@/http/invoices-http";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
@@ -28,6 +29,7 @@ import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import {
   DotsThreeIcon,
   ArrowClockwiseIcon,
+  CheckIcon,
   EyeIcon,
   PlusIcon,
   ReceiptIcon,
@@ -48,6 +50,7 @@ export function InvoicesPage() {
   } = FindAllInvoicesRequest({ page, limit, search });
   const { mutate: processInvoice, isPending: isProcessing } =
     ProcessInvoiceRequest();
+  const { mutate: issueInvoice, isPending: isIssuing } = IssueInvoiceRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
   if (isError)
@@ -148,6 +151,13 @@ export function InvoicesPage() {
                     >
                       <ArrowClockwiseIcon size={32} />
                       Process
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={invoice.status !== "PROCESSING" || isIssuing}
+                      onClick={() => issueInvoice(invoice.id)}
+                    >
+                      <CheckIcon size={32} />
+                      Issue
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

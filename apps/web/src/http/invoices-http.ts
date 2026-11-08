@@ -58,6 +58,21 @@ export function ProcessInvoiceRequest() {
   });
 }
 
+export function IssueInvoiceRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`invoices/${id}/issue`);
+      return response.json<Invoice>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      toast.success("Invoice issued successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function FindAllInvoicesRequest(
   paginationData: PaginatedRequest & { search?: string },
 ) {
