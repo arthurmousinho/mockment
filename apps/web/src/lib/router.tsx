@@ -3,6 +3,7 @@ import { MainLayout } from "../layouts/main-layout";
 import { ApiKeysPage } from "@/pages/api-keys";
 import { CheckoutsPage } from "@/pages/checkouts";
 import { PaymentsPage } from "@/pages/payments";
+import { InvoicesPage } from "@/pages/invoices";
 import { WebhooksPage } from "@/pages/webhooks";
 import { CheckoutPage } from "@/pages/checkout";
 import { FrontendLayout } from "@/layouts/frontend-layout";
@@ -32,6 +33,11 @@ export const router = createBrowserRouter([
                 path: "payments",
                 handle: { title: "Payments" },
                 element: <PaymentsPage />,
+              },
+              {
+                path: "invoices",
+                handle: { title: "Invoices" },
+                element: <InvoicesPage />,
               },
               {
                 path: "checkouts",

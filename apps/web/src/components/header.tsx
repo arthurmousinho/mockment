@@ -24,6 +24,7 @@ import {
   ReceiptIcon,
   LinkSimpleIcon,
   FlaskIcon,
+  TicketIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -32,6 +33,7 @@ import { Logo } from "./logo";
 const navigationLinks = [
   { label: "Guide", href: "/", icon: PathIcon },
   { label: "Payments", href: "/payments", icon: CurrencyCircleDollarIcon },
+  { label: "Invoices", href: "/invoices", icon: TicketIcon },
   { label: "Checkouts", href: "/checkouts", icon: LinkSimpleIcon },
   { label: "Simulations", href: "/simulations", icon: FlaskIcon },
   { label: "Subscriptions", href: "/subscriptions", icon: StarIcon },
