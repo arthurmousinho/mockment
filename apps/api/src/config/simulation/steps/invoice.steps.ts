@@ -100,9 +100,7 @@ export const cancelInvoiceStep = {
   id: "invoice.cancel",
   name: "Cancel invoice",
   description: "Cancel an existing invoice.",
-  input: [
-    { name: "id", label: "Invoice ID", type: "string", required: true },
-  ],
+  input: [{ name: "id", label: "Invoice ID", type: "string", required: true }],
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
@@ -126,9 +124,7 @@ export const issueInvoiceStep = {
   id: "invoice.issue",
   name: "Issue invoice",
   description: "Issue a processing invoice.",
-  input: [
-    { name: "id", label: "Invoice ID", type: "string", required: true },
-  ],
+  input: [{ name: "id", label: "Invoice ID", type: "string", required: true }],
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
@@ -148,10 +144,49 @@ export const issueInvoiceStep = {
   },
 } satisfies Step;
 
+export const updateInvoiceStep = {
+  id: "invoice.update",
+  name: "Update invoice",
+  description: "Update customer details on a created invoice.",
+  input: [
+    { name: "id", label: "Invoice ID", type: "string", required: true },
+    {
+      name: "customerName",
+      label: "Customer name",
+      type: "string",
+      required: false,
+    },
+    {
+      name: "customerTaxId",
+      label: "Customer tax ID",
+      type: "string",
+      required: false,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "paymentId", type: "string" },
+    { name: "customerName", type: "string" },
+    { name: "customerTaxId", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "status", type: "string" },
+    { name: "issuedAt", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "PATCH",
+    endpoint: "/invoices/:id",
+  },
+} satisfies Step;
+
 export const INVOICE_STEPS = [
   createInvoiceStep,
   getInvoiceStep,
   processInvoiceStep,
   cancelInvoiceStep,
   issueInvoiceStep,
+  updateInvoiceStep,
 ] as const;
