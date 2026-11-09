@@ -65,4 +65,39 @@ export const getInvoiceStep = {
   },
 } satisfies Step;
 
-export const INVOICE_STEPS = [createInvoiceStep, getInvoiceStep] as const;
+export const processInvoiceStep = {
+  id: "invoice.process",
+  name: "Process invoice",
+  description: "Move an existing invoice to the processing state.",
+  input: [
+    {
+      name: "id",
+      label: "Invoice ID",
+      type: "string",
+      required: true,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "paymentId", type: "string" },
+    { name: "customerName", type: "string" },
+    { name: "customerTaxId", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "status", type: "string" },
+    { name: "issuedAt", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "POST",
+    endpoint: "/invoices/:id/process",
+  },
+} satisfies Step;
+
+export const INVOICE_STEPS = [
+  createInvoiceStep,
+  getInvoiceStep,
+  processInvoiceStep,
+] as const;
