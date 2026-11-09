@@ -1,5 +1,5 @@
 import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
-import { readFile } from "node:fs/promises";
+import { readFile, unlink } from "node:fs/promises";
 import type { InvoiceStatus } from "../../../generated/prisma/enums.ts";
 import {
   buildPaginatedResponse,
@@ -117,6 +117,16 @@ async function getPdf(id: string) {
   }
 }
 
+async function deletePdf(id: string) {
+  try {
+    await unlink(getInvoicePdfPath(id));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
+}
+
 function validateStatusTransition(
   currentStatus: InvoiceStatus,
   newStatus: InvoiceStatus,
@@ -182,6 +192,10 @@ async function issue(id: string) {
 async function cancel(id: string) {
   const invoice = await findById(id);
   validateStatusTransition(invoice.status, "CANCELED");
+
+  if (invoice.status === "ISSUED") {
+    await deletePdf(invoice.id);
+  }
 
   const canceledInvoice = await prismaSingleton.invoice.update({
     where: { id: invoice.id },
