@@ -55,6 +55,12 @@ export async function invoiceRoutes(app: FastifyInstance) {
     return reply.status(201).send(invoice);
   });
 
+  app.delete("/:id", { schema: invoiceDocs.remove }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    await invoiceService.remove(id);
+    return reply.status(204).send();
+  });
+
   app.patch("/:id", { schema: invoiceDocs.update }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const input = updateInvoiceSchema.parse(request.body);

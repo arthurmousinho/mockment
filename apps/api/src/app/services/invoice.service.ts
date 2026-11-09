@@ -127,6 +127,20 @@ async function update(id: string, input: UpdateInvoiceInput) {
   return updatedInvoice;
 }
 
+async function remove(id: string) {
+  const invoice = await findById(id);
+
+  if (invoice.status !== "CREATED") {
+    throw new BadRequestError("Only created invoices can be deleted.");
+  }
+
+  const deletedInvoice = await prismaSingleton.invoice.delete({
+    where: { id },
+  });
+
+  return deletedInvoice;
+}
+
 async function getPdf(id: string) {
   const invoice = await findById(id);
 
@@ -241,6 +255,7 @@ export const invoiceService = {
   findById,
   getDetails,
   update,
+  remove,
   getPdf,
   process,
   issue,

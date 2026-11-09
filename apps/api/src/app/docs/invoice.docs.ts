@@ -14,6 +14,18 @@ import {
 } from "../schemas/invoice.schema.ts";
 
 export const invoiceDocs = {
+  remove: {
+    summary: "Delete an invoice",
+    description:
+      "Deletes an invoice in CREATED status. Related events are retained.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    response: {
+      204: { description: "When the invoice is deleted successfully." },
+      400: { description: "When the invoice is not in CREATED status." },
+      404: { description: "When the invoice is not found." },
+    },
+  },
   update: {
     summary: "Update an invoice",
     description:
@@ -24,10 +36,13 @@ export const invoiceDocs = {
     response: {
       200: {
         description: "When the invoice is updated successfully.",
-        content: { "application/json": { schema: openApiSchema(invoiceSchema) } },
+        content: {
+          "application/json": { schema: openApiSchema(invoiceSchema) },
+        },
       },
       400: {
-        description: "When the input is invalid or the invoice is not in CREATED status.",
+        description:
+          "When the input is invalid or the invoice is not in CREATED status.",
       },
       404: {
         description: "When the invoice is not found.",
@@ -118,13 +133,20 @@ export const invoiceDocs = {
     response: {
       200: {
         description: "When the invoice is moved to processing successfully.",
-        content: { "application/json": { schema: openApiSchema(invoiceSchema) } },
+        content: {
+          "application/json": { schema: openApiSchema(invoiceSchema) },
+        },
       },
       400: {
         description: "When the invoice cannot transition to PROCESSING.",
         content: {
           "application/json": {
-            schema: httpErrorSchema({ error: "BAD_REQUEST", code: 400, message: "Cannot change invoice status from {currentStatus} to PROCESSING." }),
+            schema: httpErrorSchema({
+              error: "BAD_REQUEST",
+              code: 400,
+              message:
+                "Cannot change invoice status from {currentStatus} to PROCESSING.",
+            }),
           },
         },
       },
@@ -132,7 +154,11 @@ export const invoiceDocs = {
         description: "When the invoice is not found.",
         content: {
           "application/json": {
-            schema: httpErrorSchema({ error: "NOT_FOUND", code: 404, message: "Invoice with ID {id} was not found." }),
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Invoice with ID {id} was not found.",
+            }),
           },
         },
       },
