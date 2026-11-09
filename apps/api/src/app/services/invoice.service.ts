@@ -1,4 +1,9 @@
-import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../../common/http-error.ts";
 import { readFile, unlink } from "node:fs/promises";
 import type { InvoiceStatus } from "../../../generated/prisma/enums.ts";
 import {
@@ -19,20 +24,33 @@ import {
   generateInvoicePdf,
   getInvoicePdfPath,
 } from "../../config/invoice-pdf.ts";
+import { paymentService } from "./payment.service.ts";
 
 async function create(apiKey: string, input: CreateInvoiceInput) {
-  const validatedApiKey = await apiKeyService.validate(apiKey);
-  const payment = await prismaSingleton.payment.findFirst({
-    where: { id: input.paymentId, apiKeyId: validatedApiKey.id },
-  });
+  await apiKeyService.validate(apiKey);
 
-  if (!payment) {
-    throw new NotFoundError(
-      `Payment with ID ${input.paymentId} was not found.`,
+  const payment = await paymentService.findById(input.paymentId);
+
+  if (payment.status !== "APPROVED") {
+    throw new UnprocessableEntityError(
+      "Only approved payments can be used to create invoices.",
     );
   }
 
-  const invoice = await prismaSingleton.invoice.create({
+  const existingInvoice = await prismaSingleton.invoice.findFirst({
+    where: {
+      paymentId: payment.id,
+      status: { not: "CANCELED" },
+    },
+  });
+
+  if (existingInvoice) {
+    throw new ConflictError(
+      "An valid invoice for this payment already exists.",
+    );
+  }
+
+  const createdInvoice = await prismaSingleton.invoice.create({
     data: {
       id: createPrefixedId("inv"),
       status: "CREATED",
@@ -47,11 +65,11 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
   await eventService.emit({
     paymentId: payment.id,
     type: "INVOICE_CREATED",
-    invoiceId: invoice.id,
-    payload: invoice,
+    invoiceId: createdInvoice.id,
+    payload: createdInvoice,
   });
 
-  return invoice;
+  return createdInvoice;
 }
 
 async function findAll(input: InvoiceListInput) {
