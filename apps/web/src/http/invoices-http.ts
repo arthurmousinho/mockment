@@ -48,6 +48,27 @@ export function CreateInvoiceRequest() {
   });
 }
 
+export function UpdateInvoiceRequest() {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...body
+    }: {
+      id: string;
+      customerName: string;
+      customerTaxId: string | null;
+    }) => {
+      const response = await api.patch(`invoices/${id}`, { json: body });
+      return response.json<Invoice>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Invoice updated successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function ProcessInvoiceRequest() {
   return useMutation({
     mutationFn: async (id: string) => {

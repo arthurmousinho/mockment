@@ -2,7 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CreateInvoiceRequest } from "@/http/invoices-http";
+import {
+  CreateInvoiceRequest,
+  UpdateInvoiceRequest,
+  type Invoice,
+} from "@/http/invoices-http";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,36 +28,76 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const invoiceFormSchema = z.object({
-  apiKey: z.string().trim().min(1, "API key is required."),
-  paymentId: z.string().trim().min(1, "Payment ID is required.").max(191),
-  customerName: z.string().trim().min(1, "Customer name is required.").max(191),
-  customerTaxId: z.string().trim().max(191),
-});
+function buildSchema(isEditing: boolean) {
+  return z.object({
+    apiKey: isEditing
+      ? z.string()
+      : z.string().trim().min(1, "API key is required."),
+    paymentId: z.string().trim().min(1, "Payment ID is required.").max(191),
+    customerName: z
+      .string()
+      .trim()
+      .min(1, "Customer name is required.")
+      .max(191),
+    customerTaxId: z.string().trim().max(191),
+  });
+}
 
-type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
+type InvoiceFormData = z.infer<ReturnType<typeof buildSchema>>;
 
-export function InvoiceFormDialog({ children }: { children: ReactNode }) {
+export function InvoiceFormDialog({
+  children,
+  invoice,
+}: {
+  children: ReactNode;
+  invoice?: Invoice;
+}) {
+  const isEditing = Boolean(invoice);
   const [open, setOpen] = useState(false);
-  const { mutate: createInvoice, isPending } = CreateInvoiceRequest();
+
+  const { mutate: createInvoice, isPending: isCreating } =
+    CreateInvoiceRequest();
+
+  const { mutate: updateInvoice, isPending: isUpdating } =
+    UpdateInvoiceRequest();
+
+  const isPending = isCreating || isUpdating;
+
   const form = useForm<InvoiceFormData>({
-    resolver: zodResolver(invoiceFormSchema),
+    resolver: zodResolver(buildSchema(isEditing)),
     defaultValues: {
       apiKey: "",
-      paymentId: "",
-      customerName: "",
-      customerTaxId: "",
+      paymentId: invoice?.paymentId ?? "",
+      customerName: invoice?.customerName ?? "",
+      customerTaxId: invoice?.customerTaxId ?? "",
     },
   });
 
   function handleOpenChange(nextOpen: boolean) {
     if (isPending) return;
-    if (nextOpen) form.reset();
+    if (nextOpen)
+      form.reset({
+        apiKey: "",
+        paymentId: invoice?.paymentId ?? "",
+        customerName: invoice?.customerName ?? "",
+        customerTaxId: invoice?.customerTaxId ?? "",
+      });
     setOpen(nextOpen);
   }
 
   function onSubmit(data: InvoiceFormData) {
     if (isPending) return;
+    if (invoice) {
+      updateInvoice(
+        {
+          id: invoice.id,
+          customerName: data.customerName,
+          customerTaxId: data.customerTaxId || null,
+        },
+        { onSuccess: () => setOpen(false) },
+      );
+      return;
+    }
     createInvoice(
       { ...data, customerTaxId: data.customerTaxId || undefined },
       { onSuccess: () => handleOpenChange(false) },
@@ -65,9 +109,13 @@ export function InvoiceFormDialog({ children }: { children: ReactNode }) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New invoice</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit invoice" : "New invoice"}
+          </DialogTitle>
           <DialogDescription>
-            Enter the payment and customer details for this invoice.
+            {isEditing
+              ? "Update the customer details for this invoice."
+              : "Enter the payment and customer details for this invoice."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -79,30 +127,37 @@ export function InvoiceFormDialog({ children }: { children: ReactNode }) {
                 <FormItem>
                   <FormLabel>Payment ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="pay_..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="apiKey"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>API Key</FormLabel>
-                  <FormControl>
                     <Input
-                      placeholder="mk_test_..."
-                      type="password"
-                      autoComplete="off"
+                      placeholder="pay_..."
                       {...field}
+                      readOnly={isEditing}
+                      disabled={isEditing}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="apiKey"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API Key</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="mk_test_..."
+                        type="password"
+                        autoComplete="off"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="customerName"

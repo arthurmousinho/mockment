@@ -36,6 +36,7 @@ import {
   DownloadSimpleIcon,
   EyeIcon,
   PlusIcon,
+  PencilSimpleIcon,
   ReceiptIcon,
   XIcon,
 } from "@phosphor-icons/react";
@@ -155,6 +156,15 @@ export function InvoicesPage() {
                         Details
                       </DropdownMenuItem>
                     </InvoiceDetailsDialog>
+                    <InvoiceFormDialog invoice={invoice}>
+                      <DropdownMenuItem
+                        disabled={invoice.status !== "CREATED"}
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        <PencilSimpleIcon size={32} />
+                        Edit
+                      </DropdownMenuItem>
+                    </InvoiceFormDialog>
                     <DropdownMenuItem
                       disabled={invoice.status !== "CREATED" || isProcessing}
                       onClick={() => processInvoice(invoice.id)}
@@ -170,13 +180,6 @@ export function InvoicesPage() {
                       Issue
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      disabled={invoice.status !== "ISSUED" || isDownloading}
-                      onClick={() => downloadInvoicePdf(invoice.id)}
-                    >
-                      <DownloadSimpleIcon size={32} />
-                      Download PDF
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
                       disabled={
                         !["CREATED", "PROCESSING", "ISSUED"].includes(
                           invoice.status,
@@ -186,6 +189,13 @@ export function InvoicesPage() {
                     >
                       <XIcon size={32} />
                       Cancel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={invoice.status !== "ISSUED" || isDownloading}
+                      onClick={() => downloadInvoicePdf(invoice.id)}
+                    >
+                      <DownloadSimpleIcon size={32} />
+                      Download PDF
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
