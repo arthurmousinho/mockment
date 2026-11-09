@@ -29,6 +29,7 @@ import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { InvoiceFormDialog } from "@/components/invoice-form-dialog";
 import { InvoiceDetailsDialog } from "@/components/invoice-details-dialog";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
+import { canChangeInvoiceStatus } from "@/lib/utils";
 import {
   DotsThreeIcon,
   ArrowClockwiseIcon,
@@ -166,14 +167,14 @@ export function InvoicesPage() {
                       </DropdownMenuItem>
                     </InvoiceFormDialog>
                     <DropdownMenuItem
-                      disabled={invoice.status !== "CREATED" || isProcessing}
+                      disabled={!canChangeInvoiceStatus(invoice.status, "PROCESSING") || isProcessing}
                       onClick={() => processInvoice(invoice.id)}
                     >
                       <ArrowClockwiseIcon size={32} />
                       Process
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      disabled={invoice.status !== "PROCESSING" || isIssuing}
+                      disabled={!canChangeInvoiceStatus(invoice.status, "ISSUED") || isIssuing}
                       onClick={() => issueInvoice(invoice.id)}
                     >
                       <CheckIcon size={32} />
@@ -181,9 +182,8 @@ export function InvoicesPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={
-                        !["CREATED", "PROCESSING", "ISSUED"].includes(
-                          invoice.status,
-                        ) || isCanceling
+                        !canChangeInvoiceStatus(invoice.status, "CANCELED") ||
+                        isCanceling
                       }
                       onClick={() => setPendingCancel(invoice.id)}
                     >

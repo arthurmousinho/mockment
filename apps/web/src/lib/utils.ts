@@ -1,4 +1,5 @@
 import type { PaymentStatus } from "@/http/payments-http";
+import type { InvoiceStatus } from "@/http/invoices-http";
 import type { SubscriptionStatus } from "@/http/subscription-http";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -18,6 +19,21 @@ export function canChangePaymentStatus(
     DECLINED: [],
     CANCELED: [],
     REFUNDED: [],
+  };
+  const allowed = validTransitions[currentStatus];
+  return allowed.includes(newStatus);
+}
+
+export function canChangeInvoiceStatus(
+  currentStatus: InvoiceStatus,
+  newStatus: InvoiceStatus,
+) {
+  const validTransitions: Record<InvoiceStatus, InvoiceStatus[]> = {
+    CREATED: ["PROCESSING", "CANCELED"],
+    PROCESSING: ["ISSUED", "REJECTED", "CANCELED"],
+    ISSUED: ["CANCELED"],
+    REJECTED: [],
+    CANCELED: [],
   };
   const allowed = validTransitions[currentStatus];
   return allowed.includes(newStatus);
