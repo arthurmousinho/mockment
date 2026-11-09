@@ -158,7 +158,8 @@ model Invoice {
   payment Payment @relation(fields: [paymentId], references: [id])
   events  Event[]
 
-  @@index([paymentId, customerTaxId])
+  @@index([paymentId])
+  @@index([customerTaxId])
   @@map("invoices")
 }
 
