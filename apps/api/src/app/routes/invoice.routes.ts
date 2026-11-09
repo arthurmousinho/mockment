@@ -73,4 +73,14 @@ export async function invoiceRoutes(app: FastifyInstance) {
       return reply.status(200).send(invoice);
     },
   );
+
+  app.post(
+    "/:id/cancel",
+    { schema: invoiceDocs.cancel },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const invoice = await invoiceService.cancel(id);
+      return reply.status(200).send(invoice);
+    },
+  );
 }

@@ -179,6 +179,25 @@ async function issue(id: string) {
   return issuedInvoice;
 }
 
+async function cancel(id: string) {
+  const invoice = await findById(id);
+  validateStatusTransition(invoice.status, "CANCELED");
+
+  const canceledInvoice = await prismaSingleton.invoice.update({
+    where: { id: invoice.id },
+    data: { status: "CANCELED" },
+  });
+
+  await eventService.emit({
+    paymentId: invoice.paymentId,
+    invoiceId: invoice.id,
+    type: "INVOICE_CANCELED",
+    payload: canceledInvoice,
+  });
+
+  return canceledInvoice;
+}
+
 export const invoiceService = {
   create,
   findAll,
@@ -187,4 +206,5 @@ export const invoiceService = {
   getPdf,
   process,
   issue,
+  cancel,
 };

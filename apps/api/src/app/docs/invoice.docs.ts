@@ -13,6 +13,47 @@ import {
 } from "../schemas/invoice.schema.ts";
 
 export const invoiceDocs = {
+  cancel: {
+    summary: "Cancel an invoice",
+    description: "Cancels a created, processing, or issued invoice.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the invoice is canceled successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(invoiceSchema),
+          },
+        },
+      },
+      400: {
+        description: "When the invoice cannot transition to CANCELED.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "BAD_REQUEST",
+              code: 400,
+              message:
+                "Cannot change invoice status from {currentStatus} to CANCELED.",
+            }),
+          },
+        },
+      },
+      404: {
+        description: "When the invoice is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Invoice with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   downloadPdf: {
     summary: "Download an invoice PDF",
     description: "Downloads the PDF generated when the invoice was issued.",
