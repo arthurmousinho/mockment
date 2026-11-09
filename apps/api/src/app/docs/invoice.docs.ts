@@ -10,9 +10,39 @@ import {
   createInvoiceSchema,
   detailedInvoiceSchema,
   invoiceSchema,
+  updateInvoiceSchema,
 } from "../schemas/invoice.schema.ts";
 
 export const invoiceDocs = {
+  update: {
+    summary: "Update an invoice",
+    description:
+      "Updates the customer name or tax ID of an invoice in CREATED status. Set the tax ID to null to remove it.",
+    tags: ["Invoices"],
+    params: idParamsSchema,
+    body: openApiSchema(updateInvoiceSchema),
+    response: {
+      200: {
+        description: "When the invoice is updated successfully.",
+        content: { "application/json": { schema: openApiSchema(invoiceSchema) } },
+      },
+      400: {
+        description: "When the input is invalid or the invoice is not in CREATED status.",
+      },
+      404: {
+        description: "When the invoice is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Invoice with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   cancel: {
     summary: "Cancel an invoice",
     description: "Cancels a created, processing, or issued invoice.",

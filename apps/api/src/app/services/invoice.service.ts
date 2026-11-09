@@ -11,6 +11,7 @@ import { buildInvoiceSearchFilter } from "../filters/invoice.filters.ts";
 import type {
   CreateInvoiceInput,
   InvoiceListInput,
+  UpdateInvoiceInput,
 } from "../schemas/invoice.schema.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { eventService } from "./event.service.ts";
@@ -102,6 +103,28 @@ async function getDetails(id: string) {
   }
 
   return invoice;
+}
+
+async function update(id: string, input: UpdateInvoiceInput) {
+  const invoice = await findById(id);
+
+  if (invoice.status !== "CREATED") {
+    throw new BadRequestError("Only created invoices can be updated.");
+  }
+
+  const updatedInvoice = await prismaSingleton.invoice.update({
+    where: { id },
+    data: {
+      ...(input.customerName !== undefined && {
+        customerName: input.customerName,
+      }),
+      ...(input.customerTaxId !== undefined && {
+        customerTaxId: input.customerTaxId,
+      }),
+    },
+  });
+
+  return updatedInvoice;
 }
 
 async function getPdf(id: string) {
@@ -217,6 +240,7 @@ export const invoiceService = {
   findAll,
   findById,
   getDetails,
+  update,
   getPdf,
   process,
   issue,

@@ -3,6 +3,7 @@ import { invoiceDocs } from "../docs/invoice.docs.ts";
 import {
   createInvoiceSchema,
   invoiceListSchema,
+  updateInvoiceSchema,
 } from "../schemas/invoice.schema.ts";
 import { invoiceService } from "../services/invoice.service.ts";
 import type { FastifyInstance } from "fastify";
@@ -52,6 +53,13 @@ export async function invoiceRoutes(app: FastifyInstance) {
     const invoice = await invoiceService.create(apiKey, input);
 
     return reply.status(201).send(invoice);
+  });
+
+  app.patch("/:id", { schema: invoiceDocs.update }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const input = updateInvoiceSchema.parse(request.body);
+    const invoice = await invoiceService.update(id, input);
+    return reply.status(200).send(invoice);
   });
 
   app.post(
