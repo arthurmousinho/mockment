@@ -1,6 +1,5 @@
-import { Link } from "react-router-dom";
-import { Button, buttonVariants } from "./ui/button";
-import { Card } from "./ui/card";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,21 +54,23 @@ const apiDocLinks = [
   },
 ] as const;
 
+const GITHUB_URL = "https://github.com/arthurmousinho/mockment";
+
 export function Header() {
   const { setTheme } = useTheme();
+  const { pathname } = useLocation();
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <Card className="@container flex w-full flex-row items-center justify-between gap-3 rounded bg-slate-100 px-3 py-3 sm:px-6 sm:py-4 dark:bg-muted">
-      <Logo />
-
-      <nav
-        aria-label="Main navigation"
-        className="flex shrink-0 items-center gap-2"
-      >
+    <header className="@container w-full overflow-hidden border bg-slate-50 dark:bg-muted/40">
+      <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
+        <Logo />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="secondary"
+              variant="outline"
               size="icon"
               className="@min-[68rem]:hidden"
               aria-label="Open navigation menu"
@@ -95,116 +96,137 @@ export function Header() {
                 <a href={doc.href} target="_blank" rel="noopener noreferrer">
                   <BookOpenIcon size={18} />
                   {doc.label}
-                  <ArrowUpRightIcon size={16} />
+                  <ArrowUpRightIcon size={16} className="ml-auto" />
                 </a>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setTheme("light")}>
+              <SunIcon size={18} />
+              Light
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("dark")}>
+              <MoonIcon size={18} />
+              Dark
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("system")}>
+              <DesktopIcon size={18} />
+              System
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a
-                href="https://github.com/arthurmousinho/mockment"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
                 <GithubLogoIcon size={18} />
                 Star on GitHub
               </a>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        {navigationLinks.map((link, index) => {
-          const Icon = link.icon;
-          return (
-            <Link
-              to={link.href}
-              key={index}
-              className={cn(
-                buttonVariants({ variant: "secondary" }),
-                "hidden @min-[68rem]:inline-flex",
+
+        <div className="hidden shrink-0 items-center gap-1 @min-[68rem]:flex">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" aria-label="API documentation">
+                <BookOpenIcon size={18} />
+                API Docs
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {apiDocLinks.map((doc) =>
+                doc.external ? (
+                  <DropdownMenuItem key={doc.label} asChild>
+                    <a
+                      href={doc.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ArrowUpRightIcon size={16} />
+                      {doc.label}
+                    </a>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem key={doc.label} asChild>
+                    <Link to={doc.href}>
+                      <ArrowUpRightIcon size={16} />
+                      {doc.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ),
               )}
-            >
-              <Icon size={18} />
-              {link.label}
-            </Link>
-          );
-        })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <SunIcon
+                  size={18}
+                  className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+                />
+                <MoonIcon
+                  size={18}
+                  className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+                />
+                <span className="sr-only">Alternar tema</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                <SunIcon size={16} />
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <MoonIcon size={16} />
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                <DesktopIcon size={16} />
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="secondary"
-              className="hidden @min-[68rem]:inline-flex"
-            >
-              <BookOpenIcon size={18} />
-              API Doc
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {apiDocLinks.map((doc) =>
-              doc.external ? (
-                <DropdownMenuItem key={doc.label} asChild>
-                  <a href={doc.href} target="_blank" rel="noopener noreferrer">
-                    <ArrowUpRightIcon size={16} />
-                    {doc.label}
-                  </a>
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem key={doc.label} asChild>
-                  <Link to={doc.href}>
-                    <ArrowUpRightIcon size={16} />
-                    {doc.label}
-                  </Link>
-                </DropdownMenuItem>
-              ),
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="relative">
-              <SunIcon
-                size={18}
-                className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-              />
-              <MoonIcon
-                size={18}
-                className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-              />
-              <span className="sr-only">Alternar tema</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <SunIcon size={16} />
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <MoonIcon size={16} />
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <DesktopIcon size={16} />
-              System
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button
-          variant="outline"
-          className="hidden @min-[68rem]:inline-flex"
-          asChild
-        >
-          <a
-            href="https://github.com/arthurmousinho/mockment"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <GithubLogoIcon size={32} />
-            Star on GitHub
-          </a>
-        </Button>
+          <Button variant="outline" className="ml-1" asChild>
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              <GithubLogoIcon size={16} />
+              Star on GitHub
+            </a>
+          </Button>
+        </div>
+      </div>
+      <nav
+        aria-label="Main navigation"
+        className="hidden overflow-x-auto border-t px-2 @min-[68rem]:block sm:px-3"
+      >
+        <ul className="flex items-center">
+          {navigationLinks.map((link) => {
+            const Icon = link.icon;
+            const active = isActive(link.href);
+            return (
+              <li key={link.href} className="relative shrink-0 py-1.5">
+                <Link
+                  to={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-accent",
+                    active
+                      ? "font-medium text-primary"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon size={16} />
+                  {link.label}
+                </Link>
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary"
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </nav>
-    </Card>
+    </header>
   );
 }
