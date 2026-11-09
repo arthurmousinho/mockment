@@ -30,9 +30,8 @@ export function canChangeInvoiceStatus(
 ) {
   const validTransitions: Record<InvoiceStatus, InvoiceStatus[]> = {
     CREATED: ["PROCESSING", "CANCELED"],
-    PROCESSING: ["ISSUED", "REJECTED", "CANCELED"],
+    PROCESSING: ["ISSUED", "CANCELED"],
     ISSUED: ["CANCELED"],
-    REJECTED: [],
     CANCELED: [],
   };
   const allowed = validTransitions[currentStatus];

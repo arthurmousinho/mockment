@@ -1,0 +1,3 @@
+UPDATE `invoices` SET `status` = 'CANCELED' WHERE `status` = 'REJECTED';
+
+ALTER TABLE `invoices` MODIFY `status` ENUM('CREATED', 'PROCESSING', 'ISSUED', 'CANCELED') NOT NULL DEFAULT 'CREATED';

@@ -6,7 +6,7 @@ import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 import type { EventType } from "./events-http";
 
 export type InvoiceStatus =
-  "CREATED" | "PROCESSING" | "ISSUED" | "REJECTED" | "CANCELED";
+  "CREATED" | "PROCESSING" | "ISSUED" | "CANCELED";
 export type Invoice = {
   id: string;
   status: InvoiceStatus;

@@ -5,7 +5,6 @@ import {
   ClockIcon,
   SpinnerGapIcon,
   CheckCircleIcon,
-  XCircleIcon,
   ProhibitIcon,
 } from "@phosphor-icons/react";
 
@@ -35,12 +34,6 @@ const INVOICE_STATUS_CONFIG: Record<
     icon: CheckCircleIcon,
     className:
       "bg-green-100 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-900",
-  },
-  REJECTED: {
-    label: "Rejected",
-    icon: XCircleIcon,
-    className:
-      "bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-900",
   },
   CANCELED: {
     label: "Canceled",

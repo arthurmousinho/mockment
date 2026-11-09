@@ -32,7 +32,6 @@ enum InvoiceStatus {
   CREATED
   PROCESSING
   ISSUED
-  REJECTED
   CANCELED
 }
 
