@@ -122,9 +122,36 @@ export const cancelInvoiceStep = {
   },
 } satisfies Step;
 
+export const issueInvoiceStep = {
+  id: "invoice.issue",
+  name: "Issue invoice",
+  description: "Issue a processing invoice.",
+  input: [
+    { name: "id", label: "Invoice ID", type: "string", required: true },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "paymentId", type: "string" },
+    { name: "customerName", type: "string" },
+    { name: "customerTaxId", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "status", type: "string" },
+    { name: "issuedAt", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: {
+    type: "http",
+    method: "POST",
+    endpoint: "/invoices/:id/issue",
+  },
+} satisfies Step;
+
 export const INVOICE_STEPS = [
   createInvoiceStep,
   getInvoiceStep,
   processInvoiceStep,
   cancelInvoiceStep,
+  issueInvoiceStep,
 ] as const;
