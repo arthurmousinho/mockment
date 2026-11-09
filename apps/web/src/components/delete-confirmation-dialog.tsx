@@ -15,6 +15,9 @@ export function DeleteConfirmationDialog({
   itemName,
   isPending,
   onConfirm,
+  action = "delete",
+  confirmLabel = "Delete",
+  pendingLabel = "Deleting…",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,6 +25,9 @@ export function DeleteConfirmationDialog({
   itemName: string;
   isPending: boolean;
   onConfirm: () => void;
+  action?: string;
+  confirmLabel?: string;
+  pendingLabel?: string;
 }) {
   return (
     <Dialog
@@ -34,7 +40,7 @@ export function DeleteConfirmationDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete{" "}
+            Are you sure you want to {action}{" "}
             <span className="break-all font-medium">{itemName}</span>? This
             action cannot be undone.
           </DialogDescription>
@@ -56,7 +62,7 @@ export function DeleteConfirmationDialog({
               if (!isPending) onConfirm();
             }}
           >
-            {isPending ? "Deleting…" : "Delete"}
+            {isPending ? pendingLabel : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -71,8 +71,21 @@ export function IssueInvoiceRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Invoice issued successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
+export function CancelInvoiceRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`invoices/${id}/cancel`);
+      return response.json<Invoice>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Invoice canceled successfully.");
     },
     onError: apiErrorHandler,
   });

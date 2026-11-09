@@ -1,4 +1,5 @@
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
@@ -18,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  CancelInvoiceRequest,
   DownloadInvoicePdfRequest,
   FindAllInvoicesRequest,
   IssueInvoiceRequest,
@@ -35,6 +37,7 @@ import {
   EyeIcon,
   PlusIcon,
   ReceiptIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
 
@@ -43,6 +46,7 @@ export function InvoicesPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingCancel, setPendingCancel] = useState<string | null>(null);
   const {
     data: response,
     isPending,
@@ -55,6 +59,8 @@ export function InvoicesPage() {
   const { mutate: issueInvoice, isPending: isIssuing } = IssueInvoiceRequest();
   const { mutate: downloadInvoicePdf, isPending: isDownloading } =
     DownloadInvoicePdfRequest();
+  const { mutate: cancelInvoice, isPending: isCanceling } =
+    CancelInvoiceRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
   if (isError)
@@ -170,6 +176,17 @@ export function InvoicesPage() {
                       <DownloadSimpleIcon size={32} />
                       Download PDF
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={
+                        !["CREATED", "PROCESSING", "ISSUED"].includes(
+                          invoice.status,
+                        ) || isCanceling
+                      }
+                      onClick={() => setPendingCancel(invoice.id)}
+                    >
+                      <XIcon size={32} />
+                      Cancel
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -199,6 +216,24 @@ export function InvoicesPage() {
           }}
         />
       </div>
+      <DeleteConfirmationDialog
+        open={Boolean(pendingCancel)}
+        onOpenChange={(open) => {
+          if (!open) setPendingCancel(null);
+        }}
+        title="Cancel invoice?"
+        itemName={pendingCancel ?? ""}
+        action="cancel"
+        confirmLabel="Cancel invoice"
+        pendingLabel="Canceling…"
+        isPending={isCanceling}
+        onConfirm={() => {
+          if (!pendingCancel || isCanceling) return;
+          cancelInvoice(pendingCancel, {
+            onSuccess: () => setPendingCancel(null),
+          });
+        }}
+      />
     </div>
   );
 }
