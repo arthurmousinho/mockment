@@ -69,6 +69,19 @@ export function UpdateInvoiceRequest() {
   });
 }
 
+export function DeleteInvoiceRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`invoices/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Invoice deleted successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
 export function ProcessInvoiceRequest() {
   return useMutation({
     mutationFn: async (id: string) => {

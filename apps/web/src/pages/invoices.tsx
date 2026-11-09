@@ -21,6 +21,7 @@ import {
 import {
   CancelInvoiceRequest,
   DownloadInvoicePdfRequest,
+  DeleteInvoiceRequest,
   FindAllInvoicesRequest,
   IssueInvoiceRequest,
   ProcessInvoiceRequest,
@@ -39,6 +40,7 @@ import {
   PlusIcon,
   PencilSimpleIcon,
   ReceiptIcon,
+  TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -48,6 +50,7 @@ export function InvoicesPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [pendingCancel, setPendingCancel] = useState<string | null>(null);
   const {
     data: response,
@@ -63,6 +66,8 @@ export function InvoicesPage() {
     DownloadInvoicePdfRequest();
   const { mutate: cancelInvoice, isPending: isCanceling } =
     CancelInvoiceRequest();
+  const { mutate: deleteInvoice, isPending: isDeleting } =
+    DeleteInvoiceRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
   if (isError)
@@ -167,14 +172,20 @@ export function InvoicesPage() {
                       </DropdownMenuItem>
                     </InvoiceFormDialog>
                     <DropdownMenuItem
-                      disabled={!canChangeInvoiceStatus(invoice.status, "PROCESSING") || isProcessing}
+                      disabled={
+                        !canChangeInvoiceStatus(invoice.status, "PROCESSING") ||
+                        isProcessing
+                      }
                       onClick={() => processInvoice(invoice.id)}
                     >
                       <ArrowClockwiseIcon size={32} />
                       Process
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      disabled={!canChangeInvoiceStatus(invoice.status, "ISSUED") || isIssuing}
+                      disabled={
+                        !canChangeInvoiceStatus(invoice.status, "ISSUED") ||
+                        isIssuing
+                      }
                       onClick={() => issueInvoice(invoice.id)}
                     >
                       <CheckIcon size={32} />
@@ -189,6 +200,13 @@ export function InvoicesPage() {
                     >
                       <XIcon size={32} />
                       Cancel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={invoice.status !== "CREATED" || isDeleting}
+                      onClick={() => setPendingDelete(invoice.id)}
+                    >
+                      <TrashIcon size={32} />
+                      Delete
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={invoice.status !== "ISSUED" || isDownloading}
@@ -226,6 +244,24 @@ export function InvoicesPage() {
           }}
         />
       </div>
+      <DeleteConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete invoice?"
+        itemName={pendingDelete ?? ""}
+        isPending={isDeleting}
+        onConfirm={() => {
+          if (!pendingDelete || isDeleting) return;
+          deleteInvoice(pendingDelete, {
+            onSuccess: () => {
+              setPendingDelete(null);
+              if (response.data.length === 1 && page > 1) setPage(page - 1);
+            },
+          });
+        }}
+      />
       <DeleteConfirmationDialog
         open={Boolean(pendingCancel)}
         onOpenChange={(open) => {
