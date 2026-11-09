@@ -149,7 +149,8 @@ export const simulationDocs = {
   },
   removeScenario: {
     summary: "Delete a simulation scenario",
-    description: "Permanently deletes a scenario and all its runs and step runs.",
+    description:
+      "Permanently deletes a scenario and all its runs and step runs.",
     tags: ["Simulations"],
     params: idParamsSchema,
     response: {
@@ -171,7 +172,7 @@ export const simulationDocs = {
   availableSteps: {
     summary: "List available simulation steps",
     description:
-      "Returns step definitions grouped by payments, subscriptions, and checkouts for building simulation forms.",
+      "Returns step definitions grouped by payments, subscriptions, checkouts, and invoices for building simulation forms.",
     tags: ["Simulations"],
     response: {
       200: {

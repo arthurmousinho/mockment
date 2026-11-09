@@ -107,7 +107,9 @@ function buildRequest(executor: StepHTTPExecutor, input: StepInput) {
 
 async function ensureAuthorization(context: ExecutionContext, action: string) {
   const requiresKey =
-    action === "payment.create" || action === "subscription.create";
+    action === "payment.create" ||
+    action === "subscription.create" ||
+    action === "invoice.create";
   if (context.authorization || !requiresKey) {
     return;
   }
