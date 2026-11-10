@@ -62,3 +62,20 @@ export function GetCustomerDetailsRequest(
     enabled: options?.enabled ?? true,
   });
 }
+
+export function UpdateCustomerRequest() {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...data
+    }: { id: string } & CreateCustomerRequestData) => {
+      const response = await api.patch(`customers/${id}`, { json: data });
+      return response.json<Customer>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer updated successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}

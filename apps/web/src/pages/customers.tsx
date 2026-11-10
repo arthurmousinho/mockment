@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { FindAllCustomersRequest } from "@/http/customers-http";
 import { formatDateTime } from "@/lib/formatters";
-import { DotsThreeIcon, EyeIcon, PlusIcon, UsersIcon } from "@phosphor-icons/react";
+import { DotsThreeIcon, EyeIcon, PencilSimpleIcon, PlusIcon, UsersIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function CustomersPage() {
@@ -131,6 +131,12 @@ export function CustomersPage() {
                         Details
                       </DropdownMenuItem>
                     </CustomerDetailsDialog>
+                    <CustomerFormDialog customer={customer}>
+                      <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                        <PencilSimpleIcon size={32} />
+                        Edit
+                      </DropdownMenuItem>
+                    </CustomerFormDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

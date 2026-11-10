@@ -19,7 +19,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { CreateCustomerRequest } from "@/http/customers-http";
+import {
+  CreateCustomerRequest,
+  UpdateCustomerRequest,
+  type Customer,
+} from "@/http/customers-http";
 import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,31 +40,54 @@ type CustomerFormData = z.infer<typeof customerSchema>;
 
 type CustomerFormDialogProps = {
   children: ReactNode;
+  customer?: Customer;
 };
 
-export function CustomerFormDialog({ children }: CustomerFormDialogProps) {
+export function CustomerFormDialog({
+  children,
+  customer,
+}: CustomerFormDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate: createRequest, isPending: isCreating } =
     CreateCustomerRequest();
+  const { mutate: updateRequest, isPending: isUpdating } =
+    UpdateCustomerRequest();
+  const isPending = isCreating || isUpdating;
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      document: "",
-      externalId: "",
+      name: customer?.name ?? "",
+      email: customer?.email ?? "",
+      phone: customer?.phone ?? "",
+      document: customer?.document ?? "",
+      externalId: customer?.externalId ?? "",
     },
   });
 
   function handleOpenChange(nextOpen: boolean) {
+    if (isPending) return;
+    if (nextOpen) {
+      form.reset({
+        name: customer?.name ?? "",
+        email: customer?.email ?? "",
+        phone: customer?.phone ?? "",
+        document: customer?.document ?? "",
+        externalId: customer?.externalId ?? "",
+      });
+    }
     setOpen(nextOpen);
-    if (!nextOpen) form.reset();
   }
 
   function onSubmit(data: CustomerFormData) {
-    if (isCreating) return;
-    createRequest(data, { onSuccess: () => handleOpenChange(false) });
+    if (isPending) return;
+    if (customer) {
+      updateRequest(
+        { id: customer.id, ...data },
+        { onSuccess: () => setOpen(false) },
+      );
+      return;
+    }
+    createRequest(data, { onSuccess: () => setOpen(false) });
   }
 
   return (
@@ -68,9 +95,13 @@ export function CustomerFormDialog({ children }: CustomerFormDialogProps) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Customer</DialogTitle>
+          <DialogTitle>
+            {customer ? "Edit Customer" : "New Customer"}
+          </DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a customer.
+            {customer
+              ? "Update the customer details below."
+              : "Fill out the form below to create a customer."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -158,7 +189,7 @@ export function CustomerFormDialog({ children }: CustomerFormDialogProps) {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isCreating}>
+              <Button type="submit" disabled={isPending}>
                 Save
               </Button>
             </DialogFooter>
