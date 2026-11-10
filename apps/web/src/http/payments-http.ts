@@ -16,6 +16,7 @@ export type Payment = {
   currency: PaymentCurrency;
   method: PaymentMethod;
   status: PaymentStatus;
+  customerId: string | null;
   description: string | null;
   externalId: string | null;
   idempotencyKey: string | null;
@@ -29,6 +30,7 @@ export type CreatePaymentRequestData = {
   amountInCents: number;
   currency: PaymentCurrency;
   method: PaymentMethod;
+  customerId?: string;
   successUrl?: string;
   cancelUrl?: string;
   description?: string;

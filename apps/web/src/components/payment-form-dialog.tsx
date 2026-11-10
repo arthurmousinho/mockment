@@ -57,6 +57,7 @@ const paymentFormSchema = z.object({
   currency: z.enum(PaymentCurrencyValues),
   method: z.enum(PaymentMethodValues),
   apiKey: z.string().trim().min(1, "API key is required."),
+  customerId: z.string().trim().max(191, "Customer ID must be at most 191 characters long."),
   successUrl: z.union([z.url(), z.literal("")]),
   cancelUrl: z.union([z.url(), z.literal("")]),
   description: z
@@ -89,6 +90,7 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
       currency: "BRL",
       method: "PIX",
       apiKey: "",
+      customerId: "",
       successUrl: "",
       cancelUrl: "",
       description: "",
@@ -111,6 +113,7 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
     createPayment(
       {
         ...data,
+        customerId: data.customerId || undefined,
         successUrl: data.successUrl || undefined,
         cancelUrl: data.cancelUrl || undefined,
         description: data.description || undefined,
@@ -245,6 +248,19 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-3 pt-2">
+                        <FormField
+                          control={form.control}
+                          name="customerId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Customer ID</FormLabel>
+                              <FormControl>
+                                <Input placeholder="cus_..." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <div className="grid grid-cols-2 gap-3">
                           <FormField
                             control={form.control}
