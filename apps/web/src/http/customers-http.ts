@@ -79,3 +79,16 @@ export function UpdateCustomerRequest() {
     onError: apiErrorHandler,
   });
 }
+
+export function DeleteCustomerRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`customers/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer deleted successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}

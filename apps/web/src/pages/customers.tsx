@@ -1,4 +1,5 @@
 import { CustomerDetailsDialog } from "@/components/customer-details-dialog";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { CustomerFormDialog } from "@/components/customer-form-dialog";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { ListingSearch } from "@/components/listing-search";
@@ -19,9 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllCustomersRequest } from "@/http/customers-http";
+import {
+  DeleteCustomerRequest,
+  FindAllCustomersRequest,
+} from "@/http/customers-http";
 import { formatDateTime } from "@/lib/formatters";
-import { DotsThreeIcon, EyeIcon, PencilSimpleIcon, PlusIcon, UsersIcon } from "@phosphor-icons/react";
+import {
+  DotsThreeIcon,
+  EyeIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  TrashIcon,
+  UsersIcon,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function CustomersPage() {
@@ -29,6 +40,11 @@ export function CustomersPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const {
     data: response,
     isPending,
@@ -36,6 +52,8 @@ export function CustomersPage() {
     isError,
     refetch,
   } = FindAllCustomersRequest({ page, limit, search });
+  const { mutate: deleteCustomer, isPending: isDeleting } =
+    DeleteCustomerRequest();
 
   if (isPending) return <ListingPageSkeleton columns={7} rows={limit} />;
 
@@ -120,23 +138,44 @@ export function CustomersPage() {
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" aria-label={`Actions for ${customer.name}`}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Actions for ${customer.name}`}
+                    >
                       <DotsThreeIcon size={32} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
                     <CustomerDetailsDialog id={customer.id}>
-                      <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                      <DropdownMenuItem
+                        onSelect={(event) => event.preventDefault()}
+                      >
                         <EyeIcon size={32} />
                         Details
                       </DropdownMenuItem>
                     </CustomerDetailsDialog>
                     <CustomerFormDialog customer={customer}>
-                      <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                      <DropdownMenuItem
+                        onSelect={(event) => event.preventDefault()}
+                      >
                         <PencilSimpleIcon size={32} />
                         Edit
                       </DropdownMenuItem>
                     </CustomerFormDialog>
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onSelect={() =>
+                        setPendingDelete({
+                          id: customer.id,
+                          name: customer.name,
+                        })
+                      }
+                      disabled={isDeleting}
+                    >
+                      <TrashIcon size={32} />
+                      Delete
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -166,6 +205,24 @@ export function CustomersPage() {
           }}
         />
       </div>
+      <DeleteConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete customer?"
+        itemName={pendingDelete?.name ?? ""}
+        isPending={isDeleting}
+        onConfirm={() => {
+          if (!pendingDelete || isDeleting) return;
+          deleteCustomer(pendingDelete.id, {
+            onSuccess: () => {
+              setPendingDelete(null);
+              if (response.data.length === 1 && page > 1) setPage(page - 1);
+            },
+          });
+        }}
+      />
     </div>
   );
 }
