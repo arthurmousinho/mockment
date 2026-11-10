@@ -24,7 +24,6 @@ import {
   DeleteCustomerRequest,
   FindAllCustomersRequest,
 } from "@/http/customers-http";
-import { formatDateTime } from "@/lib/formatters";
 import {
   DotsThreeIcon,
   EyeIcon,
@@ -115,26 +114,22 @@ export function CustomersPage() {
       <Table>
         <TableHeader className="bg-muted/70">
           <TableRow>
+            <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Document</TableHead>
-            <TableHead>External ID</TableHead>
-            <TableHead className="text-right">Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {response.data.map((customer) => (
             <TableRow key={customer.id}>
+              <TableCell>{customer.id}</TableCell>
               <TableCell>{customer.name}</TableCell>
               <TableCell>{customer.email}</TableCell>
               <TableCell>{customer.phone}</TableCell>
               <TableCell>{customer.document}</TableCell>
-              <TableCell>{customer.externalId}</TableCell>
-              <TableCell className="text-right">
-                {formatDateTime(customer.createdAt)}
-              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
