@@ -13,6 +13,12 @@ export async function customerRoutes(app: FastifyInstance) {
     return reply.status(200).send(customers);
   });
 
+  app.get("/:id", { schema: customerDocs.findById }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const customer = await customerService.findById(id);
+    return reply.status(200).send(customer);
+  });
+
   app.post("/", { schema: customerDocs.create }, async (request, reply) => {
     const input = createCustomerSchema.parse(request.body);
     const customer = await customerService.create(input);

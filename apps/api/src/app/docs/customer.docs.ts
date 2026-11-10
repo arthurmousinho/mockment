@@ -1,5 +1,14 @@
-import { httpErrorSchema, openApiSchema, paginatedResponseSchema, searchablePaginationParamsSchema } from "../../common/openapi.ts";
-import { createCustomerSchema, customerSchema } from "../schemas/customer.schema.ts";
+import {
+  httpErrorSchema,
+  idParamsSchema,
+  openApiSchema,
+  paginatedResponseSchema,
+  searchablePaginationParamsSchema,
+} from "../../common/openapi.ts";
+import {
+  createCustomerSchema,
+  customerSchema,
+} from "../schemas/customer.schema.ts";
 
 export const customerDocs = {
   findAll: {
@@ -14,6 +23,34 @@ export const customerDocs = {
         content: {
           "application/json": {
             schema: paginatedResponseSchema(customerSchema),
+          },
+        },
+      },
+    },
+  },
+  findById: {
+    summary: "Get customer details",
+    description: "Returns the details of a customer.",
+    tags: ["Customers"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the customer is retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(customerSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the customer with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Customer with ID {id} was not found.",
+            }),
           },
         },
       },
@@ -40,7 +77,8 @@ export const customerDocs = {
             schema: httpErrorSchema({
               error: "CONFLICT",
               code: 409,
-              message: "A customer with the same email, document, or external ID already exists.",
+              message:
+                "A customer with the same email, document, or external ID already exists.",
             }),
           },
         },

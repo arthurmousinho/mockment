@@ -54,6 +54,16 @@ async function findAll(input: CustomerListInput) {
   });
 }
 
+async function findById(id: string) {
+  const customer = await prismaSingleton.customer.findUnique({ where: { id } });
+
+  if (!customer) {
+    throw new NotFoundError(`Customer with ID ${id} was not found.`);
+  }
+
+  return customer;
+}
+
 async function checkEmailUniqueness(email: string) {
   const customerWithEmail = await prismaSingleton.customer.findUnique({
     where: { email },
@@ -86,4 +96,4 @@ async function checkExternalIdUniqueness(externalId: string) {
   }
 }
 
-export const customerService = { create, findAll };
+export const customerService = { create, findAll, findById };
