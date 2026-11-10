@@ -1,6 +1,8 @@
-import { api } from "@/lib/ky";
+import { api, apiErrorHandler } from "@/lib/ky";
+import { queryClient } from "@/lib/query-client";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export type Customer = {
   id: string;
@@ -25,5 +27,24 @@ export function FindAllCustomersRequest(
       return await request.json<PaginatedAPIResponse<Customer>>();
     },
     placeholderData: keepPreviousData,
+  });
+}
+
+export type CreateCustomerRequestData = Pick<
+  Customer,
+  "name" | "email" | "phone" | "document" | "externalId"
+>;
+
+export function CreateCustomerRequest() {
+  return useMutation({
+    mutationFn: async (data: CreateCustomerRequestData) => {
+      const request = await api.post("customers", { json: data });
+      return await request.json<Customer>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer created successfully.");
+    },
+    onError: apiErrorHandler,
   });
 }

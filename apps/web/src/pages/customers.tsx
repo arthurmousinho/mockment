@@ -1,3 +1,4 @@
+import { CustomerFormDialog } from "@/components/customer-form-dialog";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
@@ -77,10 +78,12 @@ export function CustomersPage() {
         />
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-          <Button>
-            <PlusIcon />
-            New Customer
-          </Button>
+          <CustomerFormDialog>
+            <Button>
+              <PlusIcon />
+              New Customer
+            </Button>
+          </CustomerFormDialog>
         </div>
       </div>
 
