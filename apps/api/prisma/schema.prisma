@@ -273,6 +273,21 @@ model Subscription {
   @@map("subscriptions")
 }
 
+model Customer {
+  id String @id
+
+  name       String
+  email      String @unique
+  phone      String
+  document   String @unique
+  externalId String @unique @map("external_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+
 model VirtualClock {
   id String @id @default("default")
 
