@@ -5,6 +5,7 @@ export function buildPaymentSearchFilter(search?: string): PaymentWhereInput {
   return buildSearchFilter<PaymentWhereInput>(search, [
     (term) => ({ id: { contains: term } }),
     (term) => ({ description: { contains: term } }),
+    (term) => ({ customerId: { contains: term } }),
     (term) => ({ externalId: { contains: term } }),
     (term) => ({ idempotencyKey: { contains: term } }),
   ]);
