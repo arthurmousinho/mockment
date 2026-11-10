@@ -1,6 +1,7 @@
 import cors from "@fastify/cors";
 import { ZodError } from "zod";
 import { createApp } from "./app.ts";
+import { customerRoutes } from "./app/routes/customer.routes.ts";
 import { apiKeyRoutes } from "./app/routes/api-key.routes.ts";
 import { env } from "./config/env.ts";
 import { HttpError } from "./common/http-error.ts";
@@ -67,6 +68,7 @@ appSingleton.post("/webhooks/mock/handler", async (request, reply) => {
 appSingleton.register(apiKeyRoutes, { prefix: "/api-keys" });
 appSingleton.register(paymentRoutes, { prefix: "/payments" });
 appSingleton.register(invoiceRoutes, { prefix: "/invoices" });
+appSingleton.register(customerRoutes, { prefix: "/customers" });
 appSingleton.register(webhookEndpointRoutes, { prefix: "/webhooks/endpoints" });
 appSingleton.register(webhookDeliveryRoutes, {
   prefix: "/webhooks/deliveries",

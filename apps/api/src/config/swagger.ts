@@ -35,6 +35,11 @@ export async function registerSwagger(app: FastifyInstance) {
             "Invoice creation for payments, including customer details, amounts, currencies, and invoice status.",
         },
         {
+          name: "Customers",
+          description:
+            "Represents the individuals or entities making payments, including their contact information, tax identification, and unique identifiers.",
+        },
+        {
           name: "Events",
           description:
             "Events generated throughout the lifecycle of payments and subscriptions. Allows integrations to track state changes, recurring billing activity, and other relevant events within the payment system.",
