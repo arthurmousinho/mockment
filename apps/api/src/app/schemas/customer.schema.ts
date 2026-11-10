@@ -12,6 +12,16 @@ export const createCustomerSchema = z.object({
   externalId: z.string().trim().min(1).max(255),
 });
 
+export const updateCustomerSchema = createCustomerSchema
+  .partial()
+  .strict()
+  .refine(
+    (input) => Object.values(input).some((value) => value !== undefined),
+    { message: "Provide at least one field to update." },
+  );
+
+export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>;
+
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 
 export const customerSchema = createCustomerSchema.extend({

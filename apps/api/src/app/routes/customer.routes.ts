@@ -2,6 +2,7 @@ import { customerDocs } from "../docs/customer.docs.ts";
 import {
   createCustomerSchema,
   customerListSchema,
+  updateCustomerSchema,
 } from "../schemas/customer.schema.ts";
 import { customerService } from "../services/customer.service.ts";
 import type { FastifyInstance } from "fastify";
@@ -16,6 +17,13 @@ export async function customerRoutes(app: FastifyInstance) {
   app.get("/:id", { schema: customerDocs.findById }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const customer = await customerService.findById(id);
+    return reply.status(200).send(customer);
+  });
+
+  app.patch("/:id", { schema: customerDocs.update }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const input = updateCustomerSchema.parse(request.body);
+    const customer = await customerService.update(id, input);
     return reply.status(200).send(customer);
   });
 

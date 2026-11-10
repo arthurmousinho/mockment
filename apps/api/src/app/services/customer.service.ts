@@ -10,6 +10,7 @@ import { buildCustomerSearchFilter } from "../filters/customer.filters.ts";
 import type {
   CreateCustomerInput,
   CustomerListInput,
+  UpdateCustomerInput,
 } from "../schemas/customer.schema.ts";
 
 async function create(input: CreateCustomerInput) {
@@ -64,36 +65,68 @@ async function findById(id: string) {
   return customer;
 }
 
-async function checkEmailUniqueness(email: string) {
+async function update(id: string, input: UpdateCustomerInput) {
+  await findById(id);
+
+  if (input.email !== undefined) {
+    await checkEmailUniqueness(input.email, id);
+  }
+
+  if (input.document !== undefined) {
+    await checkDocumentUniqueness(input.document, id);
+  }
+
+  if (input.externalId !== undefined) {
+    await checkExternalIdUniqueness(input.externalId, id);
+  }
+
+  const updatedCustomer = await prismaSingleton.customer.update({
+    where: { id },
+    data: {
+      ...(input.name !== undefined && { name: input.name }),
+      ...(input.email !== undefined && { email: input.email }),
+      ...(input.phone !== undefined && { phone: input.phone }),
+      ...(input.document !== undefined && { document: input.document }),
+      ...(input.externalId !== undefined && { externalId: input.externalId }),
+    },
+  });
+
+  return updatedCustomer;
+}
+
+async function checkEmailUniqueness(email: string, customerId?: string) {
   const customerWithEmail = await prismaSingleton.customer.findUnique({
     where: { email },
   });
 
-  if (customerWithEmail) {
+  if (customerWithEmail && customerWithEmail.id !== customerId) {
     throw new ConflictError("Customer with this email already exists.");
   }
 }
 
-async function checkDocumentUniqueness(document: string) {
+async function checkDocumentUniqueness(document: string, customerId?: string) {
   const customerWithDocument = await prismaSingleton.customer.findUnique({
     where: { document },
   });
 
-  if (customerWithDocument) {
+  if (customerWithDocument && customerWithDocument.id !== customerId) {
     throw new ConflictError("Customer with this document already exists.");
   }
 }
 
-async function checkExternalIdUniqueness(externalId: string) {
+async function checkExternalIdUniqueness(
+  externalId: string,
+  customerId?: string,
+) {
   const customerWithExternalId = await prismaSingleton.customer.findUnique({
     where: { externalId },
   });
 
-  if (customerWithExternalId) {
+  if (customerWithExternalId && customerWithExternalId.id !== customerId) {
     throw new ConflictError(
       `Customer with externalId ${externalId} already exists.`,
     );
   }
 }
 
-export const customerService = { create, findAll, findById };
+export const customerService = { create, findAll, findById, update };

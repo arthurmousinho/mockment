@@ -8,6 +8,7 @@ import {
 import {
   createCustomerSchema,
   customerSchema,
+  updateCustomerSchema,
 } from "../schemas/customer.schema.ts";
 
 export const customerDocs = {
@@ -50,6 +51,48 @@ export const customerDocs = {
               error: "NOT_FOUND",
               code: 404,
               message: "Customer with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
+  update: {
+    summary: "Update a customer",
+    description: "Updates the supplied fields of a customer.",
+    tags: ["Customers"],
+    params: idParamsSchema,
+    body: openApiSchema(updateCustomerSchema),
+    response: {
+      200: {
+        description: "When the customer is updated successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(customerSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the customer with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Customer with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      409: {
+        description: "When the email, document, or external ID already exists.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "CONFLICT",
+              code: 409,
+              message:
+                "A customer with the same email, document, or external ID already exists.",
             }),
           },
         },
