@@ -2,6 +2,7 @@ import { setTimeout } from "node:timers/promises";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { Prisma } from "../../../generated/prisma/client.ts";
+import { API_PREFIX } from "../env.ts";
 import { prismaSingleton } from "../prisma.ts";
 import { createPrefixedId } from "../../common/utils.ts";
 import { simulationScenarioStepSchema } from "../../app/schemas/simulation.schema.ts";
@@ -102,7 +103,11 @@ function buildRequest(executor: StepHTTPExecutor, input: StepInput) {
   const hasPayload =
     executor.method !== "GET" && Object.keys(payload).length > 0;
 
-  return { method: executor.method, url, ...(hasPayload ? { payload } : {}) };
+  return {
+    method: executor.method,
+    url: `${API_PREFIX}${url}`,
+    ...(hasPayload ? { payload } : {}),
+  };
 }
 
 async function ensureAuthorization(context: ExecutionContext, action: string) {

@@ -157,7 +157,7 @@ After everything is running, the services will be available at:
 
 | Service           | URL                                  |
 | ----------------- | ------------------------------------ |
-| REST API          | http://localhost:8080                |
+| REST API          | http://localhost:8080/api/v1         |
 | API Doc (Swagger) | http://localhost:8080/docs           |
 | API Doc (Scalar)  | http://localhost:4200/scalar-api-doc |
 | Web Dashboard     | http://localhost:4200                |
@@ -171,7 +171,7 @@ Once Mockment is running, you're ready to start simulating payment flows.
 The first step is creating a mock API key. Every request to the Mockment API must be authenticated using an API key, just like a real payment provider.
 
 ```bash
-curl -X POST http://localhost:8080/api-keys \
+curl -X POST http://localhost:8080/api/v1/api-keys \
   -H "Content-Type: application/json" \
   -d '{
     "name": "my first api key"
@@ -181,7 +181,7 @@ curl -X POST http://localhost:8080/api-keys \
 The response contains a `rawKey`. Keep this value safe, as it is the only time it will be returned and it will be required to authenticate future requests. Next, register a webhook endpoint. Mockment will send payment events to this URL whenever a payment changes state. Replace `<YOUR_API_KEY>` with the `rawKey` from the previous step.
 
 ```bash
-curl -X POST http://localhost:8080/webhooks/endpoints \
+curl -X POST http://localhost:8080/api/v1/webhooks/endpoints \
   -H "Authorization: Bearer <YOUR_API_KEY>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -199,7 +199,7 @@ curl -X POST http://localhost:8080/webhooks/endpoints \
 With a webhook configured, you can now create your first mock payment.
 
 ```bash
-curl -X POST http://localhost:8080/payments \
+curl -X POST http://localhost:8080/api/v1/payments \
   -H "Authorization: Bearer <YOUR_API_KEY>" \
   -H "Content-Type: application/json" \
   -d '{

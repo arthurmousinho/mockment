@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import { createApp } from "./app.ts";
 import { customerRoutes } from "./app/routes/customer.routes.ts";
 import { apiKeyRoutes } from "./app/routes/api-key.routes.ts";
-import { env } from "./config/env.ts";
+import { API_PREFIX, env } from "./config/env.ts";
 import { HttpError } from "./common/http-error.ts";
 import { paymentRoutes } from "./app/routes/payment.routes.ts";
 import { invoiceRoutes } from "./app/routes/invoice.routes.ts";
@@ -56,28 +56,33 @@ appSingleton.setErrorHandler((error, request, reply) => {
   });
 });
 
-// Mock Webhook Handler
-appSingleton.post("/webhooks/mock/handler", async (request, reply) => {
-  console.log("Webhook received");
-  console.log("Body:", request.body);
-  console.log("Signature:", request.headers["x-signature"]);
-  return reply.status(200).send();
-});
+await appSingleton.register(
+  async (app) => {
+    // Mock Webhook Handler
+    app.post("/webhooks/mock/handler", async (request, reply) => {
+      console.log("Webhook received");
+      console.log("Body:", request.body);
+      console.log("Signature:", request.headers["x-signature"]);
+      return reply.status(200).send();
+    });
 
-// Routes
-appSingleton.register(apiKeyRoutes, { prefix: "/api-keys" });
-appSingleton.register(paymentRoutes, { prefix: "/payments" });
-appSingleton.register(invoiceRoutes, { prefix: "/invoices" });
-appSingleton.register(customerRoutes, { prefix: "/customers" });
-appSingleton.register(webhookEndpointRoutes, { prefix: "/webhooks/endpoints" });
-appSingleton.register(webhookDeliveryRoutes, {
-  prefix: "/webhooks/deliveries",
-});
-appSingleton.register(eventRoutes, { prefix: "/events" });
-appSingleton.register(checkoutRoutes, { prefix: "/checkouts" });
-appSingleton.register(subcriptionRoutes, { prefix: "/subscriptions" });
-appSingleton.register(virtualClockRoutes, { prefix: "/virtual-clock" });
-appSingleton.register(simulationRoutes, { prefix: "/simulation" });
+    // Routes
+    app.register(apiKeyRoutes, { prefix: "/api-keys" });
+    app.register(paymentRoutes, { prefix: "/payments" });
+    app.register(invoiceRoutes, { prefix: "/invoices" });
+    app.register(customerRoutes, { prefix: "/customers" });
+    app.register(webhookEndpointRoutes, { prefix: "/webhooks/endpoints" });
+    app.register(webhookDeliveryRoutes, {
+      prefix: "/webhooks/deliveries",
+    });
+    app.register(eventRoutes, { prefix: "/events" });
+    app.register(checkoutRoutes, { prefix: "/checkouts" });
+    app.register(subcriptionRoutes, { prefix: "/subscriptions" });
+    app.register(virtualClockRoutes, { prefix: "/virtual-clock" });
+    app.register(simulationRoutes, { prefix: "/simulation" });
+  },
+  { prefix: API_PREFIX },
+);
 
 // Scheduler
 await registerScheduler(appSingleton);

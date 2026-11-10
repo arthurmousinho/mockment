@@ -1,7 +1,7 @@
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
-import { env } from "./env.ts";
+import { API_PREFIX, env } from "./env.ts";
 
 export async function registerSwagger(app: FastifyInstance) {
   await app.register(swagger, {
@@ -15,7 +15,7 @@ export async function registerSwagger(app: FastifyInstance) {
       },
       servers: [
         {
-          url: `http://localhost:${env.PORT}`,
+          url: `http://localhost:${env.PORT}/api/v1`,
           description: "Local development server",
         },
       ],
@@ -79,6 +79,6 @@ export async function registerSwagger(app: FastifyInstance) {
   });
 
   await app.register(swaggerUi, {
-    routePrefix: "/docs",
+    routePrefix: `${API_PREFIX}/docs`,
   });
 }

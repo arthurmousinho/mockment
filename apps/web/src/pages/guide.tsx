@@ -109,7 +109,7 @@ export function GuidePage() {
             description="Send a request to the payments endpoint."
           >
             <CodeBlock>
-              {`curl -X POST http://localhost:8080/payments \\
+              {`curl -X POST http://localhost:8080/api/v1/payments \\
   -H "Authorization: Bearer $MOCKMENT_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

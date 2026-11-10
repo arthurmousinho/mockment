@@ -1,8 +1,10 @@
 import ky, { HTTPError } from "ky";
 import { toast } from "sonner";
 
+export const API_URL = import.meta.env.VITE_API_URL;
+
 export const api = ky.create({
-  prefix: import.meta.env.VITE_API_URL,
+  prefix: API_URL,
 });
 
 export function apiErrorHandler(error: unknown) {
@@ -20,7 +22,9 @@ export function apiErrorHandler(error: unknown) {
     if (messages.length > 0) {
       messages.forEach((msg) => toast.error(msg));
     } else {
-      toast.error(`Request failed (${error.response.status}). Please try again.`);
+      toast.error(
+        `Request failed (${error.response.status}). Please try again.`,
+      );
     }
     return;
   }

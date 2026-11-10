@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/ky";
 import { ApiReferenceReact } from "@scalar/api-reference-react";
 import "@scalar/api-reference-react/style.css";
 
@@ -5,7 +6,7 @@ export function ScalarApiDocPage() {
   return (
     <ApiReferenceReact
       configuration={{
-        url: "http://localhost:8080/docs/json",
+        url: `${API_URL}/docs/json`,
         theme: "default",
         showDeveloperTools: "never",
         agent: {

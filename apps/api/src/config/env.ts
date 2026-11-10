@@ -6,6 +6,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   HOST: z.string(),
   PORT: z.coerce.number().int().positive(),
+  API_VERSION: z.string(),
   WEB_URL: z.url(),
   DATABASE_URL: z.url(),
   DATABASE_USER: z.string(),
@@ -25,3 +26,5 @@ if (!result.success) {
 }
 
 export const env = result.data;
+
+export const API_PREFIX = `/api/${env.API_VERSION}` as const;

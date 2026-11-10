@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/ky";
 import { useEffect, useRef, useState } from "react";
 
 const TICK_INTERVAL_MS = 1000;
@@ -10,9 +11,7 @@ export function useVirtualClockEvents() {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      "http://localhost:8080/virtual-clock/events",
-    );
+    const eventSource = new EventSource(`${API_URL}/virtual-clock/events`);
 
     const handleClockTick = (event: MessageEvent<string>) => {
       const dateTime = new Date(JSON.parse(event.data));
