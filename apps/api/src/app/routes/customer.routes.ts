@@ -32,4 +32,14 @@ export async function customerRoutes(app: FastifyInstance) {
     const customer = await customerService.create(input);
     return reply.status(201).send(customer);
   });
+
+  app.delete(
+    "/:id",
+    { schema: customerDocs.remove },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      await customerService.remove(id);
+      return reply.status(204).send();
+    },
+  );
 }

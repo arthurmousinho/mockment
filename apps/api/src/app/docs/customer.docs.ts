@@ -99,6 +99,27 @@ export const customerDocs = {
       },
     },
   },
+  remove: {
+    summary: "Delete a customer",
+    description: "Permanently deletes a customer.",
+    tags: ["Customers"],
+    params: idParamsSchema,
+    response: {
+      204: { description: "When the customer is deleted successfully." },
+      404: {
+        description: "When the customer with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Customer with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   create: {
     summary: "Create a customer",
     description: "Creates a new customer.",

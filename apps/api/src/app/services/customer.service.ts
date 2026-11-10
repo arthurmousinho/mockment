@@ -94,6 +94,11 @@ async function update(id: string, input: UpdateCustomerInput) {
   return updatedCustomer;
 }
 
+async function remove(id: string) {
+  await findById(id);
+  await prismaSingleton.customer.delete({ where: { id } });
+}
+
 async function checkEmailUniqueness(email: string, customerId?: string) {
   const customerWithEmail = await prismaSingleton.customer.findUnique({
     where: { email },
@@ -129,4 +134,4 @@ async function checkExternalIdUniqueness(
   }
 }
 
-export const customerService = { create, findAll, findById, update };
+export const customerService = { create, findAll, findById, update, remove };
