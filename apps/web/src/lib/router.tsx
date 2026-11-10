@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import { MainLayout } from "../layouts/main-layout";
+import { CustomersPage } from "@/pages/customers";
 import { ApiKeysPage } from "@/pages/api-keys";
 import { CheckoutsPage } from "@/pages/checkouts";
 import { PaymentsPage } from "@/pages/payments";
@@ -29,6 +30,11 @@ export const router = createBrowserRouter([
             element: <MainLayout />,
             children: [
               { path: "", handle: { title: "Guide" }, element: <GuidePage /> },
+              {
+                path: "customers",
+                handle: { title: "Customers" },
+                element: <CustomersPage />,
+              },
               {
                 path: "payments",
                 handle: { title: "Payments" },
