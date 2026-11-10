@@ -1,4 +1,8 @@
 import { z } from "zod";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
+
+export const customerListSchema = searchablePaginationSchema;
+export type CustomerListInput = z.infer<typeof customerListSchema>;
 
 export const createCustomerSchema = z.object({
   name: z.string().trim().min(1).max(255),

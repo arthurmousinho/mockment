@@ -1,8 +1,16 @@
 import { Prisma } from "../../../generated/prisma/client.ts";
 import { ConflictError, NotFoundError } from "../../common/http-error.ts";
-import { createPrefixedId } from "../../common/utils.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+  createPrefixedId,
+} from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
-import type { CreateCustomerInput } from "../schemas/customer.schema.ts";
+import { buildCustomerSearchFilter } from "../filters/customer.filters.ts";
+import type {
+  CreateCustomerInput,
+  CustomerListInput,
+} from "../schemas/customer.schema.ts";
 
 async function create(input: CreateCustomerInput) {
   await checkDocumentUniqueness(input.document);
@@ -24,6 +32,26 @@ async function create(input: CreateCustomerInput) {
   });
 
   return createdCustomer;
+}
+
+async function findAll(input: CustomerListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildCustomerSearchFilter(input.search);
+  const [customers, total] = await Promise.all([
+    prismaSingleton.customer.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.customer.count({ where }),
+  ]);
+  return buildPaginatedResponse({
+    data: customers,
+    page: input.page,
+    limit: input.limit,
+    total,
+  });
 }
 
 async function checkEmailUniqueness(email: string) {
@@ -58,4 +86,4 @@ async function checkExternalIdUniqueness(externalId: string) {
   }
 }
 
-export const customerService = { create };
+export const customerService = { create, findAll };
