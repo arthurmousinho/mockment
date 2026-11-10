@@ -38,6 +38,7 @@ function availableSteps() {
     subscriptions: mapSteps(STEPS.subscriptions),
     checkouts: mapSteps(STEPS.checkouts),
     invoices: mapSteps(STEPS.invoices),
+    customers: mapSteps(STEPS.customers),
   };
 }
 

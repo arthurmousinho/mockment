@@ -34,6 +34,7 @@ export const availableStepsSchema = z.object({
   subscriptions: z.array(availableStepSchema),
   checkouts: z.array(availableStepSchema),
   invoices: z.array(availableStepSchema),
+  customers: z.array(availableStepSchema),
 });
 
 export type AvailableStep = z.infer<typeof availableStepSchema>;

@@ -49,6 +49,7 @@ const stepGroupLabels: Record<string, string> = {
   subscriptions: "Subscriptions",
   checkouts: "Checkouts",
   invoices: "Invoices",
+  customers: "Customers",
 };
 
 export function SimulationScenarioFormDialog({

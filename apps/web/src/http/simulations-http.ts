@@ -117,7 +117,7 @@ export function DeleteSimulationScenarioRequest() {
 
 export function FindAvailableSimulationStepsRequest(enabled = true) {
   return useQuery({
-    queryKey: ["simulation-steps", "grouped", "invoices"],
+    queryKey: ["simulation-steps", "grouped", "customers"],
     enabled,
     queryFn: async () => {
       const response = await api.get("simulation/steps");
