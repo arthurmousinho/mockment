@@ -15,6 +15,7 @@ import type {
   CreatePaymentInput,
   PaymentListInput,
 } from "../schemas/payment.schema.ts";
+import { customerService } from "./customer.service.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import { buildCheckoutLink, checkoutService } from "./checkout.service.ts";
 import { eventService } from "./event.service.ts";
@@ -62,6 +63,10 @@ async function create(
     }
   }
 
+  if (input.customerId) {
+    await customerService.findById(input.customerId);
+  }
+
   const payment = await prismaSingleton.payment.create({
     data: {
       id: createPrefixedId("pay"),
@@ -72,6 +77,7 @@ async function create(
       externalId: input.externalId ?? null,
       description: input.description ?? null,
       apiKeyId: validatedApiKey.id,
+      customerId: input.customerId ?? null,
       status: "CREATED",
     },
   });

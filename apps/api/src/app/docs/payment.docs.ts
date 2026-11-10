@@ -84,6 +84,18 @@ export const paymentDocs = {
           },
         },
       },
+      404: {
+        description: "When the customer with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Customer with ID {id} was not found.",
+            }),
+          },
+        },
+      },
       409: {
         description: "When already exists a payment with the same external ID.",
         content: {

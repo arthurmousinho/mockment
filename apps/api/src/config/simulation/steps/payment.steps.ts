@@ -27,6 +27,12 @@ export const createPaymentStep = {
       options: createPaymentSchema.shape.method.options,
     },
     {
+      name: "customerId",
+      label: "Customer ID",
+      type: "string",
+      required: false,
+    },
+    {
       name: "successUrl",
       label: "Success URL",
       type: "string",
@@ -63,6 +69,7 @@ export const createPaymentStep = {
     { name: "currency", type: "string" },
     { name: "method", type: "string" },
     { name: "status", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "externalId", type: "string" },
     { name: "idempotencyKey", type: "string" },

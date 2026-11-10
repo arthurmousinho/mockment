@@ -16,6 +16,7 @@ export const paymentSchema = z.object({
   currency: z.enum(PaymentCurrency),
   method: z.enum(PaymentMethod),
   status: z.enum(PaymentStatus),
+  customerId: z.string().nullable(),
   description: z.string().nullable(),
   externalId: z.string().nullable(),
   idempotencyKey: z.string().nullable(),
@@ -28,6 +29,12 @@ export const createPaymentSchema = z.object({
     .number({ message: "Amount must be a number." })
     .int({ message: "Amount must be an integer." })
     .positive({ message: "Amount must be greater than zero." }),
+  customerId: z
+    .string({ message: "Customer ID must be a valid string" })
+    .trim()
+    .min(1, { message: "Customer ID must be at least 1 character long." })
+    .max(191, { message: "Customer ID must be at most 191 characters long." })
+    .optional(),
   currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
   method: z.enum(PaymentMethod, { message: "Invalid payment method." }),
   successUrl: z.url({ message: "Invalid success URL." }).optional(),
