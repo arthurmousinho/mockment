@@ -48,3 +48,17 @@ export function CreateCustomerRequest() {
     onError: apiErrorHandler,
   });
 }
+
+export function GetCustomerDetailsRequest(
+  id: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: ["customers", id],
+    queryFn: async () => {
+      const response = await api.get(`customers/${id}`);
+      return response.json<Customer>();
+    },
+    enabled: options?.enabled ?? true,
+  });
+}

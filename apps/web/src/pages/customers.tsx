@@ -1,9 +1,16 @@
+import { CustomerDetailsDialog } from "@/components/customer-details-dialog";
 import { CustomerFormDialog } from "@/components/customer-form-dialog";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -14,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { FindAllCustomersRequest } from "@/http/customers-http";
 import { formatDateTime } from "@/lib/formatters";
-import { PlusIcon, UsersIcon } from "@phosphor-icons/react";
+import { DotsThreeIcon, EyeIcon, PlusIcon, UsersIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function CustomersPage() {
@@ -30,7 +37,7 @@ export function CustomersPage() {
     refetch,
   } = FindAllCustomersRequest({ page, limit, search });
 
-  if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
+  if (isPending) return <ListingPageSkeleton columns={7} rows={limit} />;
 
   if (isError) {
     return (
@@ -96,6 +103,7 @@ export function CustomersPage() {
             <TableHead>Document</TableHead>
             <TableHead>External ID</TableHead>
             <TableHead className="text-right">Created At</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -109,12 +117,29 @@ export function CustomersPage() {
               <TableCell className="text-right">
                 {formatDateTime(customer.createdAt)}
               </TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" aria-label={`Actions for ${customer.name}`}>
+                      <DotsThreeIcon size={32} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right">
+                    <CustomerDetailsDialog id={customer.id}>
+                      <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                        <EyeIcon size={32} />
+                        Details
+                      </DropdownMenuItem>
+                    </CustomerDetailsDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
             </TableRow>
           ))}
           {response.data.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
                 {search
