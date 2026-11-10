@@ -63,7 +63,7 @@ export function PaymentDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Payment details</DialogTitle>
           <DialogDescription>
@@ -107,6 +107,12 @@ export function PaymentDetailsDialog({
             <Separator />
             <div className="space-y-2.5">
               <CopyableField label="Payment ID" value={paymentDetails.id} />
+              {paymentDetails.customerId && (
+                <CopyableField
+                  label="Customer ID"
+                  value={paymentDetails.customerId}
+                />
+              )}
               <CopyableField
                 label="API Key ID"
                 value={paymentDetails.apiKeyId}
