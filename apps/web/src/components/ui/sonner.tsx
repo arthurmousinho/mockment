@@ -1,4 +1,4 @@
-import { useTheme } from "@/components/theme-provider";
+import { getThemeColorScheme, useTheme } from "@/components/theme-provider";
 import { createPortal } from "react-dom";
 import "sonner/dist/styles.css";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
@@ -15,7 +15,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return createPortal(
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={getThemeColorScheme(theme)}
       position="top-right"
       closeButton
       className="toaster group"

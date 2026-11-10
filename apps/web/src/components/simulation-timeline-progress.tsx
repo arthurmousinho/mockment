@@ -33,7 +33,6 @@ function Connector({
   delay: number | undefined;
 }) {
   const fill = useRef<HTMLSpanElement>(null);
-  // Último progresso conhecido (0..1). null = ainda não montou.
   const progress = useRef<number | null>(null);
 
   const timed =

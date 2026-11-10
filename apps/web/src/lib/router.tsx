@@ -17,6 +17,7 @@ import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
 import { SimulationRunPage } from "@/pages/simulation-run";
 import { NotFoundPage } from "@/pages/not-found";
 import { PageLayout } from "@/layouts/page-layout";
+import { SettingsPage } from "@/pages/settings";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,11 @@ export const router = createBrowserRouter([
             element: <MainLayout />,
             children: [
               { path: "", handle: { title: "Guide" }, element: <GuidePage /> },
+              {
+                path: "settings",
+                handle: { title: "Settings" },
+                element: <SettingsPage />,
+              },
               {
                 path: "customers",
                 handle: { title: "Customers" },

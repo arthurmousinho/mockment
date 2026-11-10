@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import * as React from "react";
 
-type Theme = "dark" | "light" | "system";
+export type Theme =
+  "dark" | "light" | "dimmed" | "midnight" | "warm" | "system";
 type ResolvedTheme = "dark" | "light";
 
 type ThemeProviderProps = {
@@ -17,7 +18,19 @@ type ThemeProviderState = {
 };
 
 const COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)";
-const THEME_VALUES: Theme[] = ["dark", "light", "system"];
+const THEME_VALUES: Theme[] = [
+  "dark",
+  "light",
+  "dimmed",
+  "midnight",
+  "warm",
+  "system",
+];
+
+export function getThemeColorScheme(theme: Theme): "light" | "dark" | "system" {
+  if (theme === "system") return "system";
+  return theme === "light" || theme === "warm" ? "light" : "dark";
+}
 
 const ThemeProviderContext = React.createContext<
   ThemeProviderState | undefined
@@ -105,12 +118,16 @@ export function ThemeProvider({
     (nextTheme: Theme) => {
       const root = document.documentElement;
       const resolvedTheme =
-        nextTheme === "system" ? getSystemTheme() : nextTheme;
+        nextTheme === "system"
+          ? getSystemTheme()
+          : getThemeColorScheme(nextTheme);
       const restoreTransitions = disableTransitionOnChange
         ? disableTransitionsTemporarily()
         : null;
 
       root.dataset.appTheme = resolvedTheme;
+      root.dataset.appPalette =
+        nextTheme === "system" ? resolvedTheme : nextTheme;
 
       if (restoreTransitions) {
         restoreTransitions();
@@ -125,6 +142,7 @@ export function ThemeProvider({
     if (theme !== "system") {
       return () => {
         delete document.documentElement.dataset.appTheme;
+        delete document.documentElement.dataset.appPalette;
       };
     }
 
@@ -138,6 +156,7 @@ export function ThemeProvider({
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
       delete document.documentElement.dataset.appTheme;
+      delete document.documentElement.dataset.appPalette;
     };
   }, [theme, applyTheme]);
 
@@ -160,14 +179,11 @@ export function ThemeProvider({
       }
 
       setThemeState((currentTheme) => {
-        const nextTheme =
-          currentTheme === "dark"
-            ? "light"
-            : currentTheme === "light"
-              ? "dark"
-              : getSystemTheme() === "dark"
-                ? "light"
-                : "dark";
+        const colorScheme =
+          currentTheme === "system"
+            ? getSystemTheme()
+            : getThemeColorScheme(currentTheme);
+        const nextTheme = colorScheme === "dark" ? "light" : "dark";
 
         localStorage.setItem(storageKey, nextTheme);
         return nextTheme;
