@@ -24,4 +24,22 @@ export const createCustomerStep = {
   executor: { type: "http", method: "POST", endpoint: "/customers" },
 } satisfies Step;
 
-export const CUSTOMER_STEPS = [createCustomerStep] as const;
+export const getCustomerStep = {
+  id: "customer.get",
+  name: "Get customer",
+  description: "Get an existing customer by its ID.",
+  input: [{ name: "id", label: "Customer ID", type: "string", required: true }],
+  output: [
+    { name: "id", type: "string" },
+    { name: "name", type: "string" },
+    { name: "email", type: "string" },
+    { name: "phone", type: "string" },
+    { name: "document", type: "string" },
+    { name: "externalId", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "updatedAt", type: "string" },
+  ],
+  executor: { type: "http", method: "GET", endpoint: "/customers/:id" },
+} satisfies Step;
+
+export const CUSTOMER_STEPS = [createCustomerStep, getCustomerStep] as const;
