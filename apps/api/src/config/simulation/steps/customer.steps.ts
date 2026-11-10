@@ -67,4 +67,18 @@ export const updateCustomerStep = {
   executor: { type: "http", method: "PATCH", endpoint: "/customers/:id" },
 } satisfies Step;
 
-export const CUSTOMER_STEPS = [createCustomerStep, getCustomerStep, updateCustomerStep] as const;
+export const deleteCustomerStep = {
+  id: "customer.delete",
+  name: "Delete customer",
+  description: "Delete an existing customer.",
+  input: [{ name: "id", label: "Customer ID", type: "string", required: true }],
+  output: [],
+  executor: { type: "http", method: "DELETE", endpoint: "/customers/:id" },
+} satisfies Step;
+
+export const CUSTOMER_STEPS = [
+  createCustomerStep,
+  getCustomerStep,
+  updateCustomerStep,
+  deleteCustomerStep,
+] as const;
