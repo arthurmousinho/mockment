@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PaymentPicker } from "@/components/payment-picker";
 import {
   Form,
   FormControl,
@@ -125,14 +126,9 @@ export function InvoiceFormDialog({
               name="paymentId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment ID</FormLabel>
+                  <FormLabel>Payment</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="pay_..."
-                      {...field}
-                      readOnly={isEditing}
-                      disabled={isEditing}
-                    />
+                    <PaymentPicker {...field} disabled={isEditing} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
