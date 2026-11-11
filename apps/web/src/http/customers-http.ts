@@ -17,6 +17,7 @@ export type Customer = {
 
 export function FindAllCustomersRequest(
   paginationData: PaginatedRequest & { search?: string },
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ["customers", paginationData],
@@ -27,6 +28,7 @@ export function FindAllCustomersRequest(
       return await request.json<PaginatedAPIResponse<Customer>>();
     },
     placeholderData: keepPreviousData,
+    enabled: options?.enabled ?? true,
   });
 }
 
