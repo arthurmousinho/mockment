@@ -121,6 +121,39 @@ async function findAll(input: PaymentListInput) {
   });
 }
 
+async function getMetrics() {
+  const payments = await prismaSingleton.payment.groupBy({
+    by: ["status"],
+    _sum: { amountInCents: true },
+    _count: { _all: true },
+  });
+
+  const totalTransactions = payments.reduce(
+    (total, group) => total + group._count._all,
+    0,
+  );
+  const totalPaymentVolume = payments.reduce(
+    (total, group) => total + (group._sum.amountInCents ?? 0),
+    0,
+  );
+  const approved = payments.find((group) => group.status === "APPROVED");
+  const approvedVolume = approved?._sum.amountInCents ?? 0;
+  const approvedCount = approved?._count._all ?? 0;
+
+  return {
+    totalPaymentVolume,
+    approvedVolume,
+    approvalRate: totalTransactions
+      ? (approvedCount / totalTransactions) * 100
+      : 0,
+    totalTransactions,
+    averageTicket: approvedCount ? approvedVolume / approvedCount : 0,
+    refundedVolume:
+      payments.find((group) => group.status === "REFUNDED")?._sum
+        .amountInCents ?? 0,
+  };
+}
+
 async function findById(id: string) {
   const payment = await prismaSingleton.payment.findUnique({
     where: { id },
@@ -228,6 +261,7 @@ async function createRecurringPayment(subscription: Subscription) {
 export const paymentService = {
   create,
   findAll,
+  getMetrics,
   findById,
   changeStatus,
   getDetails,

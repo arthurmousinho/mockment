@@ -74,6 +74,10 @@ export async function registerSwagger(app: FastifyInstance) {
           description:
             "Development-time virtual time control. Allows payment and subscription lifecycles to be simulated by advancing time without waiting for real-world dates or scheduled intervals.",
         },
+        {
+          name: "Metrics",
+          description: "Metrics related to gateway.",
+        },
       ],
     },
   });
