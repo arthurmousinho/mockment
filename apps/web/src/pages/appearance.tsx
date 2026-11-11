@@ -76,7 +76,7 @@ function ThemePreview({ theme }: { theme: Exclude<Theme, "system"> }) {
   );
 }
 
-export function SettingsPage() {
+export function AppearancePage() {
   const { theme, setTheme } = useTheme();
 
   return (
@@ -84,7 +84,7 @@ export function SettingsPage() {
       <header className="space-y-2">
         <div className="flex items-center gap-2">
           <GearIcon size={24} />
-          <h1 className="text-xl font-medium tracking-tight">Settings</h1>
+          <h1 className="text-xl font-medium tracking-tight">Appearance</h1>
         </div>
         <p className="text-sm text-muted-foreground">
           Make Mockment feel at home in your workspace.

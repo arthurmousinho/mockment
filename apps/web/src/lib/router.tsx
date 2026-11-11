@@ -17,7 +17,7 @@ import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
 import { SimulationRunPage } from "@/pages/simulation-run";
 import { NotFoundPage } from "@/pages/not-found";
 import { PageLayout } from "@/layouts/page-layout";
-import { SettingsPage } from "@/pages/settings";
+import { AppearancePage } from "@/pages/appearance";
 
 export const router = createBrowserRouter([
   {
@@ -32,9 +32,9 @@ export const router = createBrowserRouter([
             children: [
               { path: "", handle: { title: "Guide" }, element: <GuidePage /> },
               {
-                path: "settings",
-                handle: { title: "Settings" },
-                element: <SettingsPage />,
+                path: "appearance",
+                handle: { title: "Appearance" },
+                element: <AppearancePage />,
               },
               {
                 path: "customers",

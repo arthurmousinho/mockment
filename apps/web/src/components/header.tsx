@@ -25,7 +25,7 @@ import {
   FlaskIcon,
   TicketIcon,
   UsersIcon,
-  GearIcon,
+  PaletteIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -42,7 +42,7 @@ const navigationLinks = [
   { label: "Events", href: "/events", icon: ReceiptIcon },
   { label: "Webhooks", href: "/webhooks", icon: WebhooksLogoIcon },
   { label: "API Keys", href: "/api-keys", icon: KeyIcon },
-  { label: "Settings", href: "/settings", icon: GearIcon },
+  { label: "Appearance", href: "/appearance", icon: PaletteIcon },
 ] as const;
 
 const apiDocLinks = [
