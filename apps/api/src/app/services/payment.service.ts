@@ -1,7 +1,7 @@
 import type { Subscription } from "../../../generated/prisma/browser.ts";
-import type {
-  PaymentCurrency,
+import {
   PaymentStatus,
+  type PaymentCurrency,
 } from "../../../generated/prisma/enums.ts";
 import {
   BadRequestError,
@@ -125,12 +125,40 @@ async function findAll(input: PaymentListInput) {
 }
 
 async function getMetrics(currency: PaymentCurrency) {
-  const payments = await prismaSingleton.payment.groupBy({
-    by: ["status"],
-    where: { currency },
-    _sum: { amountInCents: true },
-    _count: { _all: true },
-  });
+  const now = new Date();
+  const hourMs = 60 * 60 * 1000;
+  const currentHour = Math.floor(now.getTime() / hourMs) * hourMs;
+  const start = currentHour - 7 * hourMs;
+
+  const [payments, recentPayments] = await Promise.all([
+    prismaSingleton.payment.groupBy({
+      by: ["status"],
+      where: { currency },
+      _sum: { amountInCents: true },
+      _count: { _all: true },
+    }),
+    prismaSingleton.payment.findMany({
+      where: { currency, createdAt: { gte: new Date(start), lte: now } },
+      select: { createdAt: true, status: true, amountInCents: true },
+    }),
+  ]);
+
+  const hourlyReport = Array.from({ length: 8 }, (_, index) => ({
+    hour: new Date(start + index * hourMs).toISOString(),
+    statuses: Object.fromEntries(
+      Object.values(PaymentStatus).map((status) => [
+        status,
+        { count: 0, volume: 0 },
+      ]),
+    ) as Record<PaymentStatus, { count: number; volume: number }>,
+  }));
+
+  for (const payment of recentPayments) {
+    const index = Math.floor((payment.createdAt.getTime() - start) / hourMs);
+    const status = hourlyReport[index]!.statuses[payment.status];
+    status.count += 1;
+    status.volume += payment.amountInCents;
+  }
 
   const totalTransactions = payments.reduce(
     (total, group) => total + group._count._all,
@@ -145,6 +173,7 @@ async function getMetrics(currency: PaymentCurrency) {
   const approvedCount = approved?._count._all ?? 0;
 
   return {
+    hourlyReport,
     totalPaymentVolume,
     approvedVolume,
     approvalRate: totalTransactions

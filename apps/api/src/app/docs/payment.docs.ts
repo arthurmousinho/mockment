@@ -17,7 +17,8 @@ import {
 export const paymentDocs = {
   getMetrics: {
     summary: "Get payment metrics",
-    description: "Returns payment metrics for the specified currency. Amounts are in cents and status metrics reflect current payment statuses.",
+    description:
+      "Returns payment metrics for the specified currency, including hourly totals for the current hour and previous 7 hours. Amounts are in cents and status metrics reflect current payment statuses.",
     tags: ["Payments"],
     params: openApiSchema(paymentMetricsParamsSchema),
     response: {

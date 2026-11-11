@@ -8,7 +8,9 @@ import {
 } from "../../../generated/prisma/enums.ts";
 
 export const paymentListSchema = searchablePaginationSchema;
-export const paymentMetricsParamsSchema = z.object({ currency: z.enum(PaymentCurrency) });
+export const paymentMetricsParamsSchema = z.object({
+  currency: z.enum(PaymentCurrency),
+});
 export const paymentMetricsSchema = z.object({
   totalPaymentVolume: z.number(),
   approvedVolume: z.number(),
@@ -16,6 +18,18 @@ export const paymentMetricsSchema = z.object({
   totalTransactions: z.number(),
   averageTicket: z.number(),
   refundedVolume: z.number(),
+  hourlyReport: z.array(
+    z.object({
+      hour: z.iso.datetime(),
+      statuses: z.record(
+        z.enum(PaymentStatus),
+        z.object({
+          count: z.number(),
+          volume: z.number(),
+        }),
+      ),
+    }),
+  ),
 });
 export type PaymentListInput = z.infer<typeof paymentListSchema>;
 
