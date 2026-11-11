@@ -11,6 +11,7 @@ import {
 import { PaymentCurrencyBadge } from "./payment-currency-badge";
 import { PaymentMethodBadge } from "./payment-method-badge";
 import { PaymentCreatedContent } from "./payment-created-content";
+import { CustomerPicker } from "./customer-picker";
 import { Textarea } from "./ui/textarea";
 import {
   Accordion,
@@ -57,7 +58,10 @@ const paymentFormSchema = z.object({
   currency: z.enum(PaymentCurrencyValues),
   method: z.enum(PaymentMethodValues),
   apiKey: z.string().trim().min(1, "API key is required."),
-  customerId: z.string().trim().max(191, "Customer ID must be at most 191 characters long."),
+  customerId: z
+    .string()
+    .trim()
+    .max(191, "Customer ID must be at most 191 characters long."),
   successUrl: z.union([z.url(), z.literal("")]),
   cancelUrl: z.union([z.url(), z.literal("")]),
   description: z
@@ -253,9 +257,9 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
                           name="customerId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Customer ID</FormLabel>
+                              <FormLabel>Customer</FormLabel>
                               <FormControl>
-                                <Input placeholder="cus_..." {...field} />
+                                <CustomerPicker {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
