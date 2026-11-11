@@ -170,6 +170,7 @@ export function ProcessPaymentRequest() {
 }
 
 export type PaymentMetrics = {
+  requestedAt: string;
   hourlyReport: {
     hour: string;
     statuses: Record<PaymentStatus, { count: number; volume: number }>;

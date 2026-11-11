@@ -3,7 +3,9 @@ import {
   type PaymentCurrency,
   type PaymentStatus,
 } from "@/http/payments-http";
-import { formatCurrencyFromCents } from "@/lib/formatters";
+import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
+import { RefetchButton } from "@/components/refetch-button";
+import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import {
   Select,
   SelectContent,
@@ -37,7 +39,8 @@ const numberFormat = new Intl.NumberFormat(undefined, {
 export function PaymentMetrics() {
   const [currency, setCurrency] = useState<PaymentCurrency>("BRL");
   const [measure, setMeasure] = useState<"count" | "volume">("count");
-  const { data, isPending, isError } = GetMetricsRequest(currency);
+  const { data, isPending, isError, isFetching, refetch } =
+    GetMetricsRequest(currency);
   const payments = data;
   const cards = payments && [
     {
@@ -74,19 +77,35 @@ export function PaymentMetrics() {
 
   return (
     <div className="space-y-4">
-      <Select
-        value={currency}
-        onValueChange={(value) => setCurrency(value as PaymentCurrency)}
-      >
-        <SelectTrigger aria-label="Payment currency">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="BRL">BRL</SelectItem>
-          <SelectItem value="USD">USD</SelectItem>
-          <SelectItem value="EUR">EUR</SelectItem>
-        </SelectContent>
-      </Select>
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {payments && (
+          <span role="status" className="text-sm text-muted-foreground">
+            Last updated: {formatDateTime(payments.requestedAt)}
+          </span>
+        )}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <Select
+            value={currency}
+            onValueChange={(value) => setCurrency(value as PaymentCurrency)}
+          >
+            <SelectTrigger aria-label="Payment currency">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="BRL">
+                <PaymentCurrencyBadge currency="BRL" />
+              </SelectItem>
+              <SelectItem value="USD">
+                <PaymentCurrencyBadge currency="USD" />
+              </SelectItem>
+              <SelectItem value="EUR">
+                <PaymentCurrencyBadge currency="EUR" />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+        </div>
+      </header>
       {isPending && (
         <p role="status" className="text-muted-foreground">
           Loading metrics...
