@@ -1,3 +1,4 @@
+import { CustomerPicker } from "./customer-picker";
 import { SubscriptionDetailsContent } from "./subscription-details-content";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,7 @@ const SubscriptionIntervalValues: SubscriptionInterval[] = [
 
 function buildSchema(isEditing: boolean) {
   return z.object({
-    customerId: z.string().trim().min(1, "Customer ID is required.").max(191),
+    customerId: z.string().trim().min(1, "Customer is required.").max(191),
     amountInCents: z
       .number({ message: "Amount must be a number." })
       .int({ message: "Amount must be an integer." })
@@ -206,10 +207,9 @@ export function SubscriptionFormDialog({
                   name="customerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Customer ID</FormLabel>
+                      <FormLabel>Customer</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="cus_..."
+                        <CustomerPicker
                           {...field}
                           disabled={isEditing}
                         />
