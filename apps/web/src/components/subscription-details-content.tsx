@@ -82,6 +82,7 @@ export function SubscriptionDetailsContent({
         <Separator />
         <div className="space-y-2.5 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div>span]:break-all">
           <CopyableField label="Subscription ID" value={subscription.id} />
+          <CopyableField label="Customer ID" value={subscription.customerId} />
           {subscription.initPaymentId && (
             <CopyableField
               label="Initial payment ID"
