@@ -11,6 +11,7 @@ export type SubscriptionStatus = "ACTIVE" | "CANCELED" | "PAUSED" | "PENDING";
 
 export type Subscription = {
   id: string;
+  customerId: string;
   description: string | null;
   amountInCents: number;
   currency: PaymentCurrency;
@@ -35,6 +36,7 @@ export type CreateSubscriptionResponse = Subscription & {
 };
 
 export type CreateSubscriptionRequestData = {
+  customerId: string;
   apiKey: string;
   amountInCents: number;
   currency: PaymentCurrency;
@@ -49,6 +51,7 @@ export function CreateSubscriptionRequest() {
     mutationFn: async (data: CreateSubscriptionRequestData) => {
       const headers = { Authorization: `Bearer ${data.apiKey}` };
       const body = {
+        customerId: data.customerId,
         amountInCents: data.amountInCents,
         currency: data.currency,
         method: data.method,
@@ -67,7 +70,9 @@ export function CreateSubscriptionRequest() {
   });
 }
 
-type UpdateSubscriptionRequestData = Partial<CreateSubscriptionRequestData> & {
+type UpdateSubscriptionRequestData = Partial<
+  Omit<CreateSubscriptionRequestData, "customerId" | "apiKey">
+> & {
   id: string;
 };
 

@@ -56,6 +56,7 @@ const SubscriptionIntervalValues: SubscriptionInterval[] = [
 
 function buildSchema(isEditing: boolean) {
   return z.object({
+    customerId: z.string().trim().min(1, "Customer ID is required.").max(191),
     amountInCents: z
       .number({ message: "Amount must be a number." })
       .int({ message: "Amount must be an integer." })
@@ -110,6 +111,7 @@ export function SubscriptionFormDialog({
   const form = useForm<SubscriptionFormData>({
     resolver: zodResolver(buildSchema(isEditing)),
     defaultValues: {
+      customerId: subscription?.customerId ?? "",
       amountInCents: subscription?.amountInCents ?? 0,
       currency: subscription?.currency ?? "BRL",
       method: subscription?.method ?? "PIX",
@@ -133,7 +135,15 @@ export function SubscriptionFormDialog({
 
     if (isEditing && subscription) {
       updateRequest(
-        { id: subscription.id, ...data },
+        {
+          id: subscription.id,
+          amountInCents: data.amountInCents,
+          currency: data.currency,
+          method: data.method,
+          interval: data.interval,
+          intervalCount: data.intervalCount,
+          description: data.description,
+        },
         { onSuccess: () => handleOpenChange(false) },
       );
       return;
@@ -147,7 +157,19 @@ export function SubscriptionFormDialog({
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
-    if (nextOpen) setCreatedSubscription(null);
+    if (nextOpen) {
+      setCreatedSubscription(null);
+      form.reset({
+        customerId: subscription?.customerId ?? "",
+        amountInCents: subscription?.amountInCents ?? 0,
+        currency: subscription?.currency ?? "BRL",
+        method: subscription?.method ?? "PIX",
+        description: subscription?.description ?? "",
+        interval: subscription?.interval ?? "MONTH",
+        intervalCount: subscription?.intervalCount ?? 1,
+        apiKey: "",
+      });
+    }
     if (!nextOpen) {
       setTimeout(() => form.reset(), 200);
     }
@@ -179,6 +201,23 @@ export function SubscriptionFormDialog({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
+                <FormField
+                  control={form.control}
+                  name="customerId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Customer ID</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="cus_..."
+                          {...field}
+                          disabled={isEditing}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="amountInCents"
