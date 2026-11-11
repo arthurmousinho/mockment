@@ -18,6 +18,7 @@ import { SimulationRunPage } from "@/pages/simulation-run";
 import { NotFoundPage } from "@/pages/not-found";
 import { PageLayout } from "@/layouts/page-layout";
 import { AppearancePage } from "@/pages/appearance";
+import { MockboardPage } from "@/pages/mockboard";
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
             element: <MainLayout />,
             children: [
               { path: "", handle: { title: "Guide" }, element: <GuidePage /> },
+              { path: "mockboard", handle: { title: "Mockboard" }, element: <MockboardPage /> },
               {
                 path: "appearance",
                 handle: { title: "Appearance" },

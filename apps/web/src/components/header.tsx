@@ -26,6 +26,7 @@ import {
   TicketIcon,
   UsersIcon,
   PaletteIcon,
+  SpeedometerIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
@@ -34,6 +35,7 @@ import { PageSearch } from "./page-search";
 
 const navigationLinks = [
   { label: "Guide", href: "/", icon: PathIcon },
+  { label: "Mockboard", href: "/mockboard", icon: SpeedometerIcon },
   { label: "Payments", href: "/payments", icon: CurrencyCircleDollarIcon },
   { label: "Invoices", href: "/invoices", icon: TicketIcon },
   { label: "Customers", href: "/customers", icon: UsersIcon },
