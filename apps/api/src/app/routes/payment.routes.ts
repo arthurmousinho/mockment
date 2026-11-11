@@ -24,6 +24,15 @@ export async function paymentRoutes(app: FastifyInstance) {
     },
   );
 
+  app.get(
+    "/metrics",
+    { schema: paymentDocs.getMetrics },
+    async (request, reply) => {
+      const metrics = await paymentService.getMetrics();
+      return reply.status(200).send(metrics);
+    },
+  );
+
   app.post("/", { schema: paymentDocs.create }, async (request, reply) => {
     const authorization = request.headers.authorization;
     if (!authorization?.startsWith("Bearer ")) {

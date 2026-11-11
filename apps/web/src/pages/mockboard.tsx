@@ -8,7 +8,7 @@ const numberFormat = new Intl.NumberFormat(undefined, {
 
 export function MockboardPage() {
   const { data, isPending, isError } = GetMetricsRequest();
-  const payments = data?.payments;
+  const payments = data;
   const cards = payments && [
     {
       label: "Total payment volume",

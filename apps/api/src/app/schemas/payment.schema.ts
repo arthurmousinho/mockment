@@ -8,6 +8,14 @@ import {
 } from "../../../generated/prisma/enums.ts";
 
 export const paymentListSchema = searchablePaginationSchema;
+export const paymentMetricsSchema = z.object({
+  totalPaymentVolume: z.number(),
+  approvedVolume: z.number(),
+  approvalRate: z.number(),
+  totalTransactions: z.number(),
+  averageTicket: z.number(),
+  refundedVolume: z.number(),
+});
 export type PaymentListInput = z.infer<typeof paymentListSchema>;
 
 export const paymentSchema = z.object({
