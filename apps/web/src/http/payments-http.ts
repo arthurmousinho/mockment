@@ -62,6 +62,7 @@ export function CreatePaymentRequest() {
 
 export function FindAllPaymentsRequest(
   paginationData: PaginatedRequest & { search?: string },
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ["payments", paginationData],
@@ -72,6 +73,7 @@ export function FindAllPaymentsRequest(
       return await request.json<PaginatedAPIResponse<Payment>>();
     },
     placeholderData: keepPreviousData,
+    enabled: options?.enabled ?? true,
   });
 }
 
