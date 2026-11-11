@@ -11,13 +11,15 @@ import {
   detailedPaymentSchema,
   paymentSchema,
   paymentMetricsSchema,
+  paymentMetricsParamsSchema,
 } from "../schemas/payment.schema.ts";
 
 export const paymentDocs = {
   getMetrics: {
     summary: "Get payment metrics",
-    description: "Returns overall payment metrics. Amounts are in cents and combine currencies without conversion. Status metrics reflect current payment statuses.",
+    description: "Returns payment metrics for the specified currency. Amounts are in cents and status metrics reflect current payment statuses.",
     tags: ["Payments"],
+    params: openApiSchema(paymentMetricsParamsSchema),
     response: {
       200: {
         description: "When the payment metrics are retrieved successfully.",

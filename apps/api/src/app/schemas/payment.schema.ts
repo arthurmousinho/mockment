@@ -8,6 +8,7 @@ import {
 } from "../../../generated/prisma/enums.ts";
 
 export const paymentListSchema = searchablePaginationSchema;
+export const paymentMetricsParamsSchema = z.object({ currency: z.enum(PaymentCurrency) });
 export const paymentMetricsSchema = z.object({
   totalPaymentVolume: z.number(),
   approvedVolume: z.number(),

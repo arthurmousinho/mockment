@@ -3,6 +3,7 @@ import { paymentDocs } from "../docs/payment.docs.ts";
 import {
   createPaymentSchema,
   paymentListSchema,
+  paymentMetricsParamsSchema,
 } from "../schemas/payment.schema.ts";
 import { paymentService } from "../services/payment.service.ts";
 import type { FastifyInstance } from "fastify";
@@ -25,10 +26,11 @@ export async function paymentRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    "/metrics",
+    "/metrics/:currency",
     { schema: paymentDocs.getMetrics },
     async (request, reply) => {
-      const metrics = await paymentService.getMetrics();
+      const { currency } = paymentMetricsParamsSchema.parse(request.params);
+      const metrics = await paymentService.getMetrics(currency);
       return reply.status(200).send(metrics);
     },
   );

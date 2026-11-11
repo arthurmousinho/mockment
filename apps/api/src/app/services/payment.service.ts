@@ -1,5 +1,8 @@
 import type { Subscription } from "../../../generated/prisma/browser.ts";
-import type { PaymentStatus } from "../../../generated/prisma/enums.ts";
+import type {
+  PaymentCurrency,
+  PaymentStatus,
+} from "../../../generated/prisma/enums.ts";
 import {
   BadRequestError,
   ConflictError,
@@ -121,9 +124,10 @@ async function findAll(input: PaymentListInput) {
   });
 }
 
-async function getMetrics() {
+async function getMetrics(currency: PaymentCurrency) {
   const payments = await prismaSingleton.payment.groupBy({
     by: ["status"],
+    where: { currency },
     _sum: { amountInCents: true },
     _count: { _all: true },
   });

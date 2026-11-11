@@ -1,39 +1,51 @@
-import { GetMetricsRequest } from "@/http/payments-http";
+import { GetMetricsRequest, type PaymentCurrency } from "@/http/payments-http";
+import { formatCurrencyFromCents } from "@/lib/formatters";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 const numberFormat = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 2,
 });
 
 export function PaymentMetrics() {
-  const { data, isPending, isError } = GetMetricsRequest();
+  const [currency, setCurrency] = useState<PaymentCurrency>("BRL");
+  const { data, isPending, isError } = GetMetricsRequest(currency);
   const payments = data;
   const cards = payments && [
     {
       label: "Total payment volume",
-      value: payments.totalPaymentVolume / 100,
+      value: formatCurrencyFromCents(payments.totalPaymentVolume, currency),
       unit: "",
     },
     {
       label: "Approved volume",
-      value: payments.approvedVolume / 100,
+      value: formatCurrencyFromCents(payments.approvedVolume, currency),
       unit: "",
     },
-    { label: "Approval rate", value: payments.approvalRate, unit: "%" },
+    { label: "Approval rate", value: numberFormat.format(payments.approvalRate), unit: "%" },
     {
       label: "Total transactions",
-      value: payments.totalTransactions,
+      value: numberFormat.format(payments.totalTransactions),
       unit: "payments",
     },
-    { label: "Average ticket", value: payments.averageTicket / 100, unit: "" },
+    { label: "Average ticket", value: formatCurrencyFromCents(payments.averageTicket, currency), unit: "" },
     {
       label: "Refunded volume",
-      value: payments.refundedVolume / 100,
+      value: formatCurrencyFromCents(payments.refundedVolume, currency),
       unit: "",
     },
   ];
 
   return (
     <div className="space-y-4">
+      <Select value={currency} onValueChange={(value) => setCurrency(value as PaymentCurrency)}>
+        <SelectTrigger aria-label="Payment currency"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="BRL">BRL</SelectItem>
+          <SelectItem value="USD">USD</SelectItem>
+          <SelectItem value="EUR">EUR</SelectItem>
+        </SelectContent>
+      </Select>
       {isPending && (
         <p role="status" className="text-muted-foreground">
           Loading metrics...
@@ -52,7 +64,7 @@ export function PaymentMetrics() {
                 {card.label}
               </h3>
               <p className="mt-3 text-3xl font-semibold tracking-tight">
-                {numberFormat.format(card.value)}{" "}
+                {card.value}{" "}
                 <span className="text-sm font-normal text-muted-foreground">
                   {card.unit}
                 </span>

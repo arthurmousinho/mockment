@@ -178,11 +178,11 @@ export type PaymentMetrics = {
   refundedVolume: number;
 };
 
-export function GetMetricsRequest() {
+export function GetMetricsRequest(currency: PaymentCurrency) {
   return useQuery({
-    queryKey: ["payment", "metrics"],
+    queryKey: ["payment", "metrics", currency],
     queryFn: async () => {
-      const request = await api.get("payments/metrics");
+      const request = await api.get(`payments/metrics/${currency}`);
       return await request.json<PaymentMetrics>();
     },
   });
