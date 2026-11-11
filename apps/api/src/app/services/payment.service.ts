@@ -173,6 +173,7 @@ async function getMetrics(currency: PaymentCurrency) {
   const approvedCount = approved?._count._all ?? 0;
 
   return {
+    requestedAt: now.toISOString(),
     hourlyReport,
     totalPaymentVolume,
     approvedVolume,

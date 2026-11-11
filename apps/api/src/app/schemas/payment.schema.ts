@@ -12,6 +12,7 @@ export const paymentMetricsParamsSchema = z.object({
   currency: z.enum(PaymentCurrency),
 });
 export const paymentMetricsSchema = z.object({
+  requestedAt: z.iso.datetime(),
   totalPaymentVolume: z.number(),
   approvedVolume: z.number(),
   approvalRate: z.number(),
