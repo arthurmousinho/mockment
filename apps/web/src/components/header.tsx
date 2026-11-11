@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
 import { Logo } from "./logo";
+import { PageSearch } from "./page-search";
 
 const navigationLinks = [
   { label: "Guide", href: "/", icon: PathIcon },
@@ -71,130 +72,133 @@ export function Header() {
     <header className="@container w-full overflow-hidden border bg-slate-50 dark:bg-muted/40">
       <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
         <Logo />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="@min-[68rem]:hidden"
-              aria-label="Open navigation menu"
-            >
-              <ListIcon size={18} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            {navigationLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <DropdownMenuItem key={link.href} asChild>
-                  <Link to={link.href}>
-                    <Icon size={18} />
-                    {link.label}
-                  </Link>
-                </DropdownMenuItem>
-              );
-            })}
-            <DropdownMenuSeparator />
-            {apiDocLinks.map((doc) => (
-              <DropdownMenuItem key={doc.label} asChild>
-                <a href={doc.href} target="_blank" rel="noopener noreferrer">
-                  <BookOpenIcon size={18} />
-                  {doc.label}
-                  <ArrowUpRightIcon size={16} className="ml-auto" />
-                </a>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <SunIcon size={18} />
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <MoonIcon size={18} />
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <DesktopIcon size={18} />
-              System
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                <GithubLogoIcon size={18} />
-                Star on GitHub
-              </a>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="hidden shrink-0 items-center gap-1 @min-[68rem]:flex">
+        <div className="flex shrink-0 items-center gap-1">
+          <PageSearch links={navigationLinks} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" aria-label="API documentation">
-                <BookOpenIcon size={18} />
-                API Docs
+              <Button
+                variant="outline"
+                size="icon"
+                className="@min-[68rem]:hidden"
+                aria-label="Open navigation menu"
+              >
+                <ListIcon size={18} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {apiDocLinks.map((doc) =>
-                doc.external ? (
-                  <DropdownMenuItem key={doc.label} asChild>
-                    <a
-                      href={doc.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ArrowUpRightIcon size={16} />
-                      {doc.label}
-                    </a>
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem key={doc.label} asChild>
-                    <Link to={doc.href}>
-                      <ArrowUpRightIcon size={16} />
-                      {doc.label}
+            <DropdownMenuContent align="end" className="w-56">
+              {navigationLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link to={link.href}>
+                      <Icon size={18} />
+                      {link.label}
                     </Link>
                   </DropdownMenuItem>
-                ),
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <SunIcon
-                  size={18}
-                  className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-                />
-                <MoonIcon
-                  size={18}
-                  className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-                />
-                <span className="sr-only">Alternar tema</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+                );
+              })}
+              <DropdownMenuSeparator />
+              {apiDocLinks.map((doc) => (
+                <DropdownMenuItem key={doc.label} asChild>
+                  <a href={doc.href} target="_blank" rel="noopener noreferrer">
+                    <BookOpenIcon size={18} />
+                    {doc.label}
+                    <ArrowUpRightIcon size={16} className="ml-auto" />
+                  </a>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setTheme("light")}>
-                <SunIcon size={16} />
+                <SunIcon size={18} />
                 Light
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("dark")}>
-                <MoonIcon size={16} />
+                <MoonIcon size={18} />
                 Dark
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("system")}>
-                <DesktopIcon size={16} />
+                <DesktopIcon size={18} />
                 System
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+                  <GithubLogoIcon size={18} />
+                  Star on GitHub
+                </a>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="outline" className="ml-1" asChild>
-            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-              <GithubLogoIcon size={16} />
-              Star on GitHub
-            </a>
-          </Button>
+          <div className="hidden shrink-0 items-center gap-1 @min-[68rem]:flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" aria-label="API documentation">
+                  <BookOpenIcon size={18} />
+                  API Docs
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {apiDocLinks.map((doc) =>
+                  doc.external ? (
+                    <DropdownMenuItem key={doc.label} asChild>
+                      <a
+                        href={doc.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ArrowUpRightIcon size={16} />
+                        {doc.label}
+                      </a>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem key={doc.label} asChild>
+                      <Link to={doc.href}>
+                        <ArrowUpRightIcon size={16} />
+                        {doc.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ),
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <SunIcon
+                    size={18}
+                    className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+                  />
+                  <MoonIcon
+                    size={18}
+                    className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+                  />
+                  <span className="sr-only">Alternar tema</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                  <SunIcon size={16} />
+                  Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                  <MoonIcon size={16} />
+                  Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                  <DesktopIcon size={16} />
+                  System
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="outline" asChild>
+              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+                <GithubLogoIcon size={16} />
+                Star on GitHub
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
       <nav
