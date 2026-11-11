@@ -66,6 +66,18 @@ export const subscriptionDocs = {
     tags: ["Subscriptions"],
     body: openApiSchema(createSubscriptionSchema),
     response: {
+      404: {
+        description: "When the customer with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Customer with ID {id} was not found.",
+            }),
+          },
+        },
+      },
       201: {
         description: "When the subscription is created successfully.",
         content: {

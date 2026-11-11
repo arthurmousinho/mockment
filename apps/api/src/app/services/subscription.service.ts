@@ -1,4 +1,5 @@
 import { prismaSingleton } from "../../config/prisma.ts";
+import { customerService } from "./customer.service.ts";
 import { apiKeyService } from "./api-key.service.ts";
 import type {
   CreateSubscriptionInput,
@@ -40,11 +41,13 @@ function calculateNextBillingDate(
 
 async function create(apiKey: string, input: CreateSubscriptionInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
+  await customerService.findById(input.customerId);
 
   const pendingSubscription = await prismaSingleton.subscription.create({
     data: {
       id: createPrefixedId("sub"),
       apiKeyId: validatedApiKey.id,
+      customerId: input.customerId,
       amountInCents: input.amountInCents,
       currency: input.currency,
       method: input.method,
@@ -62,6 +65,7 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
       amountInCents: input.amountInCents,
       currency: input.currency,
       method: input.method,
+      customerId: input.customerId,
       description: input.description,
     },
     pendingSubscription.id,

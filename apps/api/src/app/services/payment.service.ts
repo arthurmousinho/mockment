@@ -211,6 +211,7 @@ async function createRecurringPayment(subscription: Subscription) {
       method: subscription.method,
       description: subscription.description,
       apiKeyId: subscription.apiKeyId,
+      customerId: subscription.customerId,
       status: "CREATED",
     },
   });

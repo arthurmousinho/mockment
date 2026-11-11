@@ -13,6 +13,7 @@ export type SubscriptionListInput = z.infer<typeof subscriptionListSchema>;
 
 export const subscriptionSchema = z.object({
   id: z.string(),
+  customerId: z.string(),
   description: z.string().nullable(),
   amountInCents: z.number().positive().int(),
   currency: z.enum(PaymentCurrency),
@@ -27,6 +28,7 @@ export const subscriptionSchema = z.object({
 });
 
 export const createSubscriptionSchema = z.object({
+  customerId: z.string().trim().min(1).max(191),
   amountInCents: z.coerce
     .number({ error: "Amount must be a number." })
     .int({ error: "Amount must be an integer." })

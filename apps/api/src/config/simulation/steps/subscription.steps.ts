@@ -10,6 +10,7 @@ export const createSubscriptionStep = {
   description:
     "Create a subscription and generate its initial payment checkout link.",
   input: [
+    { name: "customerId", label: "Customer ID", type: "string", required: true },
     {
       name: "amountInCents",
       label: "Amount in cents",
@@ -52,6 +53,7 @@ export const createSubscriptionStep = {
   ],
   output: [
     { name: "id", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
@@ -88,6 +90,7 @@ export const getSubscriptionStep = {
   ],
   output: [
     { name: "id", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
@@ -160,6 +163,7 @@ export const updateSubscriptionStep = {
   ],
   output: [
     { name: "id", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
@@ -193,6 +197,7 @@ export const cancelSubscriptionStep = {
   ],
   output: [
     { name: "id", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
@@ -226,6 +231,7 @@ export const resumeSubscriptionStep = {
   ],
   output: [
     { name: "id", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
@@ -259,6 +265,7 @@ export const pauseSubscriptionStep = {
   ],
   output: [
     { name: "id", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "description", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
