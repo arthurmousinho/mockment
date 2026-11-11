@@ -168,3 +168,22 @@ export function ProcessPaymentRequest() {
     onError: apiErrorHandler,
   });
 }
+
+export type PaymentMetrics = {
+  totalPaymentVolume: number;
+  approvedVolume: number;
+  approvalRate: number;
+  totalTransactions: number;
+  averageTicket: number;
+  refundedVolume: number;
+};
+
+export function GetMetricsRequest() {
+  return useQuery({
+    queryKey: ["payment", "metrics"],
+    queryFn: async () => {
+      const request = await api.get("payments/metrics");
+      return await request.json<PaymentMetrics>();
+    },
+  });
+}
