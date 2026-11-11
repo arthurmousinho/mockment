@@ -6,6 +6,7 @@ import {
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { RefetchButton } from "@/components/refetch-button";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
+import { PaymentMetricsSkeleton } from "@/components/payment-metrics-skeleton";
 import {
   Select,
   SelectContent,
@@ -106,11 +107,7 @@ export function PaymentMetrics() {
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
         </div>
       </header>
-      {isPending && (
-        <p role="status" className="text-muted-foreground">
-          Loading metrics...
-        </p>
-      )}
+      {isPending && <PaymentMetricsSkeleton />}
       {isError && (
         <p role="alert" className="text-destructive">
           Unable to load metrics. Please try again.
