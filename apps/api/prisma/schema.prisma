@@ -251,16 +251,15 @@ model Checkout {
 model Subscription {
   id String @id
 
-  description String?
-
-  amountInCents Int             @map("amount_in_cents")
+  status        SubscriptionStatus @default(PENDING)
+  amountInCents Int                @map("amount_in_cents")
   currency      PaymentCurrency
   method        PaymentMethod
-
   interval      BillingInterval
-  intervalCount Int             @default(1)
+  intervalCount Int                @default(1)
+  customerId    String
 
-  status SubscriptionStatus @default(PENDING)
+  description String?
 
   nextBillingAt DateTime? @map("next_billing_at")
   createdAt     DateTime  @default(now()) @map("created_at")
@@ -268,6 +267,7 @@ model Subscription {
 
   apiKeyId  String     @map("api_key_id")
   apiKey    ApiKey     @relation(fields: [apiKeyId], references: [id])
+  customer  Customer   @relation(fields: [customerId], references: [id])
   checkouts Checkout[]
   events    Event[]
 
@@ -283,9 +283,10 @@ model Customer {
   document   String @unique
   externalId String @unique @map("external_id")
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  payments  Payment[]
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  payments      Payment[]
+  subscriptions Subscription[]
 
   @@map("customers")
 }
