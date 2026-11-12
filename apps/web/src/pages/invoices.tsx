@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import {
   CancelInvoiceRequest,
-  DownloadInvoicePdfRequest,
   DeleteInvoiceRequest,
   FindAllInvoicesRequest,
   IssueInvoiceRequest,
@@ -28,14 +27,12 @@ import {
 } from "@/http/invoices-http";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { InvoiceFormDialog } from "@/components/invoice-form-dialog";
-import { InvoiceDetailsDialog } from "@/components/invoice-details-dialog";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { canChangeInvoiceStatus } from "@/lib/utils";
 import {
   DotsThreeIcon,
   ArrowClockwiseIcon,
   CheckIcon,
-  DownloadSimpleIcon,
   EyeIcon,
   PlusIcon,
   PencilSimpleIcon,
@@ -44,6 +41,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function InvoicesPage() {
   const [page, setPage] = useState(1);
@@ -62,8 +60,6 @@ export function InvoicesPage() {
   const { mutate: processInvoice, isPending: isProcessing } =
     ProcessInvoiceRequest();
   const { mutate: issueInvoice, isPending: isIssuing } = IssueInvoiceRequest();
-  const { mutate: downloadInvoicePdf, isPending: isDownloading } =
-    DownloadInvoicePdfRequest();
   const { mutate: cancelInvoice, isPending: isCanceling } =
     CancelInvoiceRequest();
   const { mutate: deleteInvoice, isPending: isDeleting } =
@@ -154,14 +150,12 @@ export function InvoicesPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <InvoiceDetailsDialog id={invoice.id}>
-                      <DropdownMenuItem
-                        onSelect={(event) => event.preventDefault()}
-                      >
+                    <DropdownMenuItem asChild>
+                      <Link to={`/invoices/${invoice.id}`}>
                         <EyeIcon size={32} />
                         Details
-                      </DropdownMenuItem>
-                    </InvoiceDetailsDialog>
+                      </Link>
+                    </DropdownMenuItem>
                     <InvoiceFormDialog invoice={invoice}>
                       <DropdownMenuItem
                         disabled={invoice.status !== "CREATED"}
@@ -207,13 +201,6 @@ export function InvoicesPage() {
                     >
                       <TrashIcon size={32} />
                       Delete
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      disabled={invoice.status !== "ISSUED" || isDownloading}
-                      onClick={() => downloadInvoicePdf(invoice.id)}
-                    >
-                      <DownloadSimpleIcon size={32} />
-                      Download PDF
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

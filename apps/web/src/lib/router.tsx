@@ -6,6 +6,7 @@ import { CheckoutsPage } from "@/pages/checkouts";
 import { PaymentsPage } from "@/pages/payments";
 import { PaymentDetailsPage } from "@/pages/payment-details";
 import { InvoicesPage } from "@/pages/invoices";
+import { InvoiceDetailsPage } from "@/pages/invoice-details";
 import { WebhooksPage } from "@/pages/webhooks";
 import { CheckoutPage } from "@/pages/checkout";
 import { FrontendLayout } from "@/layouts/frontend-layout";
@@ -62,6 +63,11 @@ export const router = createBrowserRouter([
                 path: "invoices",
                 handle: { title: "Invoices" },
                 element: <InvoicesPage />,
+              },
+              {
+                path: "invoices/:id",
+                handle: { title: "Invoice Details" },
+                element: <InvoiceDetailsPage />,
               },
               {
                 path: "checkouts",
