@@ -7,23 +7,16 @@ export const createInvoiceStep = {
   input: [
     { name: "paymentId", label: "Payment ID", type: "string", required: true },
     {
-      name: "customerName",
-      label: "Customer name",
+      name: "customerId",
+      label: "Customer ID",
       type: "string",
       required: true,
-    },
-    {
-      name: "customerTaxId",
-      label: "Customer tax ID",
-      type: "string",
-      required: false,
     },
   ],
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
-    { name: "customerName", type: "string" },
-    { name: "customerTaxId", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
     { name: "status", type: "string" },
@@ -49,8 +42,7 @@ export const getInvoiceStep = {
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
-    { name: "customerName", type: "string" },
-    { name: "customerTaxId", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
     { name: "status", type: "string" },
@@ -80,8 +72,7 @@ export const processInvoiceStep = {
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
-    { name: "customerName", type: "string" },
-    { name: "customerTaxId", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
     { name: "status", type: "string" },
@@ -104,8 +95,7 @@ export const cancelInvoiceStep = {
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
-    { name: "customerName", type: "string" },
-    { name: "customerTaxId", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
     { name: "status", type: "string" },
@@ -128,8 +118,7 @@ export const issueInvoiceStep = {
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
-    { name: "customerName", type: "string" },
-    { name: "customerTaxId", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
     { name: "status", type: "string" },
@@ -166,8 +155,7 @@ export const updateInvoiceStep = {
   output: [
     { name: "id", type: "string" },
     { name: "paymentId", type: "string" },
-    { name: "customerName", type: "string" },
-    { name: "customerTaxId", type: "string" },
+    { name: "customerId", type: "string" },
     { name: "amountInCents", type: "number" },
     { name: "currency", type: "string" },
     { name: "status", type: "string" },

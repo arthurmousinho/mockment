@@ -248,7 +248,7 @@ export const invoiceDocs = {
         },
       },
       404: {
-        description: "When the payment is not found for the supplied API key.",
+        description: "When the payment or customer is not found.",
         content: {
           "application/json": {
             schema: httpErrorSchema({

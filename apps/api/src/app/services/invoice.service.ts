@@ -25,11 +25,13 @@ import {
   getInvoicePdfPath,
 } from "../../config/invoice-pdf.ts";
 import { paymentService } from "./payment.service.ts";
+import { customerService } from "./customer.service.ts";
 
 async function create(apiKey: string, input: CreateInvoiceInput) {
   await apiKeyService.validate(apiKey);
 
   const payment = await paymentService.findById(input.paymentId);
+  await customerService.findById(input.customerId);
 
   if (payment.status !== "APPROVED") {
     throw new UnprocessableEntityError(
@@ -39,7 +41,9 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
 
   const existingInvoice = await prismaSingleton.invoice.findFirst({
     where: {
+      // FIXME: Create a index on paymentId and customerId to improve performance
       paymentId: payment.id,
+      customerId: input.customerId,
       status: { not: "CANCELED" },
     },
   });
@@ -54,8 +58,7 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
     data: {
       id: createPrefixedId("inv"),
       status: "CREATED",
-      customerName: input.customerName,
-      customerTaxId: input.customerTaxId ?? null,
+      customerId: input.customerId,
       amountInCents: payment.amountInCents,
       currency: payment.currency,
       paymentId: payment.id,
@@ -231,7 +234,8 @@ async function issue(id: string) {
     },
   });
 
-  await generateInvoicePdf(issuedInvoice);
+  const customer = await customerService.findById(issuedInvoice.customerId);
+  await generateInvoicePdf({ ...issuedInvoice, customer });
 
   await eventService.emit({
     paymentId: invoice.paymentId,

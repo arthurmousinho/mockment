@@ -11,27 +11,29 @@ export type InvoiceListInput = z.infer<typeof invoiceListSchema>;
 
 export const createInvoiceSchema = z.object({
   paymentId: z.string().trim().min(1).max(191),
-  customerName: z.string().trim().min(1).max(191),
-  customerTaxId: z.string().trim().min(1).max(191).optional(),
+  customerId: z.string().trim().min(1).max(191),
 });
 
 export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
 
-export const updateInvoiceSchema = z.object({
-  customerName: z.string().trim().min(1).max(191).optional(),
-  customerTaxId: z.string().trim().min(1).max(191).nullable().optional(),
-}).strict().refine(
-  (input) => input.customerName !== undefined || input.customerTaxId !== undefined,
-  { message: "Provide at least one field to update." },
-);
+export const updateInvoiceSchema = z
+  .object({
+    customerName: z.string().trim().min(1).max(191).optional(),
+    customerTaxId: z.string().trim().min(1).max(191).nullable().optional(),
+  })
+  .strict()
+  .refine(
+    (input) =>
+      input.customerName !== undefined || input.customerTaxId !== undefined,
+    { message: "Provide at least one field to update." },
+  );
 
 export type UpdateInvoiceInput = z.infer<typeof updateInvoiceSchema>;
 
 export const invoiceSchema = z.object({
   id: z.string(),
   status: z.enum(InvoiceStatus),
-  customerName: z.string(),
-  customerTaxId: z.string().nullable(),
+  customerId: z.string(),
   amountInCents: z.number(),
   currency: z.enum(PaymentCurrency),
   paymentId: z.string(),
@@ -41,9 +43,11 @@ export const invoiceSchema = z.object({
 });
 
 export const detailedInvoiceSchema = invoiceSchema.safeExtend({
-  events: z.array(z.object({
-    id: z.string(),
-    type: z.enum(EventType),
-    createdAt: z.iso.datetime(),
-  })),
+  events: z.array(
+    z.object({
+      id: z.string(),
+      type: z.enum(EventType),
+      createdAt: z.iso.datetime(),
+    }),
+  ),
 });

@@ -5,7 +5,7 @@ export function buildInvoiceSearchFilter(search?: string): InvoiceWhereInput {
   return buildSearchFilter<InvoiceWhereInput>(search, [
     (term) => ({ id: { contains: term } }),
     (term) => ({ paymentId: { contains: term } }),
-    (term) => ({ customerName: { contains: term } }),
-    (term) => ({ customerTaxId: { contains: term } }),
+    (term) => ({ customer: { name: { contains: term } } }),
+    (term) => ({ customer: { document: { contains: term } } }),
   ]);
 }

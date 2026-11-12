@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import PDFDocument from "pdfkit";
-import type { Invoice } from "../../generated/prisma/client.ts";
+import type { Customer, Invoice } from "../../generated/prisma/client.ts";
 
 const C = {
   black: "#18181B",
@@ -20,7 +20,9 @@ export function getInvoicePdfPath(id: string) {
   return path.join(directory, `${id}.pdf`);
 }
 
-export async function generateInvoicePdf(invoice: Invoice) {
+export async function generateInvoicePdf(
+  invoice: Invoice & { customer: Customer },
+) {
   const doc = new PDFDocument({
     size: "A4",
     margin: 48,
@@ -135,12 +137,12 @@ export async function generateInvoicePdf(invoice: Invoice) {
 
   // Customer
   write("BILLED TO", x, 370, 9, C.gray, true);
-  write(invoice.customerName, x, 393, 12, C.black, true, {
+  write(invoice.customer.name, x, 393, 12, C.black, true, {
     width: 230,
   });
 
-  if (invoice.customerTaxId) {
-    write(`Tax ID: ${invoice.customerTaxId}`, x, 418, 9, C.gray, false, {
+  if (invoice.customer.document) {
+    write(`Tax ID: ${invoice.customer.document}`, x, 418, 9, C.gray, false, {
       width: 230,
     });
   }
