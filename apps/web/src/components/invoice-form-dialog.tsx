@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { CustomerPicker } from "@/components/customer-picker";
 import { PaymentPicker } from "@/components/payment-picker";
 import {
   Form,
@@ -35,11 +36,12 @@ function buildSchema(isEditing: boolean) {
       ? z.string()
       : z.string().trim().min(1, "API key is required."),
     paymentId: z.string().trim().min(1, "Payment ID is required.").max(191),
-    customerName: z
-      .string()
-      .trim()
-      .min(1, "Customer name is required.")
-      .max(191),
+    customerId: isEditing
+      ? z.string()
+      : z.string().trim().min(1, "Customer is required.").max(191),
+    customerName: isEditing
+      ? z.string().trim().min(1, "Customer name is required.").max(191)
+      : z.string(),
     customerTaxId: z.string().trim().max(191),
   });
 }
@@ -69,6 +71,7 @@ export function InvoiceFormDialog({
     defaultValues: {
       apiKey: "",
       paymentId: invoice?.paymentId ?? "",
+      customerId: "",
       customerName: invoice?.customerName ?? "",
       customerTaxId: invoice?.customerTaxId ?? "",
     },
@@ -80,6 +83,7 @@ export function InvoiceFormDialog({
       form.reset({
         apiKey: "",
         paymentId: invoice?.paymentId ?? "",
+        customerId: "",
         customerName: invoice?.customerName ?? "",
         customerTaxId: invoice?.customerTaxId ?? "",
       });
@@ -100,7 +104,11 @@ export function InvoiceFormDialog({
       return;
     }
     createInvoice(
-      { ...data, customerTaxId: data.customerTaxId || undefined },
+      {
+        apiKey: data.apiKey,
+        paymentId: data.paymentId,
+        customerId: data.customerId,
+      },
       { onSuccess: () => handleOpenChange(false) },
     );
   }
@@ -154,32 +162,51 @@ export function InvoiceFormDialog({
                 )}
               />
             )}
-            <FormField
-              control={form.control}
-              name="customerName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Customer name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Full name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="customerTaxId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Customer tax ID (optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Tax ID" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="customerId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer</FormLabel>
+                    <FormControl>
+                      <CustomerPicker {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {isEditing && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="customerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Customer name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Full name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="customerTaxId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Customer tax ID (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Tax ID" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">

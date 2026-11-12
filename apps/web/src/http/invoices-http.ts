@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 import type { EventType } from "./events-http";
 
-export type InvoiceStatus =
-  "CREATED" | "PROCESSING" | "ISSUED" | "CANCELED";
+export type InvoiceStatus = "CREATED" | "PROCESSING" | "ISSUED" | "CANCELED";
 export type Invoice = {
   id: string;
   status: InvoiceStatus;
@@ -27,8 +26,7 @@ export type DetailedInvoice = Invoice & {
 export type CreateInvoiceRequestData = {
   apiKey: string;
   paymentId: string;
-  customerName: string;
-  customerTaxId?: string;
+  customerId: string;
 };
 
 export function CreateInvoiceRequest() {
