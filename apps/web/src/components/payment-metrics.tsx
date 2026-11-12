@@ -20,7 +20,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { useState } from "react";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 
@@ -155,7 +155,7 @@ export function PaymentMetrics() {
             </Select>
           </div>
           <ChartContainer config={chartConfig} className="h-64 w-full sm:h-80">
-            <LineChart
+            <AreaChart
               accessibilityLayer
               margin={{ top: 12, right: 12, bottom: 0, left: 0 }}
               data={payments.hourlyReport.map((entry) => ({
@@ -227,17 +227,19 @@ export function PaymentMetrics() {
                 }
               />
               {(Object.keys(chartConfig) as PaymentStatus[]).map((status) => (
-                <Line
+                <Area
                   key={status}
                   type="monotone"
                   dataKey={status}
                   stroke={`var(--color-${status})`}
+                  fill={`var(--color-${status})`}
+                  fillOpacity={0.12}
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, stroke: "var(--card)", strokeWidth: 2 }}
                 />
               ))}
-            </LineChart>
+            </AreaChart>
           </ChartContainer>
           <p className="text-xs text-muted-foreground">
             Grouped by creation time and current payment status. The current
