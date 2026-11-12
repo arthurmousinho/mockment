@@ -1,11 +1,13 @@
 import {
   GetMetricsRequest,
   type PaymentCurrency,
+  type PaymentMethod,
   type PaymentStatus,
 } from "@/http/payments-http";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { RefetchButton } from "@/components/refetch-button";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
+import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { PaymentMetricsSkeleton } from "@/components/payment-metrics-skeleton";
 import {
   Select,
@@ -20,7 +22,19 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useState } from "react";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 
@@ -246,6 +260,130 @@ export function PaymentMetrics() {
             hour is still in progress.
           </p>
         </section>
+      )}
+      {payments && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <section className="min-w-0 space-y-4 border bg-card p-5">
+            <div>
+              <h2 className="text-sm font-medium">Payments by method</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                All-time transactions in {currency}.
+              </p>
+            </div>
+            <ChartContainer
+              config={{
+                count: { label: "Transactions", color: "var(--primary)" },
+              }}
+              className="h-64 w-full"
+            >
+              <BarChart
+                accessibilityLayer
+                data={(["CARD", "PIX", "BANK_SLIP"] as PaymentMethod[]).map(
+                  (method) => ({
+                    method,
+                    count: payments.countByMethod[method],
+                  }),
+                )}
+              >
+                <CartesianGrid vertical={false} strokeDasharray="3 5" />
+                <XAxis
+                  dataKey="method"
+                  axisLine={false}
+                  tickLine={false}
+                  height={40}
+                  interval={0}
+                  tick={({ x, y, payload }) => (
+                    <foreignObject
+                      x={Number(x) - 50}
+                      y={Number(y) + 4}
+                      width={100}
+                      height={32}
+                    >
+                      <div className="flex justify-center">
+                        <PaymentMethodBadge
+                          method={payload.value as PaymentMethod}
+                        />
+                      </div>
+                    </foreignObject>
+                  )}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                  width={40}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  maxBarSize={56}
+                />
+              </BarChart>
+            </ChartContainer>
+          </section>
+          <section className="min-w-0 space-y-4 border bg-card p-5">
+            <div>
+              <h2 className="text-sm font-medium">Payments by status</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Current statuses of all transactions in {currency}.
+              </p>
+            </div>
+            <ChartContainer
+              config={{
+                count: { label: "Transactions", color: "var(--primary)" },
+              }}
+              className="h-64 w-full"
+            >
+              <RadarChart
+                accessibilityLayer
+                data={(Object.keys(chartConfig) as PaymentStatus[]).map(
+                  (status) => ({
+                    status,
+                    count: payments.countByStatus[status],
+                  }),
+                )}
+              >
+                <PolarGrid />
+                <PolarAngleAxis
+                  dataKey="status"
+                  tickFormatter={(status: PaymentStatus) =>
+                    chartConfig[status].label
+                  }
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      formatter={(value, _name, item) => {
+                        const status = item.payload.status as PaymentStatus;
+                        const count = Number(value);
+                        const percentage = payments.totalTransactions
+                          ? (count / payments.totalTransactions) * 100
+                          : 0;
+                        return (
+                          <div className="flex items-center gap-3">
+                            <PaymentStatusBadge status={status} />
+                            <span className="text-muted-foreground">
+                              {numberFormat.format(count)} ·{" "}
+                              {numberFormat.format(percentage)}%
+                            </span>
+                          </div>
+                        );
+                      }}
+                    />
+                  }
+                />
+                <Radar
+                  dataKey="count"
+                  stroke="var(--color-count)"
+                  fill="var(--color-count)"
+                  fillOpacity={0.25}
+                />
+              </RadarChart>
+            </ChartContainer>
+          </section>
+        </div>
       )}
     </div>
   );

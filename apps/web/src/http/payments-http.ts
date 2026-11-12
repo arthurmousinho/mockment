@@ -173,6 +173,8 @@ export function ProcessPaymentRequest() {
 
 export type PaymentMetrics = {
   requestedAt: string;
+  countByStatus: Record<PaymentStatus, number>;
+  countByMethod: Record<PaymentMethod, number>;
   hourlyReport: {
     hour: string;
     statuses: Record<PaymentStatus, { count: number; volume: number }>;
