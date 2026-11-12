@@ -29,15 +29,34 @@ type PageSearchProps = {
   links: readonly { label: string; href: string; icon: Icon }[];
 };
 
+const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
+  pay: { label: "payment", path: "/payments" },
+  sub: { label: "subscription", path: "/subscriptions" },
+  cus: { label: "customer", path: "/customers" },
+  inv: { label: "invoice", path: "/invoices" },
+  evt: { label: "event", path: "/events" },
+  scn: { label: "scenario", path: "/simulations" },
+  run: { label: "simulation run", path: "/simulations/runs" },
+  chk: { label: "checkout", path: "/checkout" },
+};
+
 export function PageSearch({ links }: PageSearchProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const id = search.trim();
+  const match = /^([a-z]+)_[a-zA-Z0-9-]+$/.exec(id);
+  const entity =
+    match && Object.hasOwn(ENTITY_ROUTES, match[1])
+      ? ENTITY_ROUTES[match[1]]
+      : undefined;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         setOpen((current) => !current);
+        setSearch("");
       }
     }
 
@@ -46,7 +65,13 @@ export function PageSearch({ links }: PageSearchProps) {
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (!nextOpen) setSearch("");
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" aria-label="Search pages">
           <MagnifyingGlassIcon size={18} />
@@ -71,9 +96,26 @@ export function PageSearch({ links }: PageSearchProps) {
           <CommandInput
             placeholder="Search pages..."
             aria-label="Search pages"
+            value={search}
+            onValueChange={setSearch}
           />
           <CommandList>
             <CommandEmpty>No pages found.</CommandEmpty>
+            {entity && (
+              <CommandGroup heading="Details">
+                <CommandItem
+                  value={`Go to ${entity.label} ${id}`}
+                  onSelect={() => {
+                    setOpen(false);
+                    setSearch("");
+                    navigate(`${entity.path}/${id}`);
+                  }}
+                >
+                  <ArrowUpRightIcon size={16} />
+                  Go to {entity.label} {id}
+                </CommandItem>
+              </CommandGroup>
+            )}
             <CommandGroup heading="Pages">
               {links.map((link) => {
                 const PageIcon = link.icon;
@@ -84,6 +126,7 @@ export function PageSearch({ links }: PageSearchProps) {
                     keywords={[link.href]}
                     onSelect={() => {
                       setOpen(false);
+                      setSearch("");
                       navigate(link.href);
                     }}
                   >
