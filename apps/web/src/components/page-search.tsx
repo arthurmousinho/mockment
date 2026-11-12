@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowUpRightIcon,
+  ClockCounterClockwiseIcon,
   MagnifyingGlassIcon,
   type Icon,
 } from "@phosphor-icons/react";
@@ -40,10 +41,45 @@ const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
   chk: { label: "checkout", path: "/checkout" },
 };
 
+const RECENT_PAGES_KEY = "mockment:recent-pages";
+
+function readRecentPages(): string[] {
+  try {
+    const stored: unknown = JSON.parse(
+      localStorage.getItem(RECENT_PAGES_KEY) ?? "[]",
+    );
+    return Array.isArray(stored)
+      ? stored
+          .filter((path): path is string => typeof path === "string")
+          .slice(0, 3)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function getPageLabel(path: string, links: PageSearchProps["links"]) {
+  const link = links.find((item) => item.href === path);
+  if (link) return link.label;
+
+  for (const [prefix, entity] of Object.entries(ENTITY_ROUTES)) {
+    const start = `${entity.path}/${prefix}_`;
+    if (
+      path.startsWith(start) &&
+      /^[a-zA-Z0-9-]+$/.test(path.slice(start.length))
+    ) {
+      return `${entity.label[0].toUpperCase()}${entity.label.slice(1)} ${path.slice(entity.path.length + 1)}`;
+    }
+  }
+}
+
 export function PageSearch({ links }: PageSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [recentPages, setRecentPages] = useState<string[]>([]);
+  const recentPagesRef = useRef<string[] | null>(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const id = search.trim();
   const match = /^([a-z]+)_[a-zA-Z0-9-]+$/.exec(id);
   const entity =
@@ -52,11 +88,28 @@ export function PageSearch({ links }: PageSearchProps) {
       : undefined;
 
   useEffect(() => {
+    if (!getPageLabel(pathname, links)) return;
+
+    const previous = recentPagesRef.current ?? readRecentPages();
+    const recent = [
+      pathname,
+      ...previous.filter((path) => path !== pathname),
+    ].slice(0, 3);
+    recentPagesRef.current = recent;
+    try {
+      localStorage.setItem(RECENT_PAGES_KEY, JSON.stringify(recent));
+    } catch {
+      // Keep the history in memory when storage is unavailable.
+    }
+  }, [pathname, links]);
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         setOpen((current) => !current);
         setSearch("");
+        setRecentPages(recentPagesRef.current ?? readRecentPages());
       }
     }
 
@@ -69,6 +122,8 @@ export function PageSearch({ links }: PageSearchProps) {
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
+        if (nextOpen)
+          setRecentPages(recentPagesRef.current ?? readRecentPages());
         if (!nextOpen) setSearch("");
       }}
     >
@@ -101,6 +156,28 @@ export function PageSearch({ links }: PageSearchProps) {
           />
           <CommandList>
             <CommandEmpty>No pages found.</CommandEmpty>
+            {!search && recentPages.length > 0 && (
+              <CommandGroup heading="Recent">
+                {recentPages.map((path) => {
+                  const label = getPageLabel(path, links);
+                  if (!label) return null;
+                  return (
+                    <CommandItem
+                      key={path}
+                      value={`Recent ${label} ${path}`}
+                      onSelect={() => {
+                        setOpen(false);
+                        setSearch("");
+                        navigate(path);
+                      }}
+                    >
+                      <ClockCounterClockwiseIcon size={16} />
+                      {label}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            )}
             {entity && (
               <CommandGroup heading="Details">
                 <CommandItem
