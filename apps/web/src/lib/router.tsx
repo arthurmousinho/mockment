@@ -4,6 +4,7 @@ import { CustomersPage } from "@/pages/customers";
 import { ApiKeysPage } from "@/pages/api-keys";
 import { CheckoutsPage } from "@/pages/checkouts";
 import { PaymentsPage } from "@/pages/payments";
+import { PaymentDetailsPage } from "@/pages/payment-details";
 import { InvoicesPage } from "@/pages/invoices";
 import { WebhooksPage } from "@/pages/webhooks";
 import { CheckoutPage } from "@/pages/checkout";
@@ -32,7 +33,11 @@ export const router = createBrowserRouter([
             element: <MainLayout />,
             children: [
               { path: "", handle: { title: "Guide" }, element: <GuidePage /> },
-              { path: "mockboard", handle: { title: "Mockboard" }, element: <MockboardPage /> },
+              {
+                path: "mockboard",
+                handle: { title: "Mockboard" },
+                element: <MockboardPage />,
+              },
               {
                 path: "appearance",
                 handle: { title: "Appearance" },
@@ -47,6 +52,11 @@ export const router = createBrowserRouter([
                 path: "payments",
                 handle: { title: "Payments" },
                 element: <PaymentsPage />,
+              },
+              {
+                path: "payments/:id",
+                handle: { title: "Payment Details" },
+                element: <PaymentDetailsPage />,
               },
               {
                 path: "invoices",

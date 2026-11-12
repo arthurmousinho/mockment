@@ -2,7 +2,6 @@ import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
-import { PaymentDetailsDialog } from "@/components/payment-details-dialog";
 import { PaymentFormDialog } from "@/components/payment-form-dialog";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
@@ -45,6 +44,7 @@ import {
   PlusIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function PaymentsPage() {
   const [page, setPage] = useState(1);
@@ -181,14 +181,12 @@ export function PaymentsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <PaymentDetailsDialog id={item.id}>
-                      <DropdownMenuItem
-                        onSelect={(event) => event.preventDefault()}
-                      >
+                    <DropdownMenuItem asChild>
+                      <Link to={`/payments/${item.id}`}>
                         <EyeIcon size={32} />
                         Details
-                      </DropdownMenuItem>
-                    </PaymentDetailsDialog>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={
                         !canChangePaymentStatus(item.status, "PROCESSING") ||
