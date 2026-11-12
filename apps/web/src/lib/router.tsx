@@ -16,6 +16,7 @@ import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
 import { SubscriptionDetailsPage } from "@/pages/subscription-details";
 import { EventsPage } from "@/pages/events";
+import { EventDetailsPage } from "@/pages/event-details";
 import { GuidePage } from "@/pages/guide";
 import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
 import { SimulationRunPage } from "@/pages/simulation-run";
@@ -105,6 +106,11 @@ export const router = createBrowserRouter([
                 path: "events",
                 handle: { title: "Events" },
                 element: <EventsPage />,
+              },
+              {
+                path: "events/:id",
+                handle: { title: "Event Details" },
+                element: <EventDetailsPage />,
               },
               {
                 path: "webhooks",

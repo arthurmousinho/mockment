@@ -47,6 +47,17 @@ export function FindAllEventsRequest(
   });
 }
 
+export function GetEventDetailsRequest(id: string) {
+  return useQuery({
+    queryKey: ["events", id],
+    queryFn: async () => {
+      const response = await api.get(`events/${id}`);
+      return response.json<Event>();
+    },
+    enabled: Boolean(id),
+  });
+}
+
 export function ReplayEventRequest() {
   return useMutation({
     mutationFn: async (id: string) => {

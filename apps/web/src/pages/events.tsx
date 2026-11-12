@@ -1,6 +1,6 @@
+import { Link } from "react-router-dom";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { RefetchButton } from "@/components/refetch-button";
-import { EventDetailsDialog } from "@/components/event-details-dialog";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
@@ -133,14 +133,12 @@ export function EventsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <EventDetailsDialog event={item}>
-                      <DropdownMenuItem
-                        onSelect={(event) => event.preventDefault()}
-                      >
+                    <DropdownMenuItem asChild>
+                      <Link to={`/events/${item.id}`}>
                         <EyeIcon size={32} />
                         Details
-                      </DropdownMenuItem>
-                    </EventDetailsDialog>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={isReplaying}
                       onClick={() => replayEvent(item.id)}
