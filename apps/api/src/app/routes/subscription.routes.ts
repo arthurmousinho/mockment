@@ -2,6 +2,7 @@ import { UnauthorizedError } from "../../common/http-error.ts";
 import {
   createSubscriptionSchema,
   subscriptionListSchema,
+  subscriptionMetricsParamsSchema,
   updateSubscriptionSchema,
 } from "../schemas/subscription.schema.ts";
 import type { FastifyInstance } from "fastify";
@@ -22,6 +23,18 @@ export async function subcriptionRoutes(app: FastifyInstance) {
       const { id } = request.params as { id: string };
       const subscription = await subscriptionService.getDetails(id);
       return reply.status(200).send(subscription);
+    },
+  );
+
+  app.get(
+    "/metrics/:currency",
+    { schema: subscriptionDocs.getMetrics },
+    async (request, reply) => {
+      const { currency } = subscriptionMetricsParamsSchema.parse(
+        request.params,
+      );
+      const metrics = await subscriptionService.getMetrics(currency);
+      return reply.status(200).send(metrics);
     },
   );
 

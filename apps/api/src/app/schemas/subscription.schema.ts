@@ -9,6 +9,14 @@ import {
 } from "../../../generated/prisma/enums.ts";
 
 export const subscriptionListSchema = searchablePaginationSchema;
+export const subscriptionMetricsParamsSchema = z.object({
+  currency: z.enum(PaymentCurrency),
+});
+export const subscriptionMetricsSchema = z.object({
+  totalSubscriptions: z.number(),
+  countByStatus: z.record(z.enum(SubscriptionStatus), z.number()),
+  mrr: z.number(),
+});
 export type SubscriptionListInput = z.infer<typeof subscriptionListSchema>;
 
 export const subscriptionSchema = z.object({

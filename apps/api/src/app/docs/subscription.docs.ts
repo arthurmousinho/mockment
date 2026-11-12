@@ -10,10 +10,30 @@ import {
   createSubscriptionSchema,
   detailedSubscriptionSchema,
   subscriptionSchema,
+  subscriptionMetricsParamsSchema,
+  subscriptionMetricsSchema,
   updateSubscriptionSchema,
 } from "../schemas/subscription.schema.ts";
 
 export const subscriptionDocs = {
+  getMetrics: {
+    summary: "Get subscription metrics",
+    description:
+      "Returns subscription counts and monthly recurring revenue for the specified currency. MRR is in cents, includes active subscriptions, and normalizes daily and weekly billing using 365 days and 52 weeks per year.",
+    tags: ["Subscriptions"],
+    params: openApiSchema(subscriptionMetricsParamsSchema),
+    response: {
+      200: {
+        description:
+          "When the subscription metrics are retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(subscriptionMetricsSchema),
+          },
+        },
+      },
+    },
+  },
   findAll: {
     summary: "List subscriptions",
     description:

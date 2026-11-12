@@ -6,9 +6,10 @@ import type {
   SubscriptionListInput,
   UpdateSubscriptionInput,
 } from "../schemas/subscription.schema.ts";
-import type {
-  BillingInterval,
+import {
   SubscriptionStatus,
+  type BillingInterval,
+  type PaymentCurrency,
 } from "../../../generated/prisma/enums.ts";
 import { BadRequestError, NotFoundError } from "../../common/http-error.ts";
 import { virtualClockService } from "./virtual-clock.service.ts";
@@ -37,6 +38,49 @@ function calculateNextBillingDate(
     case "YEAR":
       return addYears(currentDate, intervalCount);
   }
+}
+
+async function getMetrics(currency: PaymentCurrency) {
+  const [statuses, activeSubscriptions] = await Promise.all([
+    prismaSingleton.subscription.groupBy({
+      by: ["status"],
+      where: { currency },
+      _count: { _all: true },
+    }),
+    prismaSingleton.subscription.findMany({
+      where: { currency, status: "ACTIVE" },
+      select: { amountInCents: true, interval: true, intervalCount: true },
+    }),
+  ]);
+
+  const countByStatus = Object.fromEntries(
+    Object.values(SubscriptionStatus).map((status) => [
+      status,
+      statuses.find((group) => group.status === status)?._count._all ?? 0,
+    ]),
+  ) as Record<SubscriptionStatus, number>;
+
+  const monthlyFactors: Record<BillingInterval, number> = {
+    DAY: 365 / 12,
+    WEEK: 52 / 12,
+    MONTH: 1,
+    YEAR: 1 / 12,
+  };
+
+  return {
+    totalSubscriptions: statuses.reduce(
+      (total, group) => total + group._count._all,
+      0,
+    ),
+    countByStatus,
+    mrr: activeSubscriptions.reduce(
+      (total, subscription) =>
+        total +
+        (subscription.amountInCents * monthlyFactors[subscription.interval]) /
+          subscription.intervalCount,
+      0,
+    ),
+  };
 }
 
 async function create(apiKey: string, input: CreateSubscriptionInput) {
@@ -278,6 +322,7 @@ async function processDueSubscriptions() {
 }
 
 export const subscriptionService = {
+  getMetrics,
   create,
   findAll,
   changeStatus,
