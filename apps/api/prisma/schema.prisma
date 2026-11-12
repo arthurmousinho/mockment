@@ -144,22 +144,20 @@ model Invoice {
   id String @id
 
   status        InvoiceStatus   @default(CREATED)
-  customerName  String          @map("customer_name")
-  customerTaxId String?         @map("customer_tax_id")
   amountInCents Int             @map("amount_in_cents")
   currency      PaymentCurrency
-
-  paymentId String @map("payment_id")
+  customerId    String          @map("customer_id")
+  paymentId     String          @map("payment_id")
 
   issuedAt  DateTime? @map("issued_at")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  payment Payment @relation(fields: [paymentId], references: [id])
-  events  Event[]
+  customer Customer @relation(fields: [customerId], references: [id])
+  payment  Payment  @relation(fields: [paymentId], references: [id])
+  events   Event[]
 
   @@index([paymentId])
-  @@index([customerTaxId])
   @@map("invoices")
 }
 
@@ -283,10 +281,12 @@ model Customer {
   document   String @unique
   externalId String @unique @map("external_id")
 
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   payments      Payment[]
   subscriptions Subscription[]
+  invoices      Invoice[]
 
   @@map("customers")
 }
