@@ -13,6 +13,8 @@ export const paymentMetricsParamsSchema = z.object({
 });
 export const paymentMetricsSchema = z.object({
   requestedAt: z.iso.datetime(),
+  countByStatus: z.record(z.enum(PaymentStatus), z.number()),
+  countByMethod: z.record(z.enum(PaymentMethod), z.number()),
   totalPaymentVolume: z.number(),
   approvedVolume: z.number(),
   approvalRate: z.number(),

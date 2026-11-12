@@ -1,6 +1,7 @@
 import type { Subscription } from "../../../generated/prisma/browser.ts";
 import {
   PaymentStatus,
+  PaymentMethod,
   type PaymentCurrency,
 } from "../../../generated/prisma/enums.ts";
 import {
@@ -130,7 +131,7 @@ async function getMetrics(currency: PaymentCurrency) {
   const currentHour = Math.floor(now.getTime() / hourMs) * hourMs;
   const start = currentHour - 7 * hourMs;
 
-  const [payments, recentPayments] = await Promise.all([
+  const [payments, recentPayments, methods] = await Promise.all([
     prismaSingleton.payment.groupBy({
       by: ["status"],
       where: { currency },
@@ -141,7 +142,26 @@ async function getMetrics(currency: PaymentCurrency) {
       where: { currency, createdAt: { gte: new Date(start), lte: now } },
       select: { createdAt: true, status: true, amountInCents: true },
     }),
+    prismaSingleton.payment.groupBy({
+      by: ["method"],
+      where: { currency },
+      _count: { _all: true },
+    }),
   ]);
+
+  const countByStatus = Object.fromEntries(
+    Object.values(PaymentStatus).map((status) => [
+      status,
+      payments.find((group) => group.status === status)?._count._all ?? 0,
+    ]),
+  ) as Record<PaymentStatus, number>;
+
+  const countByMethod = Object.fromEntries(
+    Object.values(PaymentMethod).map((method) => [
+      method,
+      methods.find((group) => group.method === method)?._count._all ?? 0,
+    ]),
+  ) as Record<PaymentMethod, number>;
 
   const hourlyReport = Array.from({ length: 8 }, (_, index) => ({
     hour: new Date(start + index * hourMs).toISOString(),
@@ -174,6 +194,8 @@ async function getMetrics(currency: PaymentCurrency) {
 
   return {
     requestedAt: now.toISOString(),
+    countByStatus,
+    countByMethod,
     hourlyReport,
     totalPaymentVolume,
     approvedVolume,
