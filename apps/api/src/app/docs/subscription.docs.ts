@@ -19,7 +19,7 @@ export const subscriptionDocs = {
   getMetrics: {
     summary: "Get subscription metrics",
     description:
-      "Returns subscription counts and monthly recurring revenue for the specified currency. MRR is in cents, includes active subscriptions, and normalizes daily and weekly billing using 365 days and 52 weeks per year.",
+      "Returns subscription counts and monthly recurring revenue for the specified currency. Churn rate is the percentage of all subscriptions currently canceled. MRR is in cents, includes active subscriptions, and normalizes daily and weekly billing using 365 days and 52 weeks per year.",
     tags: ["Subscriptions"],
     params: openApiSchema(subscriptionMetricsParamsSchema),
     response: {

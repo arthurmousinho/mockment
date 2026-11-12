@@ -66,13 +66,17 @@ async function getMetrics(currency: PaymentCurrency) {
     MONTH: 1,
     YEAR: 1 / 12,
   };
+  const totalSubscriptions = statuses.reduce(
+    (total, group) => total + group._count._all,
+    0,
+  );
 
   return {
-    totalSubscriptions: statuses.reduce(
-      (total, group) => total + group._count._all,
-      0,
-    ),
+    totalSubscriptions,
     countByStatus,
+    churnRate: totalSubscriptions
+      ? (countByStatus.CANCELED / totalSubscriptions) * 100
+      : 0,
     mrr: activeSubscriptions.reduce(
       (total, subscription) =>
         total +

@@ -15,6 +15,7 @@ export const subscriptionMetricsParamsSchema = z.object({
 export const subscriptionMetricsSchema = z.object({
   totalSubscriptions: z.number(),
   countByStatus: z.record(z.enum(SubscriptionStatus), z.number()),
+  churnRate: z.number(),
   mrr: z.number(),
 });
 export type SubscriptionListInput = z.infer<typeof subscriptionListSchema>;
