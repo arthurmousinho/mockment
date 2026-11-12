@@ -2,6 +2,7 @@ import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { RefetchButton } from "@/components/refetch-button";
 import { SubscriptionMetricsSkeleton } from "@/components/subscription-metrics-skeleton";
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -18,10 +19,10 @@ import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { useState } from "react";
 
 const statuses: { status: SubscriptionStatus; color: string }[] = [
-  { status: "ACTIVE", color: "var(--color-green-600)" },
-  { status: "PENDING", color: "var(--color-blue-500)" },
-  { status: "PAUSED", color: "var(--color-amber-500)" },
-  { status: "CANCELED", color: "var(--color-gray-500)" },
+  { status: "ACTIVE", color: "text-green-400 dark:text-green-400" },
+  { status: "PENDING", color: "text-gray-400 dark:text-gray-400" },
+  { status: "PAUSED", color: "text-yellow-400 dark:text-yellow-400" },
+  { status: "CANCELED", color: "text-red-400 dark:text-red-400" },
 ];
 
 const numberFormat = new Intl.NumberFormat(undefined, {
@@ -123,23 +124,12 @@ export function SubscriptionMetrics() {
                         {numberFormat.format(percentage)}%
                       </span>
                     </div>
-                    <div
-                      role="progressbar"
+                    <Progress
+                      value={percentage}
                       aria-label={`${status} subscriptions`}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={percentage}
                       aria-valuetext={`${count} subscriptions, ${numberFormat.format(percentage)}%`}
-                      className="h-4 overflow-hidden bg-muted"
-                    >
-                      <div
-                        className="h-full"
-                        style={{
-                          width: `${percentage}%`,
-                          backgroundColor: color,
-                        }}
-                      />
-                    </div>
+                      className={`h-4 ${color} [&_[data-slot=progress-indicator]]:bg-current`}
+                    />
                   </div>
                 );
               })}
