@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { useRef, useState } from "react";
@@ -14,7 +15,6 @@ import {
   SpinnerGapIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { SimulationScenarioDetailsDialog } from "@/components/simulation-scenario-details-dialog";
 import { SimulationRunsSheet } from "@/components/simulation-runs-sheet";
 import { SimulationScenarioRunsSheet } from "@/components/simulation-scenario-runs-sheet";
 import { Paginator } from "@/components/paginator";
@@ -200,14 +200,12 @@ export function SimulationScenariosPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right">
-                      <SimulationScenarioDetailsDialog scenario={scenario}>
-                        <DropdownMenuItem
-                          onSelect={(event) => event.preventDefault()}
-                        >
+                      <DropdownMenuItem asChild>
+                        <Link to={`/simulations/${scenario.id}`}>
                           <EyeIcon size={20} />
                           Details
-                        </DropdownMenuItem>
-                      </SimulationScenarioDetailsDialog>
+                        </Link>
+                      </DropdownMenuItem>
                       <SimulationScenarioRunsSheet scenario={scenario}>
                         <DropdownMenuItem
                           onSelect={(event) => event.preventDefault()}

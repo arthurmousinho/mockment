@@ -94,6 +94,16 @@ export async function simulationRoutes(app: FastifyInstance) {
     },
   );
 
+  app.get(
+    "/scenarios/:id",
+    { schema: simulationDocs.getScenario },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const scenario = await simulationService.getScenario(id);
+      return reply.status(200).send(scenario);
+    },
+  );
+
   app.post(
     "/scenarios",
     { schema: simulationDocs.createScenario },

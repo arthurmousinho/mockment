@@ -19,6 +19,7 @@ import { EventsPage } from "@/pages/events";
 import { EventDetailsPage } from "@/pages/event-details";
 import { GuidePage } from "@/pages/guide";
 import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
+import { SimulationScenarioDetailsPage } from "@/pages/simulation-scenario-details";
 import { SimulationRunPage } from "@/pages/simulation-run";
 import { NotFoundPage } from "@/pages/not-found";
 import { PageLayout } from "@/layouts/page-layout";
@@ -86,6 +87,11 @@ export const router = createBrowserRouter([
                 path: "simulations",
                 handle: { title: "Simulation Scenarios" },
                 element: <SimulationScenariosPage />,
+              },
+              {
+                path: "simulations/:id",
+                handle: { title: "Scenario Details" },
+                element: <SimulationScenarioDetailsPage />,
               },
               {
                 path: "simulations/runs/:id",

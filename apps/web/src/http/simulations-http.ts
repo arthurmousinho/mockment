@@ -37,6 +37,17 @@ export function FindAllSimulationScenariosRequest(
   });
 }
 
+export function GetSimulationScenarioRequest(id: string) {
+  return useQuery({
+    queryKey: ["simulation-scenarios", id],
+    queryFn: async () => {
+      const response = await api.get(`simulation/scenarios/${id}`);
+      return response.json<SimulationScenario>();
+    },
+    enabled: Boolean(id),
+  });
+}
+
 export type CreateSimulationScenarioInput = {
   name: string;
   description?: string;
