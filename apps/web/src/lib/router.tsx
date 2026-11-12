@@ -14,6 +14,7 @@ import { FrontendLayout } from "@/layouts/frontend-layout";
 import { CheckoutDefaultSuccessPage } from "@/pages/checkout-default-success";
 import { CheckoutDefaultCancelPage } from "@/pages/checkout-default-cancel";
 import { SubscriptionsPage } from "@/pages/subscriptions";
+import { SubscriptionDetailsPage } from "@/pages/subscription-details";
 import { EventsPage } from "@/pages/events";
 import { GuidePage } from "@/pages/guide";
 import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
@@ -94,6 +95,11 @@ export const router = createBrowserRouter([
                 path: "subscriptions",
                 handle: { title: "Subscriptions" },
                 element: <SubscriptionsPage />,
+              },
+              {
+                path: "subscriptions/:id",
+                handle: { title: "Subscription Details" },
+                element: <SubscriptionDetailsPage />,
               },
               {
                 path: "events",

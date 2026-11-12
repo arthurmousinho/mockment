@@ -1,5 +1,4 @@
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
-import { SubscriptionDetailsDialog } from "@/components/subscription-details-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { Paginator } from "@/components/paginator";
 import { ListingSearch } from "@/components/listing-search";
@@ -41,6 +40,7 @@ import {
   PlusIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function SubscriptionsPage() {
   const [page, setPage] = useState(1);
@@ -185,14 +185,12 @@ export function SubscriptionsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <SubscriptionDetailsDialog id={item.id}>
-                      <DropdownMenuItem
-                        onSelect={(event) => event.preventDefault()}
-                      >
+                    <DropdownMenuItem asChild>
+                      <Link to={`/subscriptions/${item.id}`}>
                         <EyeIcon size={32} />
                         Details
-                      </DropdownMenuItem>
-                    </SubscriptionDetailsDialog>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={
                         !canChangeSubscriptionStatus(item.status, "ACTIVE") ||
