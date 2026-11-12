@@ -9,6 +9,23 @@ import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 export type SubscriptionInterval = "DAY" | "WEEK" | "MONTH" | "YEAR";
 export type SubscriptionStatus = "ACTIVE" | "CANCELED" | "PAUSED" | "PENDING";
 
+export type SubscriptionMetrics = {
+  totalSubscriptions: number;
+  countByStatus: Record<SubscriptionStatus, number>;
+  churnRate: number;
+  mrr: number;
+};
+
+export function GetSubscriptionMetricsRequest(currency: PaymentCurrency) {
+  return useQuery({
+    queryKey: ["subscriptions", "metrics", currency],
+    queryFn: async () => {
+      const request = await api.get(`subscriptions/metrics/${currency}`);
+      return await request.json<SubscriptionMetrics>();
+    },
+  });
+}
+
 export type Subscription = {
   id: string;
   customerId: string;

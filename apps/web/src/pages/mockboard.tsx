@@ -1,4 +1,5 @@
 import { PaymentMetrics } from "@/components/payment-metrics";
+import { SubscriptionMetrics } from "@/components/subscription-metrics";
 import { SpeedometerIcon } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -49,7 +50,10 @@ export function MockboardPage() {
       <TabsContent value="payments" className="space-y-4 text-sm">
         <PaymentMetrics />
       </TabsContent>
-      {(["subscriptions", "invoices", "webhooks"] as const).map((entity) => (
+      <TabsContent value="subscriptions" className="space-y-4 text-sm">
+        <SubscriptionMetrics />
+      </TabsContent>
+      {(["invoices", "webhooks"] as const).map((entity) => (
         <TabsContent
           key={entity}
           value={entity}
