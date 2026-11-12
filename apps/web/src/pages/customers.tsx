@@ -1,4 +1,3 @@
-import { CustomerDetailsDialog } from "@/components/customer-details-dialog";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { CustomerFormDialog } from "@/components/customer-form-dialog";
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
@@ -33,6 +32,7 @@ import {
   UsersIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function CustomersPage() {
   const [page, setPage] = useState(1);
@@ -142,14 +142,12 @@ export function CustomersPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <CustomerDetailsDialog id={customer.id}>
-                      <DropdownMenuItem
-                        onSelect={(event) => event.preventDefault()}
-                      >
+                    <DropdownMenuItem asChild>
+                      <Link to={`/customers/${customer.id}`}>
                         <EyeIcon size={32} />
                         Details
-                      </DropdownMenuItem>
-                    </CustomerDetailsDialog>
+                      </Link>
+                    </DropdownMenuItem>
                     <CustomerFormDialog customer={customer}>
                       <DropdownMenuItem
                         onSelect={(event) => event.preventDefault()}

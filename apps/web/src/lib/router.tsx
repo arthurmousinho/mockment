@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { MainLayout } from "../layouts/main-layout";
 import { CustomersPage } from "@/pages/customers";
+import { CustomerDetailsPage } from "@/pages/customer-details";
 import { ApiKeysPage } from "@/pages/api-keys";
 import { CheckoutsPage } from "@/pages/checkouts";
 import { PaymentsPage } from "@/pages/payments";
@@ -48,6 +49,11 @@ export const router = createBrowserRouter([
                 path: "customers",
                 handle: { title: "Customers" },
                 element: <CustomersPage />,
+              },
+              {
+                path: "customers/:id",
+                handle: { title: "Customer Details" },
+                element: <CustomerDetailsPage />,
               },
               {
                 path: "payments",
