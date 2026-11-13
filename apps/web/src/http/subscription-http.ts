@@ -14,6 +14,7 @@ export type SubscriptionMetrics = {
   countByStatus: Record<SubscriptionStatus, number>;
   churnRate: number;
   mrr: number;
+  arr: number;
 };
 
 export function GetSubscriptionMetricsRequest(currency: PaymentCurrency) {

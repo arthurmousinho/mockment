@@ -71,19 +71,22 @@ async function getMetrics(currency: PaymentCurrency) {
     0,
   );
 
+  const mrr = activeSubscriptions.reduce(
+    (total, subscription) =>
+      total +
+      (subscription.amountInCents * monthlyFactors[subscription.interval]) /
+        subscription.intervalCount,
+    0,
+  );
+
   return {
     totalSubscriptions,
     countByStatus,
     churnRate: totalSubscriptions
       ? (countByStatus.CANCELED / totalSubscriptions) * 100
       : 0,
-    mrr: activeSubscriptions.reduce(
-      (total, subscription) =>
-        total +
-        (subscription.amountInCents * monthlyFactors[subscription.interval]) /
-          subscription.intervalCount,
-      0,
-    ),
+    mrr,
+    arr: mrr * 12,
   };
 }
 
