@@ -9,8 +9,7 @@ export type InvoiceStatus = "CREATED" | "PROCESSING" | "ISSUED" | "CANCELED";
 export type Invoice = {
   id: string;
   status: InvoiceStatus;
-  customerName: string;
-  customerTaxId: string | null;
+  customerId: string;
   amountInCents: number;
   currency: "BRL" | "USD" | "EUR";
   paymentId: string;

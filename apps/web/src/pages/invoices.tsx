@@ -118,7 +118,7 @@ export function InvoicesPage() {
         <TableHeader className="bg-muted/70">
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Customer</TableHead>
+            <TableHead>Customer ID</TableHead>
             <TableHead className="text-right">Amount</TableHead>
             <TableHead className="text-right">Status</TableHead>
             <TableHead className="text-right">Created At</TableHead>
@@ -129,7 +129,7 @@ export function InvoicesPage() {
           {response.data.map((invoice) => (
             <TableRow key={invoice.id}>
               <TableCell className="max-w-52 truncate">{invoice.id}</TableCell>
-              <TableCell>{invoice.customerName}</TableCell>
+              <TableCell>{invoice.customerId}</TableCell>
               <TableCell className="text-right">
                 {formatCurrencyFromCents(
                   invoice.amountInCents,
