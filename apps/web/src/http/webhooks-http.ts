@@ -5,6 +5,26 @@ import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 import type { EventType } from "./events-http";
 
+export type WebhookDeliveryStatus = "PENDING" | "SUCCESS" | "FAILED";
+export type WebhookDeliveryMetrics = {
+  requestedAt: string;
+  totalDeliveries: number;
+  deliveredToday: number;
+  successRate: number;
+  countByStatus: Record<WebhookDeliveryStatus, number>;
+  minuteReport: ({ minute: string } & Record<WebhookDeliveryStatus, number>)[];
+};
+
+export function GetWebhookDeliveryMetricsRequest() {
+  return useQuery({
+    queryKey: ["webhooks", "deliveries", "metrics"],
+    queryFn: async () => {
+      const request = await api.get("webhooks/deliveries/metrics");
+      return await request.json<WebhookDeliveryMetrics>();
+    },
+  });
+}
+
 export type WebhookEndpoint = {
   enabled: boolean;
   id: string;

@@ -1,5 +1,6 @@
 import { PaymentMetrics } from "@/components/payment-metrics";
 import { SubscriptionMetrics } from "@/components/subscription-metrics";
+import { WebhookMetrics } from "@/components/webhook-metrics";
 import { SpeedometerIcon } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -35,12 +36,6 @@ export function MockboardPage() {
           </TabsTrigger>
           <TabsTrigger
             className="data-active:text-primary after:bg-primary"
-            value="invoices"
-          >
-            Invoices
-          </TabsTrigger>
-          <TabsTrigger
-            className="data-active:text-primary after:bg-primary"
             value="webhooks"
           >
             Webhooks
@@ -53,15 +48,9 @@ export function MockboardPage() {
       <TabsContent value="subscriptions" className="space-y-4 text-sm">
         <SubscriptionMetrics />
       </TabsContent>
-      {(["invoices", "webhooks"] as const).map((entity) => (
-        <TabsContent
-          key={entity}
-          value={entity}
-          className="py-6 text-sm text-muted-foreground"
-        >
-          <div>Metrics for {entity} are not available yet.</div>
-        </TabsContent>
-      ))}
+      <TabsContent value="webhooks" className="space-y-4 text-sm">
+        <WebhookMetrics />
+      </TabsContent>
     </Tabs>
   );
 }
