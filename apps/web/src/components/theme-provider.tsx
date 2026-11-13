@@ -93,18 +93,36 @@ function isEditableTarget(target: EventTarget | null) {
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "theme",
+  storageKey: key = "theme",
   disableTransitionOnChange = true,
   ...props
 }: ThemeProviderProps) {
+  const storageKey = key.startsWith("mockment:") ? key : `mockment:${key}`;
   const [theme, setThemeState] = React.useState<Theme>(() => {
     const storedTheme = localStorage.getItem(storageKey);
     if (isTheme(storedTheme)) {
       return storedTheme;
     }
 
+    if (storageKey === "mockment:theme") {
+      const legacyTheme = localStorage.getItem("theme");
+      if (isTheme(legacyTheme)) return legacyTheme;
+    }
+
     return defaultTheme;
   });
+
+  React.useEffect(() => {
+    if (storageKey !== "mockment:theme") return;
+
+    const legacyTheme = localStorage.getItem("theme");
+    if (!isTheme(legacyTheme)) return;
+
+    if (!isTheme(localStorage.getItem(storageKey))) {
+      localStorage.setItem(storageKey, legacyTheme);
+    }
+    localStorage.removeItem("theme");
+  }, [storageKey]);
 
   const setTheme = React.useCallback(
     (nextTheme: Theme) => {

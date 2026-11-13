@@ -85,9 +85,12 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [recentPages, setRecentPages] = useState<string[]>([]);
+
+  const { pathname } = useLocation();
+
   const recentPagesRef = useRef<string[] | null>(null);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+
   const id = search.trim();
   const match = /^([a-z]+)_[a-zA-Z0-9-]+$/.exec(id);
   const entity =
