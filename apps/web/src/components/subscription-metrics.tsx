@@ -73,13 +73,23 @@ export function SubscriptionMetrics() {
       )}
       {data && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded border bg-card p-5 xl:col-span-3">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Monthly recurring revenue (MRR)
-            </h3>
-            <p className="mt-3 text-3xl font-semibold tracking-tight">
-              {formatCurrencyFromCents(data.mrr, currency)}
-            </p>
+          <div className="grid gap-4 md:grid-cols-2 xl:col-span-3">
+            <div className="rounded border bg-card p-5">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Monthly recurring revenue (MRR)
+              </h3>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {formatCurrencyFromCents(data.mrr, currency)}
+              </p>
+            </div>
+            <div className="rounded border bg-card p-5">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Annual recurring revenue (ARR)
+              </h3>
+              <p className="mt-3 text-3xl font-semibold tracking-tight">
+                {formatCurrencyFromCents(data.arr, currency)}
+              </p>
+            </div>
           </div>
           <div className="rounded border bg-card p-5 xl:col-start-4 xl:row-start-1">
             <h3 className="text-sm font-medium text-muted-foreground">

@@ -8,10 +8,18 @@ export function SubscriptionMetricsSkeleton() {
         aria-hidden="true"
         className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
       >
-        {Array.from({ length: 3 }, (_, index) => (
+        <div className="grid gap-4 md:grid-cols-2 xl:col-span-3">
+          {Array.from({ length: 2 }, (_, index) => (
+            <div key={index} className="space-y-3 rounded border bg-card p-5">
+              <Skeleton className="h-4 w-36 max-w-full" />
+              <Skeleton className="h-9 w-28 max-w-full" />
+            </div>
+          ))}
+        </div>
+        {Array.from({ length: 2 }, (_, index) => (
           <div
             key={index}
-            className={`space-y-3 rounded border bg-card p-5 ${index === 0 ? "xl:col-span-3" : index === 1 ? "xl:col-start-4 xl:row-start-1" : "xl:col-start-4 xl:row-start-2"}`}
+            className={`space-y-3 rounded border bg-card p-5 ${index === 0 ? "xl:col-start-4 xl:row-start-1" : "xl:col-start-4 xl:row-start-2"}`}
           >
             <Skeleton className="h-4 w-36 max-w-full" />
             <Skeleton className="h-9 w-28 max-w-full" />
