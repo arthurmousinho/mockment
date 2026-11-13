@@ -5,16 +5,6 @@ import { webhookDeliveryDocs } from "../docs/webhook-delivery.docs.ts";
 import { webhookDeliveryListSchema } from "../schemas/webhook.schema.ts";
 
 export async function webhookDeliveryRoutes(app: FastifyInstance) {
-  app.post(
-    "/:id/retry",
-    { schema: webhookDeliveryDocs.retry },
-    async (request, reply) => {
-      const { id } = request.params as { id: string };
-      const delivery = await webhookDeliveryService.retry(id);
-      return reply.status(201).send(delivery);
-    },
-  );
-
   app.get(
     "/",
     { schema: webhookDeliveryDocs.findAll },
@@ -22,6 +12,15 @@ export async function webhookDeliveryRoutes(app: FastifyInstance) {
       const input = webhookDeliveryListSchema.parse(request.query);
       const response = await webhookDeliveryService.findAll(input);
       return reply.status(200).send(response);
+    },
+  );
+
+  app.get(
+    "/metrics",
+    { schema: webhookDeliveryDocs.getMetrics },
+    async (request, reply) => {
+      const metrics = await webhookDeliveryService.getMetrics();
+      return reply.status(200).send(metrics);
     },
   );
 
@@ -36,6 +35,16 @@ export async function webhookDeliveryRoutes(app: FastifyInstance) {
         paginationInput,
       );
       return reply.status(200).send(response);
+    },
+  );
+
+  app.post(
+    "/:id/retry",
+    { schema: webhookDeliveryDocs.retry },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const delivery = await webhookDeliveryService.retry(id);
+      return reply.status(201).send(delivery);
     },
   );
 }

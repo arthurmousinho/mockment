@@ -9,6 +9,7 @@ import type {
 import { webhookEndpointService } from "./webhook-endpoint.service.ts";
 import type { PaginationInput } from "../../common/pagination.schema.ts";
 import type { WebhookDeliveryListInput } from "../schemas/webhook.schema.ts";
+import { WebhookDeliveryStatus } from "../../../generated/prisma/enums.ts";
 import { buildWebhookDeliverySearchFilter } from "../filters/webhook-delivery.filters.ts";
 import {
   buildPaginatedResponse,
@@ -17,6 +18,55 @@ import {
 } from "../../common/utils.ts";
 
 const WEBHOOK_REQUEST_TIMEOUT_MS = 10_000;
+
+async function getMetrics() {
+  const now = new Date();
+  const minuteMs = 60_000;
+  const start = Math.floor(now.getTime() / minuteMs) * minuteMs - 9 * minuteMs;
+
+  const [statuses, recentDeliveries] = await Promise.all([
+    prismaSingleton.webhookDelivery.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
+    prismaSingleton.webhookDelivery.findMany({
+      where: { createdAt: { gte: new Date(start), lte: now } },
+      select: { createdAt: true, status: true },
+    }),
+  ]);
+
+  const countByStatus = Object.fromEntries(
+    Object.values(WebhookDeliveryStatus).map((status) => [
+      status,
+      statuses.find((group) => group.status === status)?._count._all ?? 0,
+    ]),
+  ) as Record<WebhookDeliveryStatus, number>;
+  const totalDeliveries = statuses.reduce(
+    (total, group) => total + group._count._all,
+    0,
+  );
+  const minuteReport = Array.from({ length: 10 }, (_, index) => ({
+    minute: new Date(start + index * minuteMs).toISOString(),
+    ...(Object.fromEntries(
+      Object.values(WebhookDeliveryStatus).map((status) => [status, 0]),
+    ) as Record<WebhookDeliveryStatus, number>),
+  }));
+
+  for (const delivery of recentDeliveries) {
+    const index = Math.floor((delivery.createdAt.getTime() - start) / minuteMs);
+    minuteReport[index]![delivery.status]++;
+  }
+
+  return {
+    requestedAt: now.toISOString(),
+    totalDeliveries,
+    successRate: totalDeliveries
+      ? (countByStatus.SUCCESS / totalDeliveries) * 100
+      : 0,
+    countByStatus,
+    minuteReport,
+  };
+}
 
 async function findAll(paginationInput: WebhookDeliveryListInput) {
   const { skip, take } = buildPrismaPaginationParams(paginationInput);
@@ -154,6 +204,7 @@ async function dispatch(event: Event) {
 }
 
 export const webhookDeliveryService = {
+  getMetrics,
   send,
   retry,
   dispatch,

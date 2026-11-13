@@ -8,9 +8,27 @@ import {
 import {
   findAllWebhookDeliveriesSchema,
   webhookDeliverySchema,
+  webhookDeliveryMetricsSchema,
 } from "../schemas/webhook.schema.ts";
 
 export const webhookDeliveryDocs = {
+  getMetrics: {
+    summary: "Get webhook delivery metrics",
+    description:
+      "Returns all-time delivery metrics. The success rate includes pending deliveries in the denominator. The minute report covers the current minute and previous 9 minutes, grouped by creation time and current status.",
+    tags: ["Webhook Deliveries"],
+    response: {
+      200: {
+        description:
+          "When the webhook delivery metrics are retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(webhookDeliveryMetricsSchema),
+          },
+        },
+      },
+    },
+  },
   retry: {
     summary: "Retry a webhook delivery",
     description:
@@ -19,7 +37,8 @@ export const webhookDeliveryDocs = {
     params: idParamsSchema,
     response: {
       201: {
-        description: "The new delivery attempt, including its success or failure status.",
+        description:
+          "The new delivery attempt, including its success or failure status.",
         content: {
           "application/json": { schema: openApiSchema(webhookDeliverySchema) },
         },

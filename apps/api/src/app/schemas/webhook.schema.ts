@@ -11,6 +11,31 @@ export type WebhookEndpointListInput = z.infer<
 >;
 
 export const webhookDeliveryListSchema = searchablePaginationSchema;
+export const webhookDeliveryMetricsSchema = z.object({
+  requestedAt: z.iso.datetime(),
+  totalDeliveries: z.number(),
+  successRate: z.number(),
+  countByStatus: z.object(
+    Object.fromEntries(
+      Object.values(WebhookDeliveryStatus).map((status) => [
+        status,
+        z.number(),
+      ]),
+    ) as Record<WebhookDeliveryStatus, z.ZodNumber>,
+  ),
+  minuteReport: z.array(
+    z.object({
+      minute: z.iso.datetime(),
+      ...(Object.fromEntries(
+        Object.values(WebhookDeliveryStatus).map((status) => [
+          status,
+          z.number(),
+        ]),
+      ) as Record<WebhookDeliveryStatus, z.ZodNumber>),
+    }),
+  ),
+});
+
 export type WebhookDeliveryListInput = z.infer<
   typeof webhookDeliveryListSchema
 >;
