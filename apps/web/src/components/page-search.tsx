@@ -26,8 +26,16 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
+type SearchLink = {
+  label: string;
+  href: string;
+  icon: Icon;
+  external?: boolean;
+};
+
 type PageSearchProps = {
-  links: readonly { label: string; href: string; icon: Icon }[];
+  navigationlinks: readonly SearchLink[];
+  apiDocLinks: readonly SearchLink[];
 };
 
 const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
@@ -58,7 +66,7 @@ function readRecentPages(): string[] {
   }
 }
 
-function getPageLabel(path: string, links: PageSearchProps["links"]) {
+function getPageLabel(path: string, links: PageSearchProps["navigationlinks"]) {
   const link = links.find((item) => item.href === path);
   if (link) return link.label;
 
@@ -73,7 +81,7 @@ function getPageLabel(path: string, links: PageSearchProps["links"]) {
   }
 }
 
-export function PageSearch({ links }: PageSearchProps) {
+export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [recentPages, setRecentPages] = useState<string[]>([]);
@@ -87,8 +95,18 @@ export function PageSearch({ links }: PageSearchProps) {
       ? ENTITY_ROUTES[match[1]]
       : undefined;
 
+  function selectLink(link: SearchLink) {
+    setOpen(false);
+    setSearch("");
+    if (link.external) {
+      window.open(link.href, "_blank", "noopener,noreferrer");
+    } else {
+      navigate(link.href);
+    }
+  }
+
   useEffect(() => {
-    if (!getPageLabel(pathname, links)) return;
+    if (!getPageLabel(pathname, navigationlinks)) return;
 
     const previous = recentPagesRef.current ?? readRecentPages();
     const recent = [
@@ -101,7 +119,7 @@ export function PageSearch({ links }: PageSearchProps) {
     } catch {
       // Keep the history in memory when storage is unavailable.
     }
-  }, [pathname, links]);
+  }, [pathname, navigationlinks]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -159,7 +177,7 @@ export function PageSearch({ links }: PageSearchProps) {
             {!search && recentPages.length > 0 && (
               <CommandGroup heading="Recent">
                 {recentPages.map((path) => {
-                  const label = getPageLabel(path, links);
+                  const label = getPageLabel(path, navigationlinks);
                   if (!label) return null;
                   return (
                     <CommandItem
@@ -194,21 +212,36 @@ export function PageSearch({ links }: PageSearchProps) {
               </CommandGroup>
             )}
             <CommandGroup heading="Pages">
-              {links.map((link) => {
+              {navigationlinks.map((link) => {
                 const PageIcon = link.icon;
                 return (
                   <CommandItem
                     key={link.href}
                     value={link.label}
                     keywords={[link.href]}
-                    onSelect={() => {
-                      setOpen(false);
-                      setSearch("");
-                      navigate(link.href);
-                    }}
+                    onSelect={() => selectLink(link)}
                   >
                     <PageIcon size={16} />
                     {link.label}
+                    <CommandShortcut className="opacity-0 transition-opacity group-hover/command-item:opacity-100">
+                      <ArrowUpRightIcon size={16} aria-hidden="true" />
+                    </CommandShortcut>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            <CommandGroup heading="API Docs">
+              {apiDocLinks.map((doc) => {
+                const DocIcon = doc.icon;
+                return (
+                  <CommandItem
+                    key={doc.href}
+                    value={`API Docs ${doc.label}`}
+                    keywords={[doc.href, "API documentation"]}
+                    onSelect={() => selectLink(doc)}
+                  >
+                    <DocIcon size={16} />
+                    {doc.label}
                     <CommandShortcut className="opacity-0 transition-opacity group-hover/command-item:opacity-100">
                       <ArrowUpRightIcon size={16} aria-hidden="true" />
                     </CommandShortcut>

@@ -52,11 +52,13 @@ const apiDocLinks = [
   {
     label: "Scalar",
     href: "/scalar-api-doc",
+    icon: BookOpenIcon,
     external: true,
   },
   {
     label: "Swagger UI",
     href: `${import.meta.env.VITE_API_URL}/docs`,
+    icon: BookOpenIcon,
     external: true,
   },
 ] as const;
@@ -75,7 +77,10 @@ export function Header() {
       <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
         <Logo />
         <div className="flex shrink-0 items-center gap-1">
-          <PageSearch links={navigationLinks} />
+          <PageSearch
+            navigationlinks={navigationLinks}
+            apiDocLinks={apiDocLinks}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
