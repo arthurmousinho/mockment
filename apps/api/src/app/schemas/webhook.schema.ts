@@ -14,6 +14,7 @@ export const webhookDeliveryListSchema = searchablePaginationSchema;
 export const webhookDeliveryMetricsSchema = z.object({
   requestedAt: z.iso.datetime(),
   totalDeliveries: z.number(),
+  deliveredToday: z.number(),
   successRate: z.number(),
   countByStatus: z.object(
     Object.fromEntries(

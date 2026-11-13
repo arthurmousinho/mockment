@@ -15,7 +15,7 @@ export const webhookDeliveryDocs = {
   getMetrics: {
     summary: "Get webhook delivery metrics",
     description:
-      "Returns all-time delivery metrics. The success rate includes pending deliveries in the denominator. The minute report covers the current minute and previous 9 minutes, grouped by creation time and current status.",
+      "Returns all-time delivery metrics. Delivered today counts successful deliveries by delivery time since midnight UTC. The success rate includes pending deliveries in the denominator. The minute report covers the current minute and previous 9 minutes, grouped by creation time and current status.",
     tags: ["Webhook Deliveries"],
     response: {
       200: {

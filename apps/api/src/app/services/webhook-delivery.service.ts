@@ -23,8 +23,11 @@ async function getMetrics() {
   const now = new Date();
   const minuteMs = 60_000;
   const start = Math.floor(now.getTime() / minuteMs) * minuteMs - 9 * minuteMs;
+  const startOfDay = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
 
-  const [statuses, recentDeliveries] = await Promise.all([
+  const [statuses, recentDeliveries, deliveredToday] = await Promise.all([
     prismaSingleton.webhookDelivery.groupBy({
       by: ["status"],
       _count: { _all: true },
@@ -32,6 +35,9 @@ async function getMetrics() {
     prismaSingleton.webhookDelivery.findMany({
       where: { createdAt: { gte: new Date(start), lte: now } },
       select: { createdAt: true, status: true },
+    }),
+    prismaSingleton.webhookDelivery.count({
+      where: { status: "SUCCESS", deliveredAt: { gte: startOfDay, lte: now } },
     }),
   ]);
 
@@ -60,6 +66,7 @@ async function getMetrics() {
   return {
     requestedAt: now.toISOString(),
     totalDeliveries,
+    deliveredToday,
     successRate: totalDeliveries
       ? (countByStatus.SUCCESS / totalDeliveries) * 100
       : 0,
