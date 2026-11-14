@@ -12,9 +12,16 @@ import {
   ProcessInvoiceRequest,
 } from "@/http/invoices-http";
 import {
+  CancelSubscriptionRequest,
+  PauseSubscriptionRequest,
+  ResumeSubscriptionRequest,
+} from "@/http/subscription-http";
+import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
   CheckIcon,
+  PauseIcon,
+  PlayIcon,
   ProhibitIcon,
   TrashIcon,
   XIcon,
@@ -129,9 +136,37 @@ function useInvoiceActions(): EntityAction[] {
   ];
 }
 
+function useSubscriptionActions(): EntityAction[] {
+  const resume = ResumeSubscriptionRequest();
+  const pause = PauseSubscriptionRequest();
+  const cancel = CancelSubscriptionRequest();
+
+  return [
+    {
+      label: "Resume",
+      icon: PlayIcon,
+      execute: resume.mutate,
+      isPending: resume.isPending,
+    },
+    {
+      label: "Pause",
+      icon: PauseIcon,
+      execute: pause.mutate,
+      isPending: pause.isPending,
+    },
+    {
+      label: "Cancel",
+      icon: XIcon,
+      execute: cancel.mutate,
+      isPending: cancel.isPending,
+    },
+  ];
+}
+
 export function useSearchEntityActions(search: string) {
   const paymentActions = usePaymentActions();
   const invoiceActions = useInvoiceActions();
+  const subscriptionActions = useSubscriptionActions();
 
   const entities: Record<
     string,
@@ -140,6 +175,7 @@ export function useSearchEntityActions(search: string) {
     ...ENTITY_ROUTES,
     pay: { ...ENTITY_ROUTES.pay, actions: paymentActions },
     inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
+    sub: { ...ENTITY_ROUTES.sub, actions: subscriptionActions },
   };
 
   const id = search.trim();
