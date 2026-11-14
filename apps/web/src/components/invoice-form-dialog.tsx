@@ -24,6 +24,7 @@ import { PaymentPicker } from "@/components/payment-picker";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -57,6 +58,9 @@ export function InvoiceFormDialog({
 }) {
   const isEditing = Boolean(invoice);
   const [open, setOpen] = useState(false);
+  const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(
+    null,
+  );
 
   const { mutate: createInvoice, isPending: isCreating } =
     CreateInvoiceRequest();
@@ -79,14 +83,14 @@ export function InvoiceFormDialog({
 
   function handleOpenChange(nextOpen: boolean) {
     if (isPending) return;
-    if (nextOpen)
+    if (nextOpen) {
+      setPaymentCustomerId(null);
       form.reset({
         apiKey: "",
         paymentId: invoice?.paymentId ?? "",
         customerId: "",
-        customerName: invoice?.customerName ?? "",
-        customerTaxId: invoice?.customerTaxId ?? "",
       });
+    }
     setOpen(nextOpen);
   }
 
@@ -136,7 +140,20 @@ export function InvoiceFormDialog({
                 <FormItem>
                   <FormLabel>Payment</FormLabel>
                   <FormControl>
-                    <PaymentPicker {...field} disabled={isEditing} />
+                    <PaymentPicker
+                      {...field}
+                      disabled={isEditing}
+                      onPaymentSelect={(payment) => {
+                        if (payment.customerId || paymentCustomerId) {
+                          form.setValue(
+                            "customerId",
+                            payment.customerId ?? "",
+                            { shouldValidate: true },
+                          );
+                        }
+                        setPaymentCustomerId(payment.customerId);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,8 +187,16 @@ export function InvoiceFormDialog({
                   <FormItem>
                     <FormLabel>Customer</FormLabel>
                     <FormControl>
-                      <CustomerPicker {...field} />
+                      <CustomerPicker
+                        {...field}
+                        disabled={Boolean(paymentCustomerId)}
+                      />
                     </FormControl>
+                    {paymentCustomerId && (
+                      <FormDescription className="text-xs italic">
+                        This customer is linked to the selected payment.
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

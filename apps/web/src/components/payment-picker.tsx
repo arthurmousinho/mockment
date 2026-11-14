@@ -26,11 +26,13 @@ type PaymentPickerProps = Omit<
 > & {
   value: string;
   onChange: (value: string) => void;
+  onPaymentSelect?: (payment: Payment) => void;
 };
 
 export function PaymentPicker({
   value,
   onChange,
+  onPaymentSelect,
   className,
   disabled,
   ...props
@@ -82,6 +84,7 @@ export function PaymentPicker({
   function handleSelect(payment: Payment) {
     setSelectedPayment(payment);
     onChange(payment.id);
+    onPaymentSelect?.(payment);
     setOpen(false);
   }
 
