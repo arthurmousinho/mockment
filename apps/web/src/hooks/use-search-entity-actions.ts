@@ -16,11 +16,13 @@ import {
   PauseSubscriptionRequest,
   ResumeSubscriptionRequest,
 } from "@/http/subscription-http";
+import { DeleteCustomerRequest } from "@/http/customers-http";
 import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
   CheckIcon,
   PauseIcon,
+  PencilSimpleIcon,
   PlayIcon,
   ProhibitIcon,
   TrashIcon,
@@ -163,10 +165,14 @@ function useSubscriptionActions(): EntityAction[] {
   ];
 }
 
-export function useSearchEntityActions(search: string) {
+export function useSearchEntityActions(
+  search: string,
+  editCustomer: (id: string) => void,
+) {
   const paymentActions = usePaymentActions();
   const invoiceActions = useInvoiceActions();
   const subscriptionActions = useSubscriptionActions();
+  const deleteCustomer = DeleteCustomerRequest();
 
   const entities: Record<
     string,
@@ -176,6 +182,24 @@ export function useSearchEntityActions(search: string) {
     pay: { ...ENTITY_ROUTES.pay, actions: paymentActions },
     inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
     sub: { ...ENTITY_ROUTES.sub, actions: subscriptionActions },
+    cus: {
+      ...ENTITY_ROUTES.cus,
+      actions: [
+        {
+          label: "Edit",
+          icon: PencilSimpleIcon,
+          execute: editCustomer,
+          isPending: false,
+        },
+        {
+          label: "Delete",
+          icon: TrashIcon,
+          execute: deleteCustomer.mutate,
+          isPending: deleteCustomer.isPending,
+          confirmation: "delete",
+        },
+      ],
+    },
   };
 
   const id = search.trim();

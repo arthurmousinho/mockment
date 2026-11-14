@@ -39,15 +39,24 @@ const customerSchema = z.object({
 type CustomerFormData = z.infer<typeof customerSchema>;
 
 type CustomerFormDialogProps = {
-  children: ReactNode;
+  children?: ReactNode;
   customer?: Customer;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function CustomerFormDialog({
   children,
   customer,
+  open: controlledOpen,
+  onOpenChange,
 }: CustomerFormDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  function setOpen(nextOpen: boolean) {
+    setInternalOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  }
   const { mutate: createRequest, isPending: isCreating } =
     CreateCustomerRequest();
   const { mutate: updateRequest, isPending: isUpdating } =
@@ -92,7 +101,7 @@ export function CustomerFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
