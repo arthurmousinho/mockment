@@ -51,27 +51,22 @@ Mockment solves these problems by providing a local payment gateway that behaves
 
 ## Project Status
 
-> **⚠️ Mockment is currently a learning project and proof of concept..**
+> **Mockment is a learning project and proof of concept.**
 
 The project is actively being developed as a way to study and experiment with payment gateway concepts.
 
 The current implementation is not intended to be a stable release or a production-ready tool. Features, APIs, database models, and architectural decisions may change as new ideas are explored.
 
-The project is currently focused on understanding and implementing concepts such as:
+The current implementation includes:
 
-| Feature            | Status |
-| ------------------ | :----: |
-| API Keys           |   ✅   |
-| Payment API        |   🚧   |
-| Payment Simulation |   🚧   |
-| Webhooks           |   ✅   |
-| Event Store        |   ✅   |
-| Dashboard          |   🚧   |
-| Refunds            |   📋   |
-| Documentation      |   🚧   |
-| CI/CD              |   📋   |
+- API keys and payment creation, including idempotency and simulated status transitions, refunds, and checkout links.
+- Customers, invoices, subscriptions, recurring payments, and a virtual clock for exploring billing over time.
+- Events and signed webhook deliveries, with endpoint configuration and delivery history.
+- A dashboard for inspecting and managing resources.
+- A visual scenario editor, saved scenarios, and simulation runs with step results and live updates.
+- Swagger and Scalar API documentation.
 
-✅ **Implemented** | 🚧 **In Progress** | 📋 **Planned**
+These features are still evolving and do not represent the full behavior or reliability of a production payment provider. There is currently no automated test suite or CI workflow.
 
 At this point, the project is not actively accepting direct code contributions. The main goal is to first explore the payment domain, validate the core concepts, and build the proof of concept.
 
@@ -91,9 +86,9 @@ The flow is straightforward:
 2. Your frontend sends the request to your backend.
 3. Your backend calls the Mockment REST API.
 4. Mockment simulates the payment lifecycle and stores the transaction locally.
-5. If configured, Mockment sends webhook events back to your application, allowing you to test asynchronous payment flows exactly as they would happen in production.
+5. If configured, Mockment sends webhook events back to your application, allowing you to explore asynchronous payment flows locally.
 
-Because everything runs locally, developers can build, debug, and reproduce payment scenarios without internet connectivity, sandbox accounts, or third-party dependencies.
+Once dependencies and the database image are available locally, developers can experiment without a payment provider or sandbox account. Webhook delivery requires a reachable endpoint.
 
 ## Tech Stack
 
@@ -127,10 +122,11 @@ git clone https://github.com/arthurmousinho/mockment.git
 cd mockment
 ```
 
-Create your local environment configuration by copying the example file:
+Configuration is stored in `apps/api/.env` and `apps/web/.env.local`. `pnpm dev` creates these files from the corresponding `.env.example` files if they do not already exist. You can also copy and edit them yourself before starting:
 
 ```bash
-cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
 ```
 
 Install all workspace dependencies:
@@ -145,7 +141,7 @@ Mockment uses MySQL running inside Docker. Start the required containers before 
 docker compose up -d
 ```
 
-The default configuration should work for most development environments, but you can adjust the variables if necessary.
+The example configuration uses the MySQL container on port 3306. Adjust the app environment files if your local setup differs.
 
 Finally, start the development environment:
 
@@ -153,12 +149,12 @@ Finally, start the development environment:
 pnpm dev
 ```
 
-After everything is running, the services will be available at:
+`pnpm dev` generates the Prisma client, runs development migrations, checks the virtual clock, and starts the API and web app. After startup, the default URLs are:
 
 | Service           | URL                                  |
 | ----------------- | ------------------------------------ |
 | REST API          | http://localhost:8080/api/v1         |
-| API Doc (Swagger) | http://localhost:8080/docs           |
+| API Doc (Swagger) | http://localhost:8080/api/v1/docs     |
 | API Doc (Scalar)  | http://localhost:4200/scalar-api-doc |
 | Web Dashboard     | http://localhost:4200                |
 
@@ -168,7 +164,7 @@ Once Mockment is running, you're ready to start simulating payment flows.
 
 > Note: Mockment is currently a learning project and proof of concept. The API and behavior may change as the project evolves.
 
-The first step is creating a mock API key. Every request to the Mockment API must be authenticated using an API key, just like a real payment provider.
+First, create a mock API key. Some endpoints, including payment and webhook endpoint creation, require it as a Bearer token; authentication is not applied globally to every route.
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/api-keys \
@@ -178,7 +174,7 @@ curl -X POST http://localhost:8080/api/v1/api-keys \
   }'
 ```
 
-The response contains a `rawKey`. Keep this value safe, as it is the only time it will be returned and it will be required to authenticate future requests. Next, register a webhook endpoint. Mockment will send payment events to this URL whenever a payment changes state. Replace `<YOUR_API_KEY>` with the `rawKey` from the previous step.
+The response contains a `rawKey`. Keep this value safe, as it is the only time it will be returned and it will be required to authenticate future requests. Optionally, register a reachable webhook endpoint. Mockment will send the selected events to this URL when they are emitted. Replace `<YOUR_API_KEY>` with the `rawKey` from the previous step.
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/webhooks/endpoints \
@@ -196,7 +192,7 @@ curl -X POST http://localhost:8080/api/v1/webhooks/endpoints \
   }'
 ```
 
-With a webhook configured, you can now create your first mock payment.
+Create your first mock payment:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/payments \
@@ -212,4 +208,21 @@ curl -X POST http://localhost:8080/api/v1/payments \
   }'
 ```
 
-If the request succeeds, Mockment will create a new payment and return its details, including the payment identifier and current status. As the payment lifecycle progresses, Mockment will automatically deliver the configured webhook events to your application, allowing you to test your integration exactly as you would with a real payment gateway.
+The response includes the payment ID, its `CREATED` status, and a checkout link. Open the checkout link to explore the payment flow, or simulate transitions through the API. For example, replace `<PAYMENT_ID>` with the returned ID:
+
+```bash
+curl -X PATCH "http://localhost:8080/api/v1/payments/<PAYMENT_ID>/process"
+curl -X PATCH "http://localhost:8080/api/v1/payments/<PAYMENT_ID>/approve"
+```
+
+Status transitions emit events and trigger deliveries to enabled endpoints subscribed to those events. You can inspect payments, events, and deliveries in the dashboard. See the API documentation for the available operations and their inputs.
+
+## Development checks
+
+```bash
+pnpm --filter @mockment/api build
+pnpm --filter web build
+pnpm --filter web lint
+```
+
+The API build runs TypeScript checks without emitting a production build. The root `pnpm test` command is a failing placeholder; there is no automated test suite yet.
