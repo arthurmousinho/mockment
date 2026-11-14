@@ -31,11 +31,17 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
   await apiKeyService.validate(apiKey);
 
   const payment = await paymentService.findById(input.paymentId);
-  await customerService.findById(input.customerId);
+  const customer = await customerService.findById(input.customerId);
 
   if (payment.status !== "APPROVED") {
     throw new UnprocessableEntityError(
       "Only approved payments can be used to create invoices.",
+    );
+  }
+
+  if (payment.customerId && customer.id !== payment.customerId) {
+    throw new ConflictError(
+      "The customer ID does not match the payment's customer ID.",
     );
   }
 

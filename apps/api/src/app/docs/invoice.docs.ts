@@ -211,7 +211,8 @@ export const invoiceDocs = {
   },
   create: {
     summary: "Create an invoice",
-    description: "Creates an new invoice for a payment.",
+    description:
+      "Creates a new invoice for a payment. If the payment has a customer, the invoice customer must match it.",
     tags: ["Invoices"],
     body: openApiSchema(createInvoiceSchema),
     response: {
@@ -255,6 +256,20 @@ export const invoiceDocs = {
               error: "NOT_FOUND",
               code: 404,
               message: "Payment with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      409: {
+        description:
+          "When the customer does not match the payment's customer, or a non-canceled invoice already exists for the payment and customer.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "CONFLICT",
+              code: 409,
+              message:
+                "The customer ID does not match the payment's customer ID.",
             }),
           },
         },
