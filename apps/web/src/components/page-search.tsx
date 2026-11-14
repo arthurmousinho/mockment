@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  getEntityPageLabel,
+  useSearchEntityActions,
+} from "@/hooks/use-search-entity-actions";
+import {
   ArrowUpRightIcon,
   ClockCounterClockwiseIcon,
   MagnifyingGlassIcon,
@@ -38,17 +42,6 @@ type PageSearchProps = {
   apiDocLinks: readonly SearchLink[];
 };
 
-const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
-  pay: { label: "payment", path: "/payments" },
-  sub: { label: "subscription", path: "/subscriptions" },
-  cus: { label: "customer", path: "/customers" },
-  inv: { label: "invoice", path: "/invoices" },
-  evt: { label: "event", path: "/events" },
-  scn: { label: "scenario", path: "/simulations" },
-  run: { label: "simulation run", path: "/simulations/runs" },
-  chk: { label: "checkout", path: "/checkout" },
-};
-
 const RECENT_PAGES_KEY = "mockment:recent-pages";
 
 function readRecentPages(): string[] {
@@ -70,15 +63,7 @@ function getPageLabel(path: string, links: PageSearchProps["navigationlinks"]) {
   const link = links.find((item) => item.href === path);
   if (link) return link.label;
 
-  for (const [prefix, entity] of Object.entries(ENTITY_ROUTES)) {
-    const start = `${entity.path}/${prefix}_`;
-    if (
-      path.startsWith(start) &&
-      /^[a-zA-Z0-9-]+$/.test(path.slice(start.length))
-    ) {
-      return `${entity.label[0].toUpperCase()}${entity.label.slice(1)} ${path.slice(entity.path.length + 1)}`;
-    }
-  }
+  return getEntityPageLabel(path);
 }
 
 export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
@@ -91,12 +76,7 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
   const recentPagesRef = useRef<string[] | null>(null);
   const navigate = useNavigate();
 
-  const id = search.trim();
-  const match = /^([a-z]+)_[a-zA-Z0-9-]+$/.exec(id);
-  const entity =
-    match && Object.hasOwn(ENTITY_ROUTES, match[1])
-      ? ENTITY_ROUTES[match[1]]
-      : undefined;
+  const entity = useSearchEntityActions(search);
 
   function selectLink(link: SearchLink) {
     setOpen(false);
@@ -202,16 +182,37 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
             {entity && (
               <CommandGroup heading="Details">
                 <CommandItem
-                  value={`Go to ${entity.label} ${id}`}
+                  value={`Go to ${entity.label} ${entity.id}`}
                   onSelect={() => {
                     setOpen(false);
                     setSearch("");
-                    navigate(`${entity.path}/${id}`);
+                    navigate(entity.href);
                   }}
                 >
                   <ArrowUpRightIcon size={16} />
-                  Go to {entity.label} {id}
+                  Go to {entity.label} {entity.id}
                 </CommandItem>
+              </CommandGroup>
+            )}
+            {entity && entity.actions.length > 0 && (
+              <CommandGroup
+                heading={`${entity.label[0].toUpperCase()}${entity.label.slice(1)} actions`}
+              >
+                {entity.actions.map(({ label, icon: ActionIcon, execute }) => (
+                  <CommandItem
+                    key={label}
+                    value={`${label} ${entity.label} ${entity.id}`}
+                    disabled={entity.isActionPending}
+                    onSelect={() => {
+                      execute(entity.id);
+                      setOpen(false);
+                      setSearch("");
+                    }}
+                  >
+                    <ActionIcon size={16} />
+                    {label} {entity.label} {entity.id}
+                  </CommandItem>
+                ))}
               </CommandGroup>
             )}
             <CommandGroup heading="Pages">
