@@ -13,6 +13,16 @@ import {
   updateInvoiceSchema,
 } from "../schemas/invoice.schema.ts";
 
+const paymentNotApprovedSchema = openApiSchema(
+  z.object({
+    error: z.literal("UNPROCESSABLE_ENTITY"),
+    code: z.literal(422),
+    message: z
+      .string()
+      .default("Only approved payments can be used to create invoices."),
+  }),
+);
+
 export const invoiceDocs = {
   remove: {
     summary: "Delete an invoice",
@@ -29,7 +39,7 @@ export const invoiceDocs = {
   update: {
     summary: "Update an invoice",
     description:
-      "Updates the customer name or tax ID of an invoice in CREATED status. Set the tax ID to null to remove it.",
+      "Updates the customer of an invoice in CREATED status. The payment must be approved, and if it has a customer, the invoice customer must match it.",
     tags: ["Invoices"],
     params: idParamsSchema,
     body: openApiSchema(updateInvoiceSchema),
@@ -45,7 +55,7 @@ export const invoiceDocs = {
           "When the input is invalid or the invoice is not in CREATED status.",
       },
       404: {
-        description: "When the invoice is not found.",
+        description: "When the invoice, payment, or customer is not found.",
         content: {
           "application/json": {
             schema: httpErrorSchema({
@@ -53,6 +63,28 @@ export const invoiceDocs = {
               code: 404,
               message: "Invoice with ID {id} was not found.",
             }),
+          },
+        },
+      },
+      409: {
+        description:
+          "When the customer does not match the payment's customer, or another non-canceled invoice exists for the payment and customer.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "CONFLICT",
+              code: 409,
+              message:
+                "The customer ID does not match the payment's customer ID.",
+            }),
+          },
+        },
+      },
+      422: {
+        description: "When the payment is not approved.",
+        content: {
+          "application/json": {
+            schema: paymentNotApprovedSchema,
           },
         },
       },
@@ -212,7 +244,7 @@ export const invoiceDocs = {
   create: {
     summary: "Create an invoice",
     description:
-      "Creates a new invoice for a payment. If the payment has a customer, the invoice customer must match it.",
+      "Creates a new invoice for an approved payment. If the payment has a customer, the invoice customer must match it.",
     tags: ["Invoices"],
     body: openApiSchema(createInvoiceSchema),
     response: {
@@ -271,6 +303,14 @@ export const invoiceDocs = {
               message:
                 "The customer ID does not match the payment's customer ID.",
             }),
+          },
+        },
+      },
+      422: {
+        description: "When the payment is not approved.",
+        content: {
+          "application/json": {
+            schema: paymentNotApprovedSchema,
           },
         },
       },

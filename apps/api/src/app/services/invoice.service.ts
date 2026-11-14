@@ -27,11 +27,14 @@ import {
 import { paymentService } from "./payment.service.ts";
 import { customerService } from "./customer.service.ts";
 
-async function create(apiKey: string, input: CreateInvoiceInput) {
-  await apiKeyService.validate(apiKey);
-
-  const payment = await paymentService.findById(input.paymentId);
-  const customer = await customerService.findById(input.customerId);
+async function validatePaymentAndCustomer(
+  paymentId: string,
+  customerId: string,
+) {
+  const [payment, customer] = await Promise.all([
+    paymentService.findById(paymentId),
+    customerService.findById(customerId),
+  ]);
 
   if (payment.status !== "APPROVED") {
     throw new UnprocessableEntityError(
@@ -39,17 +42,26 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
     );
   }
 
-  if (payment.customerId && customer.id !== payment.customerId) {
+  if (payment.customerId && customerId !== payment.customerId) {
     throw new ConflictError(
       "The customer ID does not match the payment's customer ID.",
     );
   }
 
+  return { payment, customer };
+}
+
+async function validateUniqueInvoice(
+  paymentId: string,
+  customerId: string,
+  invoiceId?: string,
+) {
   const existingInvoice = await prismaSingleton.invoice.findFirst({
     where: {
+      ...(invoiceId && { id: { not: invoiceId } }),
       // FIXME: Create a index on paymentId and customerId to improve performance
-      paymentId: payment.id,
-      customerId: input.customerId,
+      paymentId,
+      customerId,
       status: { not: "CANCELED" },
     },
   });
@@ -59,6 +71,17 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
       "An valid invoice for this payment already exists.",
     );
   }
+}
+
+async function create(apiKey: string, input: CreateInvoiceInput) {
+  await apiKeyService.validate(apiKey);
+
+  const { payment, customer } = await validatePaymentAndCustomer(
+    input.paymentId,
+    input.customerId,
+  );
+
+  await validateUniqueInvoice(payment.id, customer.id);
 
   const createdInvoice = await prismaSingleton.invoice.create({
     data: {
@@ -139,16 +162,15 @@ async function update(id: string, input: UpdateInvoiceInput) {
     throw new BadRequestError("Only created invoices can be updated.");
   }
 
+  const { customer } = await validatePaymentAndCustomer(
+    invoice.paymentId,
+    input.customerId,
+  );
+  await validateUniqueInvoice(invoice.paymentId, customer.id, id);
+
   const updatedInvoice = await prismaSingleton.invoice.update({
     where: { id },
-    data: {
-      ...(input.customerName !== undefined && {
-        customerName: input.customerName,
-      }),
-      ...(input.customerTaxId !== undefined && {
-        customerTaxId: input.customerTaxId,
-      }),
-    },
+    data: { customerId: customer.id },
   });
 
   return updatedInvoice;

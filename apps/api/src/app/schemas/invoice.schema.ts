@@ -18,15 +18,9 @@ export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
 
 export const updateInvoiceSchema = z
   .object({
-    customerName: z.string().trim().min(1).max(191).optional(),
-    customerTaxId: z.string().trim().min(1).max(191).nullable().optional(),
+    customerId: z.string().trim().min(1).max(191),
   })
-  .strict()
-  .refine(
-    (input) =>
-      input.customerName !== undefined || input.customerTaxId !== undefined,
-    { message: "Provide at least one field to update." },
-  );
+  .strict();
 
 export type UpdateInvoiceInput = z.infer<typeof updateInvoiceSchema>;
 
