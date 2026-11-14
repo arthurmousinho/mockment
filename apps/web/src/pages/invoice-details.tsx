@@ -139,6 +139,7 @@ export function InvoiceDetailsPage() {
         <CardContent className="grid min-w-0 gap-x-8 gap-y-2.5 lg:grid-cols-2 [&>div]:min-w-0 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div>span]:break-all">
           <CopyableField label="Invoice ID" value={invoice.id} />
           <CopyableField label="Payment ID" value={invoice.paymentId} />
+          <CopyableField label="Customer ID" value={invoice.customerId} />
         </CardContent>
       </Card>
 
