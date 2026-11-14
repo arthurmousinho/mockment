@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { CustomerPicker } from "@/components/customer-picker";
 import { PaymentPicker } from "@/components/payment-picker";
+import { GetPaymentDetailsRequest } from "@/http/payments-http";
 import {
   Form,
   FormControl,
@@ -37,13 +38,7 @@ function buildSchema(isEditing: boolean) {
       ? z.string()
       : z.string().trim().min(1, "API key is required."),
     paymentId: z.string().trim().min(1, "Payment ID is required.").max(191),
-    customerId: isEditing
-      ? z.string()
-      : z.string().trim().min(1, "Customer is required.").max(191),
-    customerName: isEditing
-      ? z.string().trim().min(1, "Customer name is required.").max(191)
-      : z.string(),
-    customerTaxId: z.string().trim().max(191),
+    customerId: z.string().trim().min(1, "Customer is required.").max(191),
   });
 }
 
@@ -69,15 +64,20 @@ export function InvoiceFormDialog({
     UpdateInvoiceRequest();
 
   const isPending = isCreating || isUpdating;
+  const {
+    data: editPayment,
+    isError: isPaymentError,
+    refetch: refetchPayment,
+  } = GetPaymentDetailsRequest(invoice?.paymentId ?? "", {
+    enabled: open && isEditing,
+  });
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(buildSchema(isEditing)),
     defaultValues: {
       apiKey: "",
       paymentId: invoice?.paymentId ?? "",
-      customerId: "",
-      customerName: invoice?.customerName ?? "",
-      customerTaxId: invoice?.customerTaxId ?? "",
+      customerId: invoice?.customerId ?? "",
     },
   });
 
@@ -88,7 +88,7 @@ export function InvoiceFormDialog({
       form.reset({
         apiKey: "",
         paymentId: invoice?.paymentId ?? "",
-        customerId: "",
+        customerId: invoice?.customerId ?? "",
       });
     }
     setOpen(nextOpen);
@@ -100,8 +100,7 @@ export function InvoiceFormDialog({
       updateInvoice(
         {
           id: invoice.id,
-          customerName: data.customerName,
-          customerTaxId: data.customerTaxId || null,
+          customerId: editPayment?.customerId ?? data.customerId,
         },
         { onSuccess: () => setOpen(false) },
       );
@@ -127,7 +126,7 @@ export function InvoiceFormDialog({
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the customer details for this invoice."
+              ? "Update the customer for this invoice."
               : "Enter the payment and customer details for this invoice."}
           </DialogDescription>
         </DialogHeader>
@@ -179,58 +178,44 @@ export function InvoiceFormDialog({
                 )}
               />
             )}
-            {!isEditing && (
-              <FormField
-                control={form.control}
-                name="customerId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Customer</FormLabel>
-                    <FormControl>
-                      <CustomerPicker
-                        {...field}
-                        disabled={Boolean(paymentCustomerId)}
-                      />
-                    </FormControl>
-                    {paymentCustomerId && (
-                      <FormDescription className="text-xs italic">
-                        This customer is linked to the selected payment.
-                      </FormDescription>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            {isEditing && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="customerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Customer name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+            <FormField
+              control={form.control}
+              name="customerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Customer</FormLabel>
+                  <FormControl>
+                    <CustomerPicker
+                      {...field}
+                      value={editPayment?.customerId ?? field.value}
+                      disabled={
+                        isEditing
+                          ? !editPayment || Boolean(editPayment.customerId)
+                          : Boolean(paymentCustomerId)
+                      }
+                    />
+                  </FormControl>
+                  {(paymentCustomerId ||
+                    (isEditing && editPayment?.customerId)) && (
+                    <FormDescription className="text-xs italic">
+                      This customer is linked to the selected payment.
+                    </FormDescription>
                   )}
-                />
-                <FormField
-                  control={form.control}
-                  name="customerTaxId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Customer tax ID (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Tax ID" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {isEditing && isPaymentError && !editPayment && (
+              <div role="alert" className="text-sm text-destructive">
+                Unable to load the payment.{" "}
+                <button
+                  type="button"
+                  className="underline"
+                  onClick={() => refetchPayment()}
+                >
+                  Try again
+                </button>
+              </div>
             )}
             <DialogFooter>
               <DialogClose asChild>
@@ -238,7 +223,10 @@ export function InvoiceFormDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending || (isEditing && !editPayment)}
+              >
                 Save
               </Button>
             </DialogFooter>

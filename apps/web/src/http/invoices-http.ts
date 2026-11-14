@@ -47,14 +47,7 @@ export function CreateInvoiceRequest() {
 
 export function UpdateInvoiceRequest() {
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...body
-    }: {
-      id: string;
-      customerName: string;
-      customerTaxId: string | null;
-    }) => {
+    mutationFn: async ({ id, ...body }: { id: string; customerId: string }) => {
       const response = await api.patch(`invoices/${id}`, { json: body });
       return response.json<Invoice>();
     },

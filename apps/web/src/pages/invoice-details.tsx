@@ -9,6 +9,7 @@ import {
   DownloadInvoicePdfRequest,
   GetInvoiceDetailsRequest,
 } from "@/http/invoices-http";
+import { GetCustomerDetailsRequest } from "@/http/customers-http";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import {
   ArrowLeftIcon,
@@ -28,6 +29,12 @@ export function InvoiceDetailsPage() {
     error,
     refetch,
   } = GetInvoiceDetailsRequest(id);
+  const { data: customer } = GetCustomerDetailsRequest(
+    invoice?.customerId ?? "",
+    {
+      enabled: Boolean(invoice?.customerId),
+    },
+  );
   const { mutate: downloadInvoicePdf, isPending: isDownloading } =
     DownloadInvoicePdfRequest();
 
@@ -107,9 +114,11 @@ export function InvoiceDetailsPage() {
             <DetailRow label="Status">
               <InvoiceStatusBadge status={invoice.status} />
             </DetailRow>
-            <DetailRow label="Customer">{invoice.customerName}</DetailRow>
+            <DetailRow label="Customer">
+              {customer?.name ?? invoice.customerId}
+            </DetailRow>
             <DetailRow label="Currency">{invoice.currency}</DetailRow>
-            <DetailRow label="Tax ID">{invoice.customerTaxId ?? "—"}</DetailRow>
+            <DetailRow label="Tax ID">{customer?.document ?? "—"}</DetailRow>
             <DetailRow label="Issued at">
               {invoice.issuedAt ? formatDateTime(invoice.issuedAt) : "—"}
             </DetailRow>
