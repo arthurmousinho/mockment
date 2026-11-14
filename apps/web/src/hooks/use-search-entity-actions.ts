@@ -6,19 +6,27 @@ import {
   RefundPaymentRequest,
 } from "@/http/payments-http";
 import {
+  CancelInvoiceRequest,
+  DeleteInvoiceRequest,
+  IssueInvoiceRequest,
+  ProcessInvoiceRequest,
+} from "@/http/invoices-http";
+import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
   CheckIcon,
   ProhibitIcon,
+  TrashIcon,
   XIcon,
   type Icon,
 } from "@phosphor-icons/react";
 
-type EntityAction = {
+export type EntityAction = {
   label: string;
   icon: Icon;
   execute: (id: string) => void;
   isPending: boolean;
+  confirmation?: "cancel" | "delete";
 };
 
 const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
@@ -85,8 +93,45 @@ function usePaymentActions(): EntityAction[] {
   ];
 }
 
+function useInvoiceActions(): EntityAction[] {
+  const process = ProcessInvoiceRequest();
+  const issue = IssueInvoiceRequest();
+  const cancel = CancelInvoiceRequest();
+  const remove = DeleteInvoiceRequest();
+
+  return [
+    {
+      label: "Process",
+      icon: ArrowClockwiseIcon,
+      execute: process.mutate,
+      isPending: process.isPending,
+    },
+    {
+      label: "Issue",
+      icon: CheckIcon,
+      execute: issue.mutate,
+      isPending: issue.isPending,
+    },
+    {
+      label: "Cancel",
+      icon: XIcon,
+      execute: cancel.mutate,
+      isPending: cancel.isPending,
+      confirmation: "cancel",
+    },
+    {
+      label: "Delete",
+      icon: TrashIcon,
+      execute: remove.mutate,
+      isPending: remove.isPending,
+      confirmation: "delete",
+    },
+  ];
+}
+
 export function useSearchEntityActions(search: string) {
   const paymentActions = usePaymentActions();
+  const invoiceActions = useInvoiceActions();
 
   const entities: Record<
     string,
@@ -94,6 +139,7 @@ export function useSearchEntityActions(search: string) {
   > = {
     ...ENTITY_ROUTES,
     pay: { ...ENTITY_ROUTES.pay, actions: paymentActions },
+    inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
   };
 
   const id = search.trim();
