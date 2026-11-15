@@ -1,6 +1,6 @@
 import {
   DesktopIcon,
-  GearIcon,
+  PaletteIcon,
   MoonIcon,
   SunIcon,
 } from "@phosphor-icons/react";
@@ -83,7 +83,7 @@ export function AppearancePage() {
     <div className="min-w-0 space-y-6">
       <header className="space-y-2">
         <div className="flex items-center gap-2">
-          <GearIcon size={24} />
+          <PaletteIcon size={24} />
           <h1 className="text-xl font-medium tracking-tight">Appearance</h1>
         </div>
         <p className="text-sm text-muted-foreground">

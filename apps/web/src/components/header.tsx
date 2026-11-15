@@ -15,9 +15,6 @@ import {
   CurrencyCircleDollarIcon,
   BookOpenIcon,
   PathIcon,
-  SunIcon,
-  MoonIcon,
-  DesktopIcon,
   StarIcon,
   ArrowUpRightIcon,
   ReceiptIcon,
@@ -30,7 +27,6 @@ import {
   SpeedometerIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "./theme-provider";
 import { Logo } from "./logo";
 import { PageSearch } from "./page-search";
 
@@ -47,6 +43,10 @@ const navigationLinks = [
   { label: "Events", href: "/events", icon: ReceiptIcon },
   { label: "Webhooks", href: "/webhooks", icon: WebhooksLogoIcon },
   { label: "API Keys", href: "/api-keys", icon: KeyIcon },
+] as const;
+
+const searchablePages = [
+  ...navigationLinks,
   { label: "Appearance", href: "/appearance", icon: PaletteIcon },
 ] as const;
 
@@ -68,7 +68,6 @@ const apiDocLinks = [
 const GITHUB_URL = "https://github.com/arthurmousinho/mockment";
 
 export function Header() {
-  const { setTheme } = useTheme();
   const { pathname } = useLocation();
 
   const isActive = (href: string) =>
@@ -80,9 +79,14 @@ export function Header() {
         <Logo />
         <div className="flex shrink-0 items-center gap-1">
           <PageSearch
-            navigationlinks={navigationLinks}
+            navigationlinks={searchablePages}
             apiDocLinks={apiDocLinks}
           />
+          <Button variant="outline" size="icon" asChild>
+            <Link to="/appearance" aria-label="Appearance">
+              <PaletteIcon size={18} />
+            </Link>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -116,19 +120,6 @@ export function Header() {
                   </a>
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setTheme("light")}>
-                <SunIcon size={18} />
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
-                <MoonIcon size={18} />
-                Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
-                <DesktopIcon size={18} />
-                System
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
@@ -171,36 +162,6 @@ export function Header() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <SunIcon
-                    size={18}
-                    className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-                  />
-                  <MoonIcon
-                    size={18}
-                    className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-                  />
-                  <span className="sr-only">Alternar tema</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
-                  <SunIcon size={16} />
-                  Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                  <MoonIcon size={16} />
-                  Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                  <DesktopIcon size={16} />
-                  System
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             <Button variant="outline" asChild>
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
                 <GithubLogoIcon size={16} />
