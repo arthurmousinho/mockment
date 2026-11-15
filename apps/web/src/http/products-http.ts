@@ -95,3 +95,16 @@ export function UpdateProductRequest() {
     onError: apiErrorHandler,
   });
 }
+
+export function DeleteProductRequest() {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`products/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product deleted successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}

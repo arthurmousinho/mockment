@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  DeleteProductRequest,
   FindAllProductsRequest,
   ToggleProductRequest,
 } from "@/http/products-http";
@@ -30,6 +31,7 @@ import {
   PackageIcon,
   PencilSimpleIcon,
   PlusIcon,
+  TrashIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -39,6 +41,10 @@ export function ProductsPage() {
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const {
     data: response,
@@ -49,6 +55,8 @@ export function ProductsPage() {
   } = FindAllProductsRequest({ page, limit, search });
   const { mutate: toggleRequest, isPending: isToggling } =
     ToggleProductRequest();
+  const { mutate: deleteProduct, isPending: isDeleting } =
+    DeleteProductRequest();
 
   if (isPending) return <ListingPageSkeleton columns={7} rows={limit} />;
 
@@ -168,6 +176,16 @@ export function ProductsPage() {
                         Edit
                       </DropdownMenuItem>
                     </ProductFormDialog>
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onSelect={() =>
+                        setPendingDelete({ id: product.id, name: product.name })
+                      }
+                      disabled={isDeleting}
+                    >
+                      <TrashIcon size={32} />
+                      Delete
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -197,6 +215,25 @@ export function ProductsPage() {
           }}
         />
       </div>
+      <DeleteConfirmationDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete product?"
+        itemName={pendingDelete?.name ?? ""}
+        isPending={isDeleting}
+        onConfirm={() => {
+          if (!pendingDelete || isDeleting) return;
+          deleteProduct(pendingDelete.id, {
+            onSuccess: () => {
+              setPendingDelete(null);
+              if (response.data.length === 1 && page > 1) setPage(page - 1);
+            },
+          });
+        }}
+      />
     </div>
   );
 }
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
