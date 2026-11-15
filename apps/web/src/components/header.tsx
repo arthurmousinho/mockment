@@ -25,6 +25,7 @@ import {
   FlaskIcon,
   TicketIcon,
   UsersIcon,
+  PackageIcon,
   PaletteIcon,
   SpeedometerIcon,
 } from "@phosphor-icons/react";
@@ -38,6 +39,7 @@ const navigationLinks = [
   { label: "Mockboard", href: "/mockboard", icon: SpeedometerIcon },
   { label: "Payments", href: "/payments", icon: CurrencyCircleDollarIcon },
   { label: "Invoices", href: "/invoices", icon: TicketIcon },
+  { label: "Products", href: "/products", icon: PackageIcon },
   { label: "Customers", href: "/customers", icon: UsersIcon },
   { label: "Checkouts", href: "/checkouts", icon: LinkSimpleIcon },
   { label: "Simulations", href: "/simulations", icon: FlaskIcon },

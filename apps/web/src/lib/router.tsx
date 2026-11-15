@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import { MainLayout } from "../layouts/main-layout";
+import { ProductsPage } from "@/pages/products";
 import { CustomersPage } from "@/pages/customers";
 import { CustomerDetailsPage } from "@/pages/customer-details";
 import { ApiKeysPage } from "@/pages/api-keys";
@@ -47,6 +48,11 @@ export const router = createBrowserRouter([
                 path: "appearance",
                 handle: { title: "Appearance" },
                 element: <AppearancePage />,
+              },
+              {
+                path: "products",
+                handle: { title: "Products" },
+                element: <ProductsPage />,
               },
               {
                 path: "customers",
