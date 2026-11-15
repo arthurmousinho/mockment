@@ -1,6 +1,7 @@
 import cors from "@fastify/cors";
 import { ZodError } from "zod";
 import { createApp } from "./app.ts";
+import { productRoutes } from "./app/routes/product.routes.ts";
 import { customerRoutes } from "./app/routes/customer.routes.ts";
 import { apiKeyRoutes } from "./app/routes/api-key.routes.ts";
 import { API_PREFIX, env } from "./config/env.ts";
@@ -70,6 +71,7 @@ await appSingleton.register(
     app.register(apiKeyRoutes, { prefix: "/api-keys" });
     app.register(paymentRoutes, { prefix: "/payments" });
     app.register(invoiceRoutes, { prefix: "/invoices" });
+    app.register(productRoutes, { prefix: "/products" });
     app.register(customerRoutes, { prefix: "/customers" });
     app.register(webhookEndpointRoutes, { prefix: "/webhooks/endpoints" });
     app.register(webhookDeliveryRoutes, {

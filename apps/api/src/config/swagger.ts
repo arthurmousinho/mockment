@@ -40,6 +40,11 @@ export async function registerSwagger(app: FastifyInstance) {
             "Represents the individuals or entities making payments, including their contact information, tax identification, and unique identifiers.",
         },
         {
+          name: "Products",
+          description:
+            "Represents the goods or services offered by merchants, including their names, descriptions, prices, and external identifiers.",
+        },
+        {
           name: "Events",
           description:
             "Events generated throughout the lifecycle of payments and subscriptions. Allows integrations to track state changes, recurring billing activity, and other relevant events within the payment system.",
