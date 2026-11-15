@@ -111,6 +111,21 @@ model ApiKey {
   @@map("api_keys")
 }
 
+model Product {
+  id String @id
+
+  name         String
+  description  String?
+  priceInCents Int             @map("price_in_cents")
+  currency     PaymentCurrency
+  enabled      Boolean         @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
 model Payment {
   id String @id
 
@@ -187,13 +202,13 @@ model Event {
 }
 
 model WebhookEndpoint {
-  enabled Boolean @default(true)
-  id      String  @id
+  id String @id
 
   url      String
   secret   String
   events   Json // String[] is not supported by MySQL
   apiKeyId String
+  enabled  Boolean @default(true)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
