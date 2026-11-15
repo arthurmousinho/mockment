@@ -28,6 +28,7 @@ import {
   DotsThreeIcon,
   EyeIcon,
   PackageIcon,
+  PencilSimpleIcon,
   PlusIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -159,6 +160,14 @@ export function ProductsPage() {
                         Details
                       </Link>
                     </DropdownMenuItem>
+                    <ProductFormDialog product={product}>
+                      <DropdownMenuItem
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        <PencilSimpleIcon size={32} />
+                        Edit
+                      </DropdownMenuItem>
+                    </ProductFormDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

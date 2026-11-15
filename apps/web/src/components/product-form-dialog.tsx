@@ -3,7 +3,11 @@ import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CreateProductRequest } from "@/http/products-http";
+import {
+  CreateProductRequest,
+  UpdateProductRequest,
+  type Product,
+} from "@/http/products-http";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,31 +48,55 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-export function ProductFormDialog({ children }: { children: ReactNode }) {
+export function ProductFormDialog({
+  children,
+  product,
+}: {
+  children: ReactNode;
+  product?: Product;
+}) {
   const [open, setOpen] = useState(false);
-  const { mutate: createRequest, isPending } = CreateProductRequest();
+  const { mutate: createRequest, isPending: isCreating } =
+    CreateProductRequest();
+  const { mutate: updateRequest, isPending: isUpdating } =
+    UpdateProductRequest();
+  const isPending = isCreating || isUpdating;
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      externalId: "",
-      priceInCents: 0,
-      currency: "BRL",
+      name: product?.name ?? "",
+      description: product?.description ?? "",
+      externalId: product?.externalId ?? "",
+      priceInCents: product?.priceInCents ?? 0,
+      currency: product?.currency ?? "BRL",
     },
   });
 
   function handleOpenChange(nextOpen: boolean) {
     if (isPending) return;
-    if (nextOpen) form.reset();
+    if (nextOpen)
+      form.reset({
+        name: product?.name ?? "",
+        description: product?.description ?? "",
+        externalId: product?.externalId ?? "",
+        priceInCents: product?.priceInCents ?? 0,
+        currency: product?.currency ?? "BRL",
+      });
     setOpen(nextOpen);
   }
 
   function onSubmit(data: ProductFormData) {
     if (isPending) return;
-    const { description, ...product } = data;
+    const { description, ...values } = data;
+    if (product) {
+      updateRequest(
+        { id: product.id, ...values, description: description || null },
+        { onSuccess: () => setOpen(false) },
+      );
+      return;
+    }
     createRequest(
-      { ...product, ...(description && { description }) },
+      { ...values, ...(description && { description }) },
       { onSuccess: () => setOpen(false) },
     );
   }
@@ -78,9 +106,11 @@ export function ProductFormDialog({ children }: { children: ReactNode }) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Product</DialogTitle>
+          <DialogTitle>{product ? "Edit Product" : "New Product"}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to create a product.
+            {product
+              ? "Update the product details below."
+              : "Fill out the form below to create a product."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

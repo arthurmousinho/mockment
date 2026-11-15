@@ -55,10 +55,10 @@ export function GetProductDetailsRequest(id: string) {
   });
 }
 
-export type CreateProductRequestData = Pick<
+type CreateProductRequestData = Omit<
   Product,
-  "name" | "externalId" | "priceInCents" | "currency"
-> & { description?: string };
+  "id" | "enabled" | "createdAt" | "updatedAt"
+>;
 
 export function CreateProductRequest() {
   return useMutation({
@@ -69,6 +69,28 @@ export function CreateProductRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product created successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
+type UpdateProductRequestData = Omit<
+  Product,
+  "id" | "enabled" | "createdAt" | "updatedAt"
+>;
+
+export function UpdateProductRequest() {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...data
+    }: { id: string } & UpdateProductRequestData) => {
+      const response = await api.patch(`products/${id}`, { json: data });
+      return response.json<Product>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product updated successfully.");
     },
     onError: apiErrorHandler,
   });
