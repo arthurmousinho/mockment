@@ -1,6 +1,7 @@
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
+import { ProductFormDialog } from "@/components/product-form-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -17,7 +18,7 @@ import {
   ToggleProductRequest,
 } from "@/http/products-http";
 import { formatCurrencyFromCents } from "@/lib/formatters";
-import { PackageIcon } from "@phosphor-icons/react";
+import { PackageIcon, PlusIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function ProductsPage() {
@@ -84,6 +85,12 @@ export function ProductsPage() {
         />
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <ProductFormDialog>
+            <Button>
+              <PlusIcon />
+              New Product
+            </Button>
+          </ProductFormDialog>
         </div>
       </div>
 

@@ -44,3 +44,22 @@ export function ToggleProductRequest() {
     onError: apiErrorHandler,
   });
 }
+
+export type CreateProductRequestData = Pick<
+  Product,
+  "name" | "externalId" | "priceInCents" | "currency"
+> & { description?: string };
+
+export function CreateProductRequest() {
+  return useMutation({
+    mutationFn: async (data: CreateProductRequestData) => {
+      const response = await api.post("products", { json: data });
+      return response.json<Product>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product created successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
