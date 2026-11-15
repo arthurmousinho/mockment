@@ -119,6 +119,7 @@ model Product {
   priceInCents Int             @map("price_in_cents")
   currency     PaymentCurrency
   enabled      Boolean         @default(true)
+  externalId   String          @unique @map("external_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
