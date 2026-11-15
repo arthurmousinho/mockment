@@ -1,7 +1,15 @@
 import { ConflictError } from "../../common/http-error.ts";
-import { createPrefixedId } from "../../common/utils.ts";
+import {
+  buildPaginatedResponse,
+  buildPrismaPaginationParams,
+  createPrefixedId,
+} from "../../common/utils.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
-import type { CreateProductInput } from "../schemas/product.schema.ts";
+import { buildProductSearchFilter } from "../filters/product.filters.ts";
+import type {
+  CreateProductInput,
+  ProductListInput,
+} from "../schemas/product.schema.ts";
 
 async function create(input: CreateProductInput) {
   const existingProduct = await prismaSingleton.product.findUnique({
@@ -29,4 +37,24 @@ async function create(input: CreateProductInput) {
   });
 }
 
-export const productService = { create };
+async function findAll(input: ProductListInput) {
+  const { skip, take } = buildPrismaPaginationParams(input);
+  const where = buildProductSearchFilter(input.search);
+  const [products, total] = await Promise.all([
+    prismaSingleton.product.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    }),
+    prismaSingleton.product.count({ where }),
+  ]);
+  return buildPaginatedResponse({
+    data: products,
+    page: input.page,
+    limit: input.limit,
+    total,
+  });
+}
+
+export const productService = { create, findAll };

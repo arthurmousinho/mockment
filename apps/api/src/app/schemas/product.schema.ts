@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { PaymentCurrency } from "../../../generated/prisma/enums.ts";
+import { searchablePaginationSchema } from "../../common/search.schema.ts";
+
+export const productListSchema = searchablePaginationSchema;
+export type ProductListInput = z.infer<typeof productListSchema>;
 
 export const createProductSchema = z.object({
   name: z.string().trim().min(1).max(255),
@@ -15,6 +19,7 @@ export const productSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
+  externalId: z.string(),
   priceInCents: z.number(),
   currency: z.enum(PaymentCurrency),
   enabled: z.boolean(),

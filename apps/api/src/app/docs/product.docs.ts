@@ -1,10 +1,32 @@
-import { httpErrorSchema, openApiSchema } from "../../common/openapi.ts";
+import {
+  httpErrorSchema,
+  openApiSchema,
+  paginatedResponseSchema,
+  searchablePaginationParamsSchema,
+} from "../../common/openapi.ts";
 import {
   createProductSchema,
   productSchema,
 } from "../schemas/product.schema.ts";
 
 export const productDocs = {
+  findAll: {
+    summary: "List products",
+    description:
+      "Returns a paginated list of products. Search matches partial IDs, names, descriptions, and external IDs.",
+    tags: ["Products"],
+    querystring: searchablePaginationParamsSchema,
+    response: {
+      200: {
+        description: "When the products are retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: paginatedResponseSchema(productSchema),
+          },
+        },
+      },
+    },
+  },
   create: {
     summary: "Create a product",
     description: "Creates a new product.",
