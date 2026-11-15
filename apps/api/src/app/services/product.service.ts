@@ -9,6 +9,7 @@ import { buildProductSearchFilter } from "../filters/product.filters.ts";
 import type {
   CreateProductInput,
   ProductListInput,
+  UpdateProductInput,
 } from "../schemas/product.schema.ts";
 
 async function create(input: CreateProductInput) {
@@ -75,9 +76,46 @@ async function toggle(id: string, enabled: boolean) {
   });
 }
 
+async function update(id: string, input: UpdateProductInput) {
+  await findById(id);
+
+  if (input.externalId !== undefined) {
+    const existingProduct = await prismaSingleton.product.findUnique({
+      where: { externalId: input.externalId },
+    });
+    if (existingProduct && existingProduct.id !== id) {
+      throw new ConflictError(
+        `Product with external ID ${input.externalId} already created.`,
+      );
+    }
+  }
+
+  return prismaSingleton.product.update({
+    where: { id },
+    data: {
+      ...(input.name !== undefined && { name: input.name }),
+      ...(input.description !== undefined && {
+        description: input.description,
+      }),
+      ...(input.externalId !== undefined && { externalId: input.externalId }),
+      ...(input.priceInCents !== undefined && {
+        priceInCents: input.priceInCents,
+      }),
+      ...(input.currency !== undefined && { currency: input.currency }),
+    },
+  });
+}
+
 async function remove(id: string) {
   await findById(id);
   await prismaSingleton.product.delete({ where: { id } });
 }
 
-export const productService = { create, findAll, findById, toggle, remove };
+export const productService = {
+  create,
+  findAll,
+  findById,
+  update,
+  toggle,
+  remove,
+};

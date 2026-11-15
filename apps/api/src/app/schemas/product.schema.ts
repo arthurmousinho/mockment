@@ -15,6 +15,19 @@ export const createProductSchema = z.object({
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 
+export const updateProductSchema = createProductSchema
+  .extend({ description: z.string().trim().max(255).nullable().optional() })
+  .partial()
+  .strict()
+  .refine(
+    (input) => Object.values(input).some((value) => value !== undefined),
+    {
+      message: "Provide at least one field to update.",
+    },
+  );
+
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+
 export const toggleProductSchema = z.object({
   enabled: z.boolean(),
 });

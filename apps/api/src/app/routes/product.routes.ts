@@ -3,6 +3,7 @@ import {
   createProductSchema,
   productListSchema,
   toggleProductSchema,
+  updateProductSchema,
 } from "../schemas/product.schema.ts";
 import { productService } from "../services/product.service.ts";
 import type { FastifyInstance } from "fastify";
@@ -24,6 +25,13 @@ export async function productRoutes(app: FastifyInstance) {
     const input = createProductSchema.parse(request.body);
     const product = await productService.create(input);
     return reply.status(201).send(product);
+  });
+
+  app.patch("/:id", { schema: productDocs.update }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const input = updateProductSchema.parse(request.body);
+    const product = await productService.update(id, input);
+    return reply.status(200).send(product);
   });
 
   app.patch(

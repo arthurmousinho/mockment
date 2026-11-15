@@ -9,9 +9,49 @@ import {
   createProductSchema,
   productSchema,
   toggleProductSchema,
+  updateProductSchema,
 } from "../schemas/product.schema.ts";
 
 export const productDocs = {
+  update: {
+    summary: "Update a product",
+    description: "Updates the supplied fields of a product.",
+    tags: ["Products"],
+    params: idParamsSchema,
+    body: openApiSchema(updateProductSchema),
+    response: {
+      200: {
+        description: "When the product is updated successfully.",
+        content: {
+          "application/json": { schema: openApiSchema(productSchema) },
+        },
+      },
+      404: {
+        description: "When the product with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Product with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      409: {
+        description: "When a product with the same external ID already exists.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "CONFLICT",
+              code: 409,
+              message: "Product with external ID {externalId} already created.",
+            }),
+          },
+        },
+      },
+    },
+  },
   remove: {
     summary: "Delete a product",
     description: "Permanently deletes a product.",
