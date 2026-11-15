@@ -75,4 +75,9 @@ async function toggle(id: string, enabled: boolean) {
   });
 }
 
-export const productService = { create, findAll, findById, toggle };
+async function remove(id: string) {
+  await findById(id);
+  await prismaSingleton.product.delete({ where: { id } });
+}
+
+export const productService = { create, findAll, findById, toggle, remove };

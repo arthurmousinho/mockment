@@ -36,4 +36,10 @@ export async function productRoutes(app: FastifyInstance) {
       return reply.status(200).send(product);
     },
   );
+
+  app.delete("/:id", { schema: productDocs.remove }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    await productService.remove(id);
+    return reply.status(204).send();
+  });
 }

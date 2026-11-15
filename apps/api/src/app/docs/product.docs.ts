@@ -12,6 +12,27 @@ import {
 } from "../schemas/product.schema.ts";
 
 export const productDocs = {
+  remove: {
+    summary: "Delete a product",
+    description: "Permanently deletes a product.",
+    tags: ["Products"],
+    params: idParamsSchema,
+    response: {
+      204: { description: "When the product is deleted successfully." },
+      404: {
+        description: "When the product with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Product with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   toggle: {
     summary: "Enable or disable a product",
     description: "Sets whether the product is enabled.",
