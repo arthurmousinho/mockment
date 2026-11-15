@@ -17,6 +17,7 @@ import {
   ResumeSubscriptionRequest,
 } from "@/http/subscription-http";
 import { DeleteCustomerRequest } from "@/http/customers-http";
+import { ReplayEventRequest } from "@/http/events-http";
 import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
@@ -173,6 +174,7 @@ export function useSearchEntityActions(
   const invoiceActions = useInvoiceActions();
   const subscriptionActions = useSubscriptionActions();
   const deleteCustomer = DeleteCustomerRequest();
+  const replayEvent = ReplayEventRequest();
 
   const entities: Record<
     string,
@@ -182,6 +184,17 @@ export function useSearchEntityActions(
     pay: { ...ENTITY_ROUTES.pay, actions: paymentActions },
     inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
     sub: { ...ENTITY_ROUTES.sub, actions: subscriptionActions },
+    evt: {
+      ...ENTITY_ROUTES.evt,
+      actions: [
+        {
+          label: "Replay",
+          icon: ArrowClockwiseIcon,
+          execute: replayEvent.mutate,
+          isPending: replayEvent.isPending,
+        },
+      ],
+    },
     cus: {
       ...ENTITY_ROUTES.cus,
       actions: [
