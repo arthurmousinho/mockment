@@ -3,11 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   getEntityPageLabel,
   useSearchEntityActions,
-  type EntityAction,
 } from "@/hooks/use-search-entity-actions";
-import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
-import { CustomerFormDialog } from "./customer-form-dialog";
-import { GetCustomerDetailsRequest } from "@/http/customers-http";
 import {
   ArrowUpRightIcon,
   ClockCounterClockwiseIcon,
@@ -70,73 +66,17 @@ function getPageLabel(path: string, links: PageSearchProps["navigationlinks"]) {
   return getEntityPageLabel(path);
 }
 
-function EditCustomerDialog({
-  id,
-  onClose,
-}: {
-  id: string;
-  onClose: () => void;
-}) {
-  const {
-    data: customer,
-    isPending,
-    isError,
-    refetch,
-  } = GetCustomerDetailsRequest(id);
-
-  if (customer) {
-    return (
-      <CustomerFormDialog
-        customer={customer}
-        open
-        onOpenChange={(open) => {
-          if (!open) onClose();
-        }}
-      />
-    );
-  }
-
-  return (
-    <Dialog
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit customer</DialogTitle>
-          <DialogDescription>
-            {isPending
-              ? "Loading customer details..."
-              : "Could not load customer details."}
-          </DialogDescription>
-        </DialogHeader>
-        {isError && <Button onClick={() => refetch()}>Try again</Button>}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [recentPages, setRecentPages] = useState<string[]>([]);
-  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(
-    null,
-  );
-  const [confirmation, setConfirmation] = useState<{
-    action: EntityAction;
-    id: string;
-    entityLabel: string;
-  } | null>(null);
 
   const { pathname } = useLocation();
 
   const recentPagesRef = useRef<string[] | null>(null);
   const navigate = useNavigate();
 
-  const entity = useSearchEntityActions(search, setEditingCustomerId);
+  const entity = useSearchEntityActions(search);
 
   function selectLink(link: SearchLink) {
     setOpen(false);
@@ -267,15 +207,7 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
                         value={`${label} ${entity.label} ${entity.id}`}
                         disabled={entity.isActionPending}
                         onSelect={() => {
-                          if (action.confirmation) {
-                            setConfirmation({
-                              action,
-                              id: entity.id,
-                              entityLabel: entity.label,
-                            });
-                          } else {
-                            action.execute(entity.id);
-                          }
+                          action.execute(entity.id);
                           setOpen(false);
                           setSearch("");
                         }}
@@ -329,29 +261,6 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
           </Command>
         </DialogContent>
       </Dialog>
-      {confirmation && (
-        <DeleteConfirmationDialog
-          open
-          onOpenChange={(nextOpen) => {
-            if (!nextOpen) setConfirmation(null);
-          }}
-          title={`${confirmation.action.label} ${confirmation.entityLabel}?`}
-          itemName={confirmation.id}
-          isPending={false}
-          action={confirmation.action.confirmation}
-          confirmLabel={`${confirmation.action.label} ${confirmation.entityLabel}`}
-          onConfirm={() => {
-            confirmation.action.execute(confirmation.id);
-            setConfirmation(null);
-          }}
-        />
-      )}
-      {editingCustomerId && (
-        <EditCustomerDialog
-          id={editingCustomerId}
-          onClose={() => setEditingCustomerId(null)}
-        />
-      )}
     </>
   );
 }

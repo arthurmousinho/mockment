@@ -6,8 +6,6 @@ import {
   RefundPaymentRequest,
 } from "@/http/payments-http";
 import {
-  CancelInvoiceRequest,
-  DeleteInvoiceRequest,
   IssueInvoiceRequest,
   ProcessInvoiceRequest,
 } from "@/http/invoices-http";
@@ -16,17 +14,14 @@ import {
   PauseSubscriptionRequest,
   ResumeSubscriptionRequest,
 } from "@/http/subscription-http";
-import { DeleteCustomerRequest } from "@/http/customers-http";
 import { ReplayEventRequest } from "@/http/events-http";
 import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
   CheckIcon,
   PauseIcon,
-  PencilSimpleIcon,
   PlayIcon,
   ProhibitIcon,
-  TrashIcon,
   XIcon,
   type Icon,
 } from "@phosphor-icons/react";
@@ -36,7 +31,6 @@ export type EntityAction = {
   icon: Icon;
   execute: (id: string) => void;
   isPending: boolean;
-  confirmation?: "cancel" | "delete";
 };
 
 const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
@@ -106,8 +100,6 @@ function usePaymentActions(): EntityAction[] {
 function useInvoiceActions(): EntityAction[] {
   const process = ProcessInvoiceRequest();
   const issue = IssueInvoiceRequest();
-  const cancel = CancelInvoiceRequest();
-  const remove = DeleteInvoiceRequest();
 
   return [
     {
@@ -121,20 +113,6 @@ function useInvoiceActions(): EntityAction[] {
       icon: CheckIcon,
       execute: issue.mutate,
       isPending: issue.isPending,
-    },
-    {
-      label: "Cancel",
-      icon: XIcon,
-      execute: cancel.mutate,
-      isPending: cancel.isPending,
-      confirmation: "cancel",
-    },
-    {
-      label: "Delete",
-      icon: TrashIcon,
-      execute: remove.mutate,
-      isPending: remove.isPending,
-      confirmation: "delete",
     },
   ];
 }
@@ -166,15 +144,24 @@ function useSubscriptionActions(): EntityAction[] {
   ];
 }
 
-export function useSearchEntityActions(
-  search: string,
-  editCustomer: (id: string) => void,
-) {
+function useEventActions(): EntityAction[] {
+  const replay = ReplayEventRequest();
+
+  return [
+    {
+      label: "Replay",
+      icon: ArrowClockwiseIcon,
+      execute: replay.mutate,
+      isPending: replay.isPending,
+    },
+  ];
+}
+
+export function useSearchEntityActions(search: string) {
   const paymentActions = usePaymentActions();
   const invoiceActions = useInvoiceActions();
   const subscriptionActions = useSubscriptionActions();
-  const deleteCustomer = DeleteCustomerRequest();
-  const replayEvent = ReplayEventRequest();
+  const eventActions = useEventActions();
 
   const entities: Record<
     string,
@@ -184,35 +171,7 @@ export function useSearchEntityActions(
     pay: { ...ENTITY_ROUTES.pay, actions: paymentActions },
     inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
     sub: { ...ENTITY_ROUTES.sub, actions: subscriptionActions },
-    evt: {
-      ...ENTITY_ROUTES.evt,
-      actions: [
-        {
-          label: "Replay",
-          icon: ArrowClockwiseIcon,
-          execute: replayEvent.mutate,
-          isPending: replayEvent.isPending,
-        },
-      ],
-    },
-    cus: {
-      ...ENTITY_ROUTES.cus,
-      actions: [
-        {
-          label: "Edit",
-          icon: PencilSimpleIcon,
-          execute: editCustomer,
-          isPending: false,
-        },
-        {
-          label: "Delete",
-          icon: TrashIcon,
-          execute: deleteCustomer.mutate,
-          isPending: deleteCustomer.isPending,
-          confirmation: "delete",
-        },
-      ],
-    },
+    evt: { ...ENTITY_ROUTES.evt, actions: eventActions },
   };
 
   const id = search.trim();
