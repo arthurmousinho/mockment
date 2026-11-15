@@ -37,6 +37,7 @@ const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
   pay: { label: "payment", path: "/payments" },
   sub: { label: "subscription", path: "/subscriptions" },
   cus: { label: "customer", path: "/customers" },
+  prd: { label: "product", path: "/products" },
   inv: { label: "invoice", path: "/invoices" },
   evt: { label: "event", path: "/events" },
   scn: { label: "scenario", path: "/simulations" },

@@ -4,6 +4,12 @@ import { Paginator } from "@/components/paginator";
 import { ProductFormDialog } from "@/components/product-form-dialog";
 import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -18,8 +24,14 @@ import {
   ToggleProductRequest,
 } from "@/http/products-http";
 import { formatCurrencyFromCents } from "@/lib/formatters";
-import { PackageIcon, PlusIcon } from "@phosphor-icons/react";
+import {
+  DotsThreeIcon,
+  EyeIcon,
+  PackageIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -37,7 +49,7 @@ export function ProductsPage() {
   const { mutate: toggleRequest, isPending: isToggling } =
     ToggleProductRequest();
 
-  if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
+  if (isPending) return <ListingPageSkeleton columns={7} rows={limit} />;
 
   if (isError) {
     return (
@@ -103,6 +115,7 @@ export function ProductsPage() {
             <TableHead>External ID</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Enabled</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -128,12 +141,33 @@ export function ProductsPage() {
                   }
                 />
               </TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Actions for ${product.name}`}
+                    >
+                      <DotsThreeIcon size={32} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right">
+                    <DropdownMenuItem asChild>
+                      <Link to={`/products/${product.id}`}>
+                        <EyeIcon size={32} />
+                        Details
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
             </TableRow>
           ))}
           {response.data.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-10 text-center text-muted-foreground"
               >
                 {search

@@ -45,6 +45,16 @@ export function ToggleProductRequest() {
   });
 }
 
+export function GetProductDetailsRequest(id: string) {
+  return useQuery({
+    queryKey: ["products", id],
+    queryFn: async () => {
+      const response = await api.get(`products/${id}`);
+      return response.json<Product>();
+    },
+  });
+}
+
 export type CreateProductRequestData = Pick<
   Product,
   "name" | "externalId" | "priceInCents" | "currency"
