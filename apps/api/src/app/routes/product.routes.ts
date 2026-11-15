@@ -2,6 +2,7 @@ import { productDocs } from "../docs/product.docs.ts";
 import {
   createProductSchema,
   productListSchema,
+  toggleProductSchema,
 } from "../schemas/product.schema.ts";
 import { productService } from "../services/product.service.ts";
 import type { FastifyInstance } from "fastify";
@@ -24,4 +25,15 @@ export async function productRoutes(app: FastifyInstance) {
     const product = await productService.create(input);
     return reply.status(201).send(product);
   });
+
+  app.patch(
+    "/:id/toggle",
+    { schema: productDocs.toggle },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { enabled } = toggleProductSchema.parse(request.body);
+      const product = await productService.toggle(id, enabled);
+      return reply.status(200).send(product);
+    },
+  );
 }

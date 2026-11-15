@@ -8,9 +8,39 @@ import {
 import {
   createProductSchema,
   productSchema,
+  toggleProductSchema,
 } from "../schemas/product.schema.ts";
 
 export const productDocs = {
+  toggle: {
+    summary: "Enable or disable a product",
+    description: "Sets whether the product is enabled.",
+    tags: ["Products"],
+    params: idParamsSchema,
+    body: openApiSchema(toggleProductSchema),
+    response: {
+      200: {
+        description: "When the product is updated successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(productSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the product with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Product with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+    },
+  },
   findAll: {
     summary: "List products",
     description:

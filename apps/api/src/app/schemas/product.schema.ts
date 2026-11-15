@@ -15,6 +15,10 @@ export const createProductSchema = z.object({
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 
+export const toggleProductSchema = z.object({
+  enabled: z.boolean(),
+});
+
 export const productSchema = z.object({
   id: z.string(),
   name: z.string(),

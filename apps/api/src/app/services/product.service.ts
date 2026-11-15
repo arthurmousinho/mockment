@@ -67,4 +67,12 @@ async function findById(id: string) {
   return product;
 }
 
-export const productService = { create, findAll, findById };
+async function toggle(id: string, enabled: boolean) {
+  const product = await findById(id);
+  return prismaSingleton.product.update({
+    where: { id: product.id },
+    data: { enabled },
+  });
+}
+
+export const productService = { create, findAll, findById, toggle };
