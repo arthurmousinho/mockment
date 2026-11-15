@@ -1,5 +1,6 @@
 import {
   httpErrorSchema,
+  idParamsSchema,
   openApiSchema,
   paginatedResponseSchema,
   searchablePaginationParamsSchema,
@@ -22,6 +23,34 @@ export const productDocs = {
         content: {
           "application/json": {
             schema: paginatedResponseSchema(productSchema),
+          },
+        },
+      },
+    },
+  },
+  findById: {
+    summary: "Get product details",
+    description: "Returns the details of a product.",
+    tags: ["Products"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the product is retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(productSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the product with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Product with ID {id} was not found.",
+            }),
           },
         },
       },

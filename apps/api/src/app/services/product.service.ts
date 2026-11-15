@@ -1,4 +1,4 @@
-import { ConflictError } from "../../common/http-error.ts";
+import { ConflictError, NotFoundError } from "../../common/http-error.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -57,4 +57,14 @@ async function findAll(input: ProductListInput) {
   });
 }
 
-export const productService = { create, findAll };
+async function findById(id: string) {
+  const product = await prismaSingleton.product.findUnique({ where: { id } });
+
+  if (!product) {
+    throw new NotFoundError(`Product with ID ${id} was not found.`);
+  }
+
+  return product;
+}
+
+export const productService = { create, findAll, findById };

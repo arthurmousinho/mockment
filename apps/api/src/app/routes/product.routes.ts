@@ -13,6 +13,12 @@ export async function productRoutes(app: FastifyInstance) {
     return reply.status(200).send(products);
   });
 
+  app.get("/:id", { schema: productDocs.findById }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const product = await productService.findById(id);
+    return reply.status(200).send(product);
+  });
+
   app.post("/", { schema: productDocs.create }, async (request, reply) => {
     const input = createProductSchema.parse(request.body);
     const product = await productService.create(input);
