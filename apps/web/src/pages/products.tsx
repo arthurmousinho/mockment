@@ -3,6 +3,7 @@ import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -11,7 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllProductsRequest } from "@/http/products-http";
+import {
+  FindAllProductsRequest,
+  ToggleProductRequest,
+} from "@/http/products-http";
 import { formatCurrencyFromCents } from "@/lib/formatters";
 import { PackageIcon } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -29,6 +33,8 @@ export function ProductsPage() {
     isError,
     refetch,
   } = FindAllProductsRequest({ page, limit, search });
+  const { mutate: toggleRequest, isPending: isToggling } =
+    ToggleProductRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
 
@@ -89,7 +95,7 @@ export function ProductsPage() {
             <TableHead>Description</TableHead>
             <TableHead>External ID</TableHead>
             <TableHead>Price</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Enabled</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -105,7 +111,16 @@ export function ProductsPage() {
                   product.currency,
                 )}
               </TableCell>
-              <TableCell>{product.enabled ? "Enabled" : "Disabled"}</TableCell>
+              <TableCell>
+                <Switch
+                  checked={product.enabled}
+                  disabled={isToggling}
+                  aria-label={`Enable product ${product.name}`}
+                  onCheckedChange={(enabled) =>
+                    toggleRequest({ id: product.id, enabled })
+                  }
+                />
+              </TableCell>
             </TableRow>
           ))}
           {response.data.length === 0 && (

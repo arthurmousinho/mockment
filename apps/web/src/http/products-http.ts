@@ -1,7 +1,9 @@
 import type { PaymentCurrency } from "@/http/payments-http";
-import { api } from "@/lib/ky";
+import { api, apiErrorHandler } from "@/lib/ky";
+import { queryClient } from "@/lib/query-client";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export type Product = {
   id: string;
@@ -27,5 +29,18 @@ export function FindAllProductsRequest(
       return await request.json<PaginatedAPIResponse<Product>>();
     },
     placeholderData: keepPreviousData,
+  });
+}
+
+export function ToggleProductRequest() {
+  return useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      await api.patch(`products/${id}/toggle`, { json: { enabled } });
+    },
+    onSuccess: (_, { enabled }) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success(enabled ? "Product enabled." : "Product disabled.");
+    },
+    onError: apiErrorHandler,
   });
 }
