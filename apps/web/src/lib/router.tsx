@@ -24,6 +24,8 @@ import { SimulationScenariosPage } from "@/pages/simulation-scenarios";
 import { SimulationScenarioDetailsPage } from "@/pages/simulation-scenario-details";
 import { SimulationRunPage } from "@/pages/simulation-run";
 import { NotFoundPage } from "@/pages/not-found";
+import { UnexpectedErrorPage } from "@/pages/unexpected-error";
+import { ThemeProvider } from "@/components/theme-provider";
 import { PageLayout } from "@/layouts/page-layout";
 import { AppearancePage } from "@/pages/appearance";
 import { MockboardPage } from "@/pages/mockboard";
@@ -31,6 +33,11 @@ import { MockboardPage } from "@/pages/mockboard";
 export const router = createBrowserRouter([
   {
     element: <PageLayout />,
+    errorElement: (
+      <ThemeProvider>
+        <UnexpectedErrorPage />
+      </ThemeProvider>
+    ),
     children: [
       {
         element: <FrontendLayout />,
