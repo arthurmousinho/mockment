@@ -3,10 +3,31 @@ import { SubscriptionMetrics } from "@/components/subscription-metrics";
 import { WebhookMetrics } from "@/components/webhook-metrics";
 import { SpeedometerIcon } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
 
 export function MockboardPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const dashboard = searchParams.get("dashboard");
+  const activeDashboard =
+    dashboard === "subscriptions" || dashboard === "webhooks"
+      ? dashboard
+      : "payments";
+
+  function handleDashboardChange(value: string) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("dashboard", value);
+      return next;
+    });
+  }
+
   return (
-    <Tabs defaultValue="payments" className="min-w-0 space-y-4">
+    <Tabs
+      value={activeDashboard}
+      onValueChange={handleDashboardChange}
+      className="min-w-0 space-y-4"
+    >
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
         <div className="min-w-0 space-y-2">
           <div className="flex items-center gap-2">
