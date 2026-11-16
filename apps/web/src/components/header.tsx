@@ -47,6 +47,21 @@ const navigationLinks = [
 
 const searchablePages = [
   ...navigationLinks,
+  {
+    label: "Mockboard/payments",
+    href: "/mockboard?dashboard=payments",
+    icon: SpeedometerIcon,
+  },
+  {
+    label: "Mockboard/subscriptions",
+    href: "/mockboard?dashboard=subscriptions",
+    icon: SpeedometerIcon,
+  },
+  {
+    label: "Mockboard/webhooks",
+    href: "/mockboard?dashboard=webhooks",
+    icon: SpeedometerIcon,
+  },
   { label: "Appearance", href: "/appearance", icon: PaletteIcon },
 ] as const;
 
