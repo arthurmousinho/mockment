@@ -27,7 +27,7 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
-import { PageSearch } from "./page-search";
+import { SpotlightSearch } from "./spotlight-search";
 import { VirtualClockButton } from "./virtual-clock-button";
 
 const navigationLinks = [
@@ -76,7 +76,7 @@ export function Header() {
       <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
         <Logo />
         <div className="flex shrink-0 items-center gap-1">
-          <PageSearch
+          <SpotlightSearch
             navigationlinks={searchablePages}
             apiDocLinks={apiDocLinks}
           />

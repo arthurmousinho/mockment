@@ -37,7 +37,7 @@ type SearchLink = {
   external?: boolean;
 };
 
-type PageSearchProps = {
+type SpotlightSearchProps = {
   navigationlinks: readonly SearchLink[];
   apiDocLinks: readonly SearchLink[];
 };
@@ -59,14 +59,20 @@ function readRecentPages(): string[] {
   }
 }
 
-function getPageLabel(path: string, links: PageSearchProps["navigationlinks"]) {
+function getPageLabel(
+  path: string,
+  links: SpotlightSearchProps["navigationlinks"],
+) {
   const link = links.find((item) => item.href === path);
   if (link) return link.label;
 
   return getEntityPageLabel(path);
 }
 
-export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
+export function SpotlightSearch({
+  navigationlinks,
+  apiDocLinks,
+}: SpotlightSearchProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [recentPages, setRecentPages] = useState<string[]>([]);
@@ -130,9 +136,9 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
         }}
       >
         <DialogTrigger asChild>
-          <Button variant="outline" aria-label="Search pages">
+          <Button variant="outline" aria-label="Spotlight search">
             <MagnifyingGlassIcon size={18} />
-            <span className="hidden sm:inline">Search pages...</span>
+            <span className="hidden sm:inline">Spotlight search...</span>
             <KbdGroup className="ml-4 hidden @min-[68rem]:inline-flex">
               <Kbd>⌘ / Ctrl</Kbd>
               <Kbd>K</Kbd>
@@ -144,15 +150,15 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
           showCloseButton={false}
         >
           <DialogHeader className="sr-only">
-            <DialogTitle>Search pages</DialogTitle>
+            <DialogTitle>Spotlight search</DialogTitle>
             <DialogDescription>
               Search for a page, then press Enter to navigate.
             </DialogDescription>
           </DialogHeader>
           <Command>
             <CommandInput
-              placeholder="Search pages..."
-              aria-label="Search pages"
+              placeholder="Spotlight search"
+              aria-label="Spotlight search"
               value={search}
               onValueChange={setSearch}
             />
