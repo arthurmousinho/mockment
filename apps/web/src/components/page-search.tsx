@@ -180,14 +180,14 @@ export function PageSearch({ navigationlinks, apiDocLinks }: PageSearchProps) {
                   })}
                 </CommandGroup>
               )}
-              {entity && (
+              {entity?.href && (
                 <CommandGroup heading="Details">
                   <CommandItem
                     value={`Go to ${entity.label} ${entity.id}`}
                     onSelect={() => {
                       setOpen(false);
                       setSearch("");
-                      navigate(entity.href);
+                      if (entity.href) navigate(entity.href);
                     }}
                   >
                     <ArrowUpRightIcon size={16} />

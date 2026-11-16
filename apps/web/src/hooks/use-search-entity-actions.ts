@@ -15,6 +15,7 @@ import {
   ResumeSubscriptionRequest,
 } from "@/http/subscription-http";
 import { ReplayEventRequest } from "@/http/events-http";
+import { TestWebhookEndpointRequest } from "@/http/webhooks-http";
 import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
@@ -22,6 +23,7 @@ import {
   PauseIcon,
   PlayIcon,
   ProhibitIcon,
+  WifiHighIcon,
   XIcon,
   type Icon,
 } from "@phosphor-icons/react";
@@ -158,21 +160,36 @@ function useEventActions(): EntityAction[] {
   ];
 }
 
+function useWebhookActions(): EntityAction[] {
+  const test = TestWebhookEndpointRequest();
+
+  return [
+    {
+      label: "Test",
+      icon: WifiHighIcon,
+      execute: test.mutate,
+      isPending: test.isPending,
+    },
+  ];
+}
+
 export function useSearchEntityActions(search: string) {
   const paymentActions = usePaymentActions();
   const invoiceActions = useInvoiceActions();
   const subscriptionActions = useSubscriptionActions();
   const eventActions = useEventActions();
+  const webhookActions = useWebhookActions();
 
   const entities: Record<
     string,
-    { label: string; path: string; actions?: EntityAction[] }
+    { label: string; path?: string; actions?: EntityAction[] }
   > = {
     ...ENTITY_ROUTES,
     pay: { ...ENTITY_ROUTES.pay, actions: paymentActions },
     inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
     sub: { ...ENTITY_ROUTES.sub, actions: subscriptionActions },
     evt: { ...ENTITY_ROUTES.evt, actions: eventActions },
+    whk: { label: "webhook", actions: webhookActions },
   };
 
   const id = search.trim();
@@ -185,7 +202,7 @@ export function useSearchEntityActions(search: string) {
   return {
     id,
     label: entity.label,
-    href: `${entity.path}/${id}`,
+    href: entity.path ? `${entity.path}/${id}` : undefined,
     actions,
     isActionPending: actions.some((action) => action.isPending),
   };
