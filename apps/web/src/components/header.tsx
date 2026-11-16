@@ -9,7 +9,6 @@ import {
 } from "./ui/dropdown-menu";
 import {
   ListIcon,
-  GithubLogoIcon,
   KeyIcon,
   WebhooksLogoIcon,
   CurrencyCircleDollarIcon,
@@ -29,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { PageSearch } from "./page-search";
+import { VirtualClockButton } from "./virtual-clock-button";
 
 const navigationLinks = [
   { label: "Guide", href: "/", icon: PathIcon },
@@ -65,8 +65,6 @@ const apiDocLinks = [
   },
 ] as const;
 
-const GITHUB_URL = "https://github.com/arthurmousinho/mockment";
-
 export function Header() {
   const { pathname } = useLocation();
 
@@ -82,11 +80,6 @@ export function Header() {
             navigationlinks={searchablePages}
             apiDocLinks={apiDocLinks}
           />
-          <Button variant="outline" size="icon" asChild>
-            <Link to="/appearance" aria-label="Appearance">
-              <PaletteIcon size={18} />
-            </Link>
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -120,16 +113,8 @@ export function Header() {
                   </a>
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                  <GithubLogoIcon size={18} />
-                  Star on GitHub
-                </a>
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
           <div className="hidden shrink-0 items-center gap-1 @min-[68rem]:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -162,13 +147,13 @@ export function Header() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" asChild>
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                <GithubLogoIcon size={16} />
-                Star on GitHub
-              </a>
-            </Button>
           </div>
+          <Button variant="outline" size="icon" asChild>
+            <Link to="/appearance" aria-label="Appearance">
+              <PaletteIcon size={18} />
+            </Link>
+          </Button>
+          <VirtualClockButton />
         </div>
       </div>
       <nav

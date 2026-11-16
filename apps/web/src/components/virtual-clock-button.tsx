@@ -159,23 +159,24 @@ export function VirtualClockButton() {
         />
       )}
 
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="shrink-0">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
-              size="lg"
+              size="default"
+              aria-label="Virtual clock"
               variant={isTimeAltered ? "default" : "outline"}
-              className="shadow-lg"
+              className="px-2 sm:px-3"
             >
               <ClockIcon className="h-5 w-5" weight="bold" />
 
-              <span className="text-sm font-medium">
+              <span className="hidden text-sm font-medium lg:inline">
                 {isLoading ? "Loading..." : formattedDateTime}
               </span>
             </Button>
           </PopoverTrigger>
 
-          <PopoverContent align="end" side="top" className="w-80">
+          <PopoverContent align="end" side="bottom" className="w-80">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TimerIcon className="h-4 w-4 text-muted-foreground" />

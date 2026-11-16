@@ -1,6 +1,5 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { VirtualClockButton } from "@/components/virtual-clock-button";
 import { Outlet } from "react-router-dom";
 
 export function MainLayout() {
@@ -13,7 +12,6 @@ export function MainLayout() {
         </div>
       </div>
       <Footer />
-      <VirtualClockButton />
     </div>
   );
 }
