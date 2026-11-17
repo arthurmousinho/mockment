@@ -266,14 +266,14 @@ model Checkout {
   customerId     String?         @map("customer_id")
 
   apiKeyId       String  @map("api_key_id")
-  paymentId      String  @unique @map("payment_id")
+  paymentId      String? @unique @map("payment_id")
   subscriptionId String? @map("subscription_id")
 
   expiresAt   DateTime? @map("expires_at")
   completedAt DateTime? @map("completed_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  payment      Payment       @relation(fields: [paymentId], references: [id])
+  payment      Payment?      @relation(fields: [paymentId], references: [id])
   customer     Customer?     @relation(fields: [customerId], references: [id])
   apiKey       ApiKey        @relation(fields: [apiKeyId], references: [id])
   subscription Subscription? @relation(fields: [subscriptionId], references: [id])
