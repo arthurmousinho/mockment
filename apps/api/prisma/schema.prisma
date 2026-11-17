@@ -93,6 +93,12 @@ enum SimulationStepRunStatus {
   SKIPPED
 }
 
+enum CheckoutStatus {
+  OPEN
+  COMPLETED
+  EXPIRED
+}
+
 model ApiKey {
   id String @id
 
@@ -245,8 +251,9 @@ model WebhookDelivery {
 model Checkout {
   id String @id
 
-  successUrl String @map("success_url")
-  cancelUrl  String @map("cancel_url")
+  status     CheckoutStatus @default(OPEN)
+  successUrl String         @map("success_url")
+  cancelUrl  String         @map("cancel_url")
 
   apiKeyId       String  @map("api_key_id")
   paymentId      String  @unique @map("payment_id")

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `checkouts` ADD COLUMN `status` ENUM('OPEN', 'COMPLETED', 'EXPIRED') NOT NULL DEFAULT 'OPEN';
