@@ -159,7 +159,6 @@ model Payment {
 
   customer Customer? @relation(fields: [customerId], references: [id])
   apiKey   ApiKey    @relation(fields: [apiKeyId], references: [id])
-  events   Event[]
   checkout Checkout?
   invoices Invoice[]
 
@@ -183,7 +182,6 @@ model Invoice {
 
   customer Customer @relation(fields: [customerId], references: [id])
   payment  Payment  @relation(fields: [paymentId], references: [id])
-  events   Event[]
 
   @@index([paymentId])
   @@map("invoices")
@@ -195,22 +193,14 @@ model Event {
   type    EventType
   payload Json?
 
-  paymentId      String? @map("payment_id")
-  subscriptionId String? @map("subscription_id")
-  invoiceId      String? @map("invoice_id")
+  resourceId String? @map("resource_id")
 
-  createdAt DateTime @default(now()) @map("created_at")
-
-  payment           Payment?          @relation(fields: [paymentId], references: [id])
-  subscription      Subscription?     @relation(fields: [subscriptionId], references: [id])
-  invoice           Invoice?          @relation(fields: [invoiceId], references: [id])
+  createdAt         DateTime          @default(now()) @map("created_at")
   webhookDeliveries WebhookDelivery[]
 
   @@index([type])
-  @@index([paymentId])
-  @@index([subscriptionId])
-  @@index([invoiceId])
   @@index([createdAt])
+  @@index([resourceId])
   @@map("events")
 }
 
@@ -303,7 +293,6 @@ model Subscription {
   apiKey    ApiKey     @relation(fields: [apiKeyId], references: [id])
   customer  Customer   @relation(fields: [customerId], references: [id])
   checkouts Checkout[]
-  events    Event[]
 
   @@map("subscriptions")
 }
