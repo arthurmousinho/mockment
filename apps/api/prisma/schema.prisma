@@ -257,9 +257,9 @@ model Checkout {
   status     CheckoutStatus @default(OPEN)
   successUrl String         @map("success_url")
   cancelUrl  String         @map("cancel_url")
+  customerId String?        @map("customer_id")
 
   apiKeyId       String  @map("api_key_id")
-  customerId     String  @map("customer_id")
   paymentId      String  @unique @map("payment_id")
   subscriptionId String? @map("subscription_id")
 
@@ -268,7 +268,7 @@ model Checkout {
   createdAt   DateTime  @default(now()) @map("created_at")
 
   payment      Payment       @relation(fields: [paymentId], references: [id])
-  customer     Customer      @relation(fields: [customerId], references: [id])
+  customer     Customer?     @relation(fields: [customerId], references: [id])
   apiKey       ApiKey        @relation(fields: [apiKeyId], references: [id])
   subscription Subscription? @relation(fields: [subscriptionId], references: [id])
 
