@@ -21,6 +21,7 @@ import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 import { customerService } from "./customer.service.ts";
 import { apiKeyService } from "./api-key.service.ts";
+import { eventService } from "./event.service.ts";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
@@ -59,7 +60,10 @@ export async function create(apiKey: string, input: CreateCheckoutInput) {
     },
   });
 
-  // TODO: Emit event for checkout creation
+  await eventService.emit({
+    resourceId: opennedCheckout.id,
+    type: "CHECKOUT_CREATED",
+  });
 
   return {
     ...opennedCheckout,
