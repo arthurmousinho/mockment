@@ -17,9 +17,7 @@ async function emit(input: EmitEventInput) {
     data: {
       id: createPrefixedId("evt"),
       type: input.type,
-      paymentId: input.paymentId ?? null,
-      subscriptionId: input.subscriptionId ?? null,
-      invoiceId: input.invoiceId ?? null,
+      resourceId: input.resourceId ?? null,
       payload: input.payload,
     },
   });
@@ -59,6 +57,14 @@ async function findById(id: string) {
   return event;
 }
 
+async function findAllByResourceId(resourceId: string) {
+  return await prismaSingleton.event.findMany({
+    where: { resourceId },
+    select: { id: true, type: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 async function replay(id: string) {
   const event = await findById(id);
   await webhookDeliveryService.dispatch(event);
@@ -69,5 +75,6 @@ export const eventService = {
   emit,
   findAll,
   findById,
+  findAllByResourceId,
   replay,
 };

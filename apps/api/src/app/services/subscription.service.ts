@@ -124,7 +124,7 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
   );
 
   await eventService.emit({
-    subscriptionId: pendingSubscription.id,
+    resourceId: pendingSubscription.id,
     type: "SUBSCRIPTION_CREATED",
     payload: pendingSubscription,
   });
@@ -172,25 +172,15 @@ async function findById(id: string) {
 async function getDetails(id: string) {
   const subscription = await prismaSingleton.subscription.findUnique({
     where: { id },
-    include: {
-      events: {
-        select: {
-          id: true,
-          type: true,
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-    },
   });
 
   if (!subscription) {
     throw new NotFoundError(`Subscription with ID ${id} was not found.`);
   }
 
-  return subscription;
+  const events = await eventService.findAllByResourceId(subscription.id);
+
+  return { ...subscription, events };
 }
 
 function validateStatusTransition(
@@ -224,7 +214,7 @@ async function changeStatus(
   });
 
   await eventService.emit({
-    subscriptionId: subscription.id,
+    resourceId: subscription.id,
     type: `SUBSCRIPTION_${newStatus === "ACTIVE" ? "RESUMED" : newStatus}`,
     payload: updatedSubscription,
   });
@@ -259,7 +249,7 @@ async function activate(id: string) {
   });
 
   await eventService.emit({
-    subscriptionId: activatedSubscription.id,
+    resourceId: activatedSubscription.id,
     type: "SUBSCRIPTION_ACTIVATED",
     payload: activatedSubscription,
   });

@@ -95,9 +95,8 @@ async function create(apiKey: string, input: CreateInvoiceInput) {
   });
 
   await eventService.emit({
-    paymentId: payment.id,
     type: "INVOICE_CREATED",
-    invoiceId: createdInvoice.id,
+    resourceId: createdInvoice.id,
     payload: createdInvoice,
   });
 
@@ -140,19 +139,15 @@ async function findById(id: string) {
 async function getDetails(id: string) {
   const invoice = await prismaSingleton.invoice.findUnique({
     where: { id },
-    include: {
-      events: {
-        select: { id: true, type: true, createdAt: true },
-        orderBy: { createdAt: "desc" },
-      },
-    },
   });
 
   if (!invoice) {
     throw new NotFoundError(`Invoice with ID ${id} was not found.`);
   }
 
-  return invoice;
+  const events = await eventService.findAllByResourceId(invoice.id);
+
+  return { ...invoice, events };
 }
 
 async function update(id: string, input: UpdateInvoiceInput) {
@@ -241,8 +236,7 @@ async function process(id: string) {
   });
 
   await eventService.emit({
-    paymentId: invoice.paymentId,
-    invoiceId: invoice.id,
+    resourceId: invoice.id,
     type: "INVOICE_PROCESSING",
     payload: processedInvoice,
   });
@@ -266,9 +260,8 @@ async function issue(id: string) {
   await generateInvoicePdf({ ...issuedInvoice, customer });
 
   await eventService.emit({
-    paymentId: invoice.paymentId,
+    resourceId: invoice.id,
     type: "INVOICE_ISSUED",
-    invoiceId: invoice.id,
     payload: issuedInvoice,
   });
 
@@ -289,8 +282,7 @@ async function cancel(id: string) {
   });
 
   await eventService.emit({
-    paymentId: invoice.paymentId,
-    invoiceId: invoice.id,
+    resourceId: invoice.id,
     type: "INVOICE_CANCELED",
     payload: canceledInvoice,
   });

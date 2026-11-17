@@ -86,6 +86,7 @@ async function create(
     },
   });
 
+  // TODO: Remove the checkout generation from here;
   const checkout = await checkoutService.generateLink({
     apiKeyId: validatedApiKey.id,
     paymentId: payment.id,
@@ -97,7 +98,7 @@ async function create(
   const paymentPayload = { ...payment, ...checkout };
 
   await eventService.emit({
-    paymentId: payment.id,
+    resourceId: payment.id,
     type: "PAYMENT_CREATED",
     payload: paymentPayload,
   });
@@ -227,16 +228,6 @@ async function getDetails(id: string) {
     where: { id },
     include: {
       checkout: { select: { id: true } },
-      events: {
-        select: {
-          id: true,
-          type: true,
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
     },
   });
 
@@ -245,9 +236,11 @@ async function getDetails(id: string) {
   }
 
   const { checkout, ...paymentDetails } = payment;
+  const events = await eventService.findAllByResourceId(payment.id);
 
   return {
     ...paymentDetails,
+    events,
     checkoutId: checkout?.id ?? null,
     checkoutLink: checkout ? buildCheckoutLink(checkout.id) : null,
   };
@@ -283,7 +276,7 @@ async function changeStatus(id: string, newStatus: PaymentStatus) {
   });
 
   await eventService.emit({
-    paymentId: payment.id,
+    resourceId: payment.id,
     type: `PAYMENT_${newStatus}`,
     payload: updatedPayment,
   });
@@ -306,7 +299,7 @@ async function createRecurringPayment(subscription: Subscription) {
   });
 
   await eventService.emit({
-    paymentId: payment.id,
+    resourceId: payment.id,
     type: "PAYMENT_CREATED",
     payload: payment,
   });
