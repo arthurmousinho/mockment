@@ -257,11 +257,13 @@ model WebhookDelivery {
 model Checkout {
   id String @id
 
-  amountInCents Int            @map("amount_in_cents")
-  status        CheckoutStatus @default(OPEN)
-  successUrl    String         @map("success_url")
-  cancelUrl     String         @map("cancel_url")
-  customerId    String?        @map("customer_id")
+  status         CheckoutStatus  @default(OPEN)
+  amountInCents  Int             @map("amount_in_cents")
+  currency       PaymentCurrency
+  allowedMethods Json            @map("allowed_methods")
+  successUrl     String          @map("success_url")
+  cancelUrl      String          @map("cancel_url")
+  customerId     String?         @map("customer_id")
 
   apiKeyId       String  @map("api_key_id")
   paymentId      String  @unique @map("payment_id")
