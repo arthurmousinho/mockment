@@ -10,9 +10,54 @@ import {
   completeCheckoutResponseSchema,
   detailedCheckoutSchema,
   findAllCheckoutsSchema,
+  createCheckoutSchema,
+  createCheckoutResponseSchema,
 } from "../schemas/checkout.schema.ts";
 
 export const checkoutDocs = {
+  create: {
+    summary: "Create a checkout",
+    description: "Creates an open checkout using a bearer API key.",
+    tags: ["Checkout"],
+    body: openApiSchema(createCheckoutSchema),
+    response: {
+      201: {
+        description: "When the checkout is created successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(createCheckoutResponseSchema),
+          },
+        },
+      },
+      401: {
+        description: "When the API key is missing or invalid.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "UNAUTHORIZED",
+              code: 401,
+              message: "Invalid API Key.",
+            }),
+          },
+        },
+      },
+      404: {
+        description: "When the customer or subscription is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Customer or subscription not found.",
+            }),
+          },
+        },
+      },
+      422: {
+        description: "When the expiration date is not in the future.",
+      },
+    },
+  },
   findAll: {
     summary: "List checkouts",
     description:

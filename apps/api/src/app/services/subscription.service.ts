@@ -110,6 +110,7 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
     },
   });
 
+  // TODO: Replace for checkout creation;
   const initPayment = await paymentService.create(
     apiKey,
     {
@@ -332,6 +333,7 @@ export const subscriptionService = {
   getMetrics,
   create,
   findAll,
+  findById,
   changeStatus,
   update,
   activate,
