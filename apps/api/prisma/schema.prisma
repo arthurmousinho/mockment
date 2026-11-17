@@ -99,6 +99,7 @@ enum SimulationStepRunStatus {
 enum CheckoutStatus {
   OPEN
   COMPLETED
+  CANCELED
   EXPIRED
 }
 
