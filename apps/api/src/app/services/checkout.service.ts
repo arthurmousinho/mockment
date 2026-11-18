@@ -165,10 +165,6 @@ async function complete(id: string, input: CompleteCheckoutInput) {
     );
   }
 
-  if (checkout.subscriptionId) {
-    await subscriptionService.activate(checkout.subscriptionId);
-  }
-
   const createdPayment = await paymentService.create({
     amountInCents: checkout.amountInCents,
     method: input.method,
@@ -178,6 +174,11 @@ async function complete(id: string, input: CompleteCheckoutInput) {
 
   await paymentService.changeStatus(createdPayment.id, "PROCESSING");
   await paymentService.changeStatus(createdPayment.id, "APPROVED");
+
+  // FIXME: This doesn't ensure atomicity, becouse the activation can fail.
+  if (checkout.subscriptionId) {
+    await subscriptionService.activate(checkout.subscriptionId);
+  }
 
   const completedCheckout = await prismaSingleton.checkout.update({
     where: { id: checkout.id },
