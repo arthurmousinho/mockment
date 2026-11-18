@@ -19,6 +19,7 @@ import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 import { customerService } from "./customer.service.ts";
 import { eventService } from "./event.service.ts";
+import { check } from "zod/mini";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
@@ -161,6 +162,20 @@ async function cancel(id: string) {
   return canceledCheckout;
 }
 
+async function expire(id: string) {
+  const expiredCheckout = await prismaSingleton.checkout.update({
+    where: { id },
+    data: { status: "EXPIRED" },
+  });
+
+  await eventService.emit({
+    resourceId: expiredCheckout.id,
+    type: "CHECKOUT_EXPIRED",
+  });
+
+  return expiredCheckout;
+}
+
 async function complete(id: string, input: CompleteCheckoutInput) {
   const checkout = await findById(id);
 
@@ -169,10 +184,7 @@ async function complete(id: string, input: CompleteCheckoutInput) {
   }
 
   if (checkout.expiresAt && new Date(checkout.expiresAt) <= new Date()) {
-    await prismaSingleton.checkout.update({
-      where: { id: checkout.id },
-      data: { status: "EXPIRED" },
-    });
+    await expire(id);
     throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
   }
 
