@@ -25,11 +25,7 @@ import { buildCheckoutLink, checkoutService } from "./checkout.service.ts";
 import { eventService } from "./event.service.ts";
 import { buildPaymentSearchFilter } from "../filters/payment.filters.ts";
 
-async function create(
-  apiKey: string,
-  input: CreatePaymentInput,
-  subscriptionId?: string,
-) {
+async function create(apiKey: string, input: CreatePaymentInput) {
   const validatedApiKey = await apiKeyService.validate(apiKey);
 
   if (input.idempotencyKey) {
@@ -71,7 +67,7 @@ async function create(
     await customerService.findById(input.customerId);
   }
 
-  const payment = await prismaSingleton.payment.create({
+  const createdPayment = await prismaSingleton.payment.create({
     data: {
       id: createPrefixedId("pay"),
       amountInCents: input.amountInCents,
@@ -86,24 +82,13 @@ async function create(
     },
   });
 
-  // TODO: Remove the checkout generation from here;
-  const checkout = await checkoutService.generateLink({
-    apiKeyId: validatedApiKey.id,
-    paymentId: payment.id,
-    ...(input.successUrl && { successUrl: input.successUrl }),
-    ...(input.cancelUrl && { cancelUrl: input.cancelUrl }),
-    ...(subscriptionId && { subscriptionId }),
-  });
-
-  const paymentPayload = { ...payment, ...checkout };
-
   await eventService.emit({
-    resourceId: payment.id,
+    resourceId: createdPayment.id,
     type: "PAYMENT_CREATED",
-    payload: paymentPayload,
+    payload: createdPayment,
   });
 
-  return paymentPayload;
+  return createdPayment;
 }
 
 async function findAll(input: PaymentListInput) {

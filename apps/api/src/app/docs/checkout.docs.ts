@@ -6,8 +6,7 @@ import {
   searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
-  completeCheckoutSchema,
-  completeCheckoutResponseSchema,
+  checkoutSchema,
   detailedCheckoutSchema,
   findAllCheckoutsSchema,
   createCheckoutSchema,
@@ -105,16 +104,15 @@ export const checkoutDocs = {
   },
   complete: {
     summary: "Complete a checkout",
-    description: "Completes a checkout with the provided status.",
+    description: "Completes an open, unexpired checkout.",
     tags: ["Checkout"],
     params: idParamsSchema,
-    body: openApiSchema(completeCheckoutSchema),
     response: {
       200: {
         description: "When the checkout is completed successfully.",
         content: {
           "application/json": {
-            schema: openApiSchema(completeCheckoutResponseSchema),
+            schema: openApiSchema(checkoutSchema),
           },
         },
       },
@@ -130,16 +128,14 @@ export const checkoutDocs = {
           },
         },
       },
-      409: {
-        description:
-          "When the checkout cannot be completed because of its payment current state.",
+      422: {
+        description: "When the checkout is not open or has expired.",
         content: {
           "application/json": {
             schema: httpErrorSchema({
-              error: "CONFLICT",
-              code: 409,
-              message:
-                "Payment with ID {paymentId} is not in a valid state for completion. Payment status must be CREATED but is {paymentStatus}.",
+              error: "UNPROCESSABLE_ENTITY",
+              code: 422,
+              message: "Checkout with ID {id} is not open.",
             }),
           },
         },

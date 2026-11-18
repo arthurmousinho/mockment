@@ -129,36 +129,41 @@ async function findById(id: string) {
   return checkout;
 }
 
-async function complete(id: string, status: CheckoutCompletionStatus) {
-  return;
+async function complete(id: string) {
+  const checkout = await findById(id);
 
-  // const checkout = await findById(id);
-  // const payment = await paymentService.findById(checkout.paymentId);
+  if (checkout.status !== "OPEN") {
+    throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
+  }
 
-  // if (payment.status !== "CREATED") {
-  //   throw new ConflictError(
-  //     `Payment with ID ${checkout.paymentId} is not in a valid state for completion. Payment status must be "CREATED" but is "${payment.status}".`,
-  //   );
-  // }
+  if (checkout.expiresAt && new Date(checkout.expiresAt) <= new Date()) {
+    await prismaSingleton.checkout.update({
+      where: { id: checkout.id },
+      data: { status: "EXPIRED" },
+    });
+    throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
+  }
 
-  // switch (status) {
-  //   case "APPROVED":
-  //     await paymentService.changeStatus(checkout.paymentId, "PROCESSING");
-  //     await paymentService.changeStatus(checkout.paymentId, "APPROVED");
-  //     if (checkout.subscriptionId) {
-  //       await subscriptionService.activate(checkout.subscriptionId);
-  //     }
-  //     break;
-  //   case "DECLINED":
-  //     await paymentService.changeStatus(checkout.paymentId, "PROCESSING");
-  //     await paymentService.changeStatus(checkout.paymentId, "DECLINED");
-  //     break;
-  //   case "CANCELED":
-  //     await paymentService.changeStatus(checkout.paymentId, "CANCELED");
-  //     break;
-  // }
+  if (checkout.subscriptionId) {
+    await subscriptionService.activate(checkout.subscriptionId);
+  }
 
-  // return checkout;
+  // TODO: Create a PAYMENT, process and approve it.
+
+  const completedCheckout = await prismaSingleton.checkout.update({
+    where: { id: checkout.id },
+    data: {
+      status: "COMPLETED",
+      completedAt: new Date(),
+    },
+  });
+
+  await eventService.emit({
+    resourceId: checkout.id,
+    type: "CHECKOUT_COMPLETED",
+  });
+
+  return completedCheckout;
 }
 
 export const checkoutService = {
