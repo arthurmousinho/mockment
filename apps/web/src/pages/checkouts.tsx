@@ -4,6 +4,7 @@ import { ArrowSquareOutIcon, LinkSimpleIcon } from "@phosphor-icons/react";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
+import { CheckoutStatusBadge } from "@/components/checkout-status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,22 +15,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FindAllCheckoutsRequest } from "@/http/checkout-http";
-import { formatDateTime } from "@/lib/formatters";
+import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 
 export function CheckoutsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+
   const { data, isPending, isFetching, isError, refetch } =
     FindAllCheckoutsRequest({ page, limit, search });
 
-  if (isPending) return <ListingPageSkeleton columns={5} rows={limit} />;
+  if (isPending) return <ListingPageSkeleton columns={8} rows={limit} />;
 
   if (isError || !data) {
     return (
       <div className="flex flex-col items-center gap-4 py-10">
-        <p className="text-sm text-muted-foreground">Failed to load checkouts.</p>
+        <p className="text-sm text-muted-foreground">
+          Failed to load checkouts.
+        </p>
         <Button onClick={() => refetch()}>Try again</Button>
       </div>
     );
@@ -43,8 +47,8 @@ export function CheckoutsPage() {
           <h1 className="text-xl font-medium tracking-tight">Checkouts</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Find and open generated checkout links, or search by checkout,
-          payment, subscription, or API key ID.
+          View checkout amounts, payment methods, status, and expiration, and
+          open checkout links.
         </p>
       </header>
 
@@ -59,7 +63,7 @@ export function CheckoutsPage() {
             setPage(1);
           }}
           label="Search checkouts"
-          inputLabel="Checkout, payment, subscription, or API key ID"
+          inputLabel="Checkout, payment, or subscription ID"
           placeholder="Search checkout or related IDs..."
         />
         <div className="flex items-center gap-2 lg:ml-auto">
@@ -71,8 +75,9 @@ export function CheckoutsPage() {
         <TableHeader className="bg-muted/70">
           <TableRow>
             <TableHead>Checkout ID</TableHead>
-            <TableHead>Payment ID</TableHead>
-            <TableHead>Subscription ID</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Expires At</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead className="text-right">Checkout Link</TableHead>
           </TableRow>
@@ -80,7 +85,7 @@ export function CheckoutsPage() {
         <TableBody>
           {data.data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 {search
                   ? "No checkouts match your search."
                   : "No checkouts found."}
@@ -90,9 +95,19 @@ export function CheckoutsPage() {
             data.data.map((checkout) => (
               <TableRow key={checkout.id}>
                 <TableCell className="font-mono">{checkout.id}</TableCell>
-                <TableCell className="font-mono">{checkout.paymentId}</TableCell>
-                <TableCell className="font-mono">
-                  {checkout.subscriptionId ?? "—"}
+                <TableCell className="whitespace-nowrap">
+                  {formatCurrencyFromCents(
+                    checkout.amountInCents,
+                    checkout.currency,
+                  )}
+                </TableCell>
+                <TableCell>
+                  <CheckoutStatusBadge status={checkout.status} />
+                </TableCell>
+                <TableCell>
+                  {checkout.expiresAt
+                    ? formatDateTime(checkout.expiresAt)
+                    : "—"}
                 </TableCell>
                 <TableCell>{formatDateTime(checkout.createdAt)}</TableCell>
                 <TableCell className="text-right">

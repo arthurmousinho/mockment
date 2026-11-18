@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import type { Payment } from "./payments-http";
+import type { Payment, PaymentCurrency, PaymentMethod } from "./payments-http";
 import { api } from "@/lib/ky";
 import type { Subscription } from "./subscription-http";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
@@ -14,7 +14,22 @@ export type Checkout = {
   createdAt: string;
 };
 
-export type CheckoutListItem = Checkout & { link: string };
+export type CheckoutStatus = "OPEN" | "COMPLETED" | "CANCELED" | "EXPIRED";
+
+export type CheckoutListItem = {
+  id: string;
+  status: CheckoutStatus;
+  amountInCents: number;
+  currency: PaymentCurrency;
+  allowedMethods: PaymentMethod[];
+  customerId: string | null;
+  paymentId: string | null;
+  subscriptionId: string | null;
+  expiresAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  link: string;
+};
 
 type DetailedCheckout = Checkout & {
   payment: Payment;
