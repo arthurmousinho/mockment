@@ -148,7 +148,8 @@ export const checkoutDocs = {
   },
   complete: {
     summary: "Complete a checkout",
-    description: "Completes an open, unexpired checkout.",
+    description:
+      "Completes an open, unexpired checkout with an approved or declined payment. An associated subscription is activated only when the payment is approved.",
     tags: ["Checkout"],
     params: idParamsSchema,
     body: openApiSchema(completeCheckoutSchema),

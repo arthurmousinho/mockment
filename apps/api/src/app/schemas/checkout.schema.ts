@@ -63,6 +63,7 @@ export type CheckoutListInput = z.infer<typeof checkoutListSchema>;
 
 export const completeCheckoutSchema = z.object({
   method: z.enum(PaymentMethod, { message: "Invalid payment method." }),
+  outcome: z.enum(["APPROVED", "DECLINED"], { message: "Invalid outcome." }),
 });
 export type CompleteCheckoutInput = z.infer<typeof completeCheckoutSchema>;
 

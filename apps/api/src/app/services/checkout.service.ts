@@ -226,10 +226,10 @@ async function complete(id: string, input: CompleteCheckoutInput) {
   });
 
   await paymentService.changeStatus(createdPayment.id, "PROCESSING");
-  await paymentService.changeStatus(createdPayment.id, "APPROVED");
+  await paymentService.changeStatus(createdPayment.id, input.outcome);
 
   // FIXME: This doesn't ensure atomicity, becouse the activation can fail.
-  if (checkout.subscriptionId) {
+  if (input.outcome === "APPROVED" && checkout.subscriptionId) {
     await subscriptionService.activate(checkout.subscriptionId);
   }
 

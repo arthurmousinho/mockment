@@ -33,7 +33,7 @@ export const completeCheckoutStep = {
   id: "checkout.complete",
   name: "Complete checkout",
   description:
-    "Complete an existing checkout with the selected payment status.",
+    "Complete an existing checkout with a payment method and outcome.",
   input: [
     {
       name: "id",
@@ -41,13 +41,19 @@ export const completeCheckoutStep = {
       type: "string",
       required: true,
     },
-    // TODO: Update this to match with new input data;
     {
-      name: "status",
-      label: "Completion status",
+      name: "method",
+      label: "Payment method",
       type: "select",
       required: true,
-      //options: completeCheckoutSchema.shape.status.options,
+      options: completeCheckoutSchema.shape.method.options,
+    },
+    {
+      name: "outcome",
+      label: "Payment outcome",
+      type: "select",
+      required: true,
+      options: completeCheckoutSchema.shape.outcome.options,
     },
   ],
   output: [
