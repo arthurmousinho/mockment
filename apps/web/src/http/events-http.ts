@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type EventType =
+  | "CHECKOUT_CREATED"
+  | "CHECKOUT_COMPLETED"
+  | "CHECKOUT_CANCELED"
+  | "CHECKOUT_EXPIRED"
   | "PAYMENT_CREATED"
   | "PAYMENT_PROCESSING"
   | "PAYMENT_APPROVED"
@@ -66,7 +70,9 @@ export function ReplayEventRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks", "deliveries"] });
-      toast.success("Event replay completed. Check webhook deliveries for results.");
+      toast.success(
+        "Event replay completed. Check webhook deliveries for results.",
+      );
     },
     onError: apiErrorHandler,
   });

@@ -1,8 +1,10 @@
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import type { Payment, PaymentCurrency, PaymentMethod } from "./payments-http";
+import type { PaymentCurrency, PaymentMethod } from "./payments-http";
 import { api } from "@/lib/ky";
-import type { Subscription } from "./subscription-http";
+import type { EventType } from "./events-http";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
+
+export type CheckoutStatus = "OPEN" | "COMPLETED" | "CANCELED" | "EXPIRED";
 
 export type Checkout = {
   id: string;
@@ -14,9 +16,7 @@ export type Checkout = {
   createdAt: string;
 };
 
-export type CheckoutStatus = "OPEN" | "COMPLETED" | "CANCELED" | "EXPIRED";
-
-export type CheckoutListItem = {
+type CheckoutRecord = {
   id: string;
   status: CheckoutStatus;
   amountInCents: number;
@@ -28,12 +28,16 @@ export type CheckoutListItem = {
   expiresAt: string | null;
   completedAt: string | null;
   createdAt: string;
+  successUrl: string;
+  cancelUrl: string;
+};
+
+export type CheckoutListItem = CheckoutRecord & {
   link: string;
 };
 
-type DetailedCheckout = Checkout & {
-  payment: Payment;
-  subscription: Subscription | null;
+type DetailedCheckout = CheckoutRecord & {
+  events: { id: string; type: EventType; createdAt: string }[];
 };
 
 export function GetCheckoutDetailsRequest(id: string) {

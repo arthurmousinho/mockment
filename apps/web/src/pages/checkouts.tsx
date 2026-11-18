@@ -1,11 +1,23 @@
 import { ListingPageSkeleton } from "@/components/listing-page-skeleton";
 import { useState } from "react";
-import { ArrowSquareOutIcon, LinkSimpleIcon } from "@phosphor-icons/react";
+import {
+  ArrowSquareOutIcon,
+  DotsThreeIcon,
+  EyeIcon,
+  LinkSimpleIcon,
+} from "@phosphor-icons/react";
+import { Link } from "react-router-dom";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
 import { CheckoutStatusBadge } from "@/components/checkout-status-badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -26,7 +38,7 @@ export function CheckoutsPage() {
   const { data, isPending, isFetching, isError, refetch } =
     FindAllCheckoutsRequest({ page, limit, search });
 
-  if (isPending) return <ListingPageSkeleton columns={8} rows={limit} />;
+  if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
 
   if (isError || !data) {
     return (
@@ -79,13 +91,13 @@ export function CheckoutsPage() {
             <TableHead>Status</TableHead>
             <TableHead>Expires At</TableHead>
             <TableHead>Created At</TableHead>
-            <TableHead className="text-right">Checkout Link</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 {search
                   ? "No checkouts match your search."
                   : "No checkouts found."}
@@ -111,12 +123,35 @@ export function CheckoutsPage() {
                 </TableCell>
                 <TableCell>{formatDateTime(checkout.createdAt)}</TableCell>
                 <TableCell className="text-right">
-                  <Button asChild variant="outline" size="sm">
-                    <a href={checkout.link} target="_blank" rel="noreferrer">
-                      <ArrowSquareOutIcon size={16} />
-                      Open checkout
-                    </a>
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={`Actions for checkout ${checkout.id}`}
+                      >
+                        <DotsThreeIcon size={32} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to={`/checkouts/${checkout.id}`}>
+                          <EyeIcon size={16} />
+                          Details
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <a
+                          href={checkout.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ArrowSquareOutIcon size={16} />
+                          Open Session
+                        </a>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))
