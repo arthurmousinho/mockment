@@ -11,6 +11,7 @@ import {
   findAllCheckoutsSchema,
   createCheckoutSchema,
   createCheckoutResponseSchema,
+  completeCheckoutSchema,
 } from "../schemas/checkout.schema.ts";
 
 export const checkoutDocs = {
@@ -107,6 +108,7 @@ export const checkoutDocs = {
     description: "Completes an open, unexpired checkout.",
     tags: ["Checkout"],
     params: idParamsSchema,
+    body: openApiSchema(completeCheckoutSchema),
     response: {
       200: {
         description: "When the checkout is completed successfully.",
@@ -129,7 +131,8 @@ export const checkoutDocs = {
         },
       },
       422: {
-        description: "When the checkout is not open or has expired.",
+        description:
+          "When the checkout is not open, has expired, or does not allow the selected payment method.",
         content: {
           "application/json": {
             schema: httpErrorSchema({

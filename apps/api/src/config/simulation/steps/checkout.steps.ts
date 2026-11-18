@@ -32,7 +32,8 @@ export const getCheckoutStep = {
 export const completeCheckoutStep = {
   id: "checkout.complete",
   name: "Complete checkout",
-  description: "Complete an existing checkout with the selected payment status.",
+  description:
+    "Complete an existing checkout with the selected payment status.",
   input: [
     {
       name: "id",
@@ -40,12 +41,13 @@ export const completeCheckoutStep = {
       type: "string",
       required: true,
     },
+    // TODO: Update this to match with new input data;
     {
       name: "status",
       label: "Completion status",
       type: "select",
       required: true,
-      options: completeCheckoutSchema.shape.status.options,
+      //options: completeCheckoutSchema.shape.status.options,
     },
   ],
   output: [

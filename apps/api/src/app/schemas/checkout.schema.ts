@@ -51,17 +51,10 @@ export const createCheckoutResponseSchema = checkoutSchema.safeExtend({
 export const checkoutListSchema = searchablePaginationSchema;
 export type CheckoutListInput = z.infer<typeof checkoutListSchema>;
 
-export type CheckoutCompletionStatus = "APPROVED" | "DECLINED" | "CANCELED";
-
-const CHECKOUT_COMPLETION_STATUS: readonly CheckoutCompletionStatus[] = [
-  "APPROVED",
-  "DECLINED",
-  "CANCELED",
-] as const;
-
 export const completeCheckoutSchema = z.object({
-  status: z.enum(CHECKOUT_COMPLETION_STATUS, { message: "Invalid status" }),
+  method: z.enum(PaymentMethod, { message: "Invalid payment method." }),
 });
+export type CompleteCheckoutInput = z.infer<typeof completeCheckoutSchema>;
 
 export const findAllCheckoutsSchema = z.object({
   id: z.string(),

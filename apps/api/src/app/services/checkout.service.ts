@@ -12,8 +12,8 @@ import { env } from "../../config/env.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   CheckoutListInput,
-  CheckoutCompletionStatus,
   CreateCheckoutInput,
+  CompleteCheckoutInput,
 } from "../schemas/checkout.schema.ts";
 import { paymentService } from "./payment.service.ts";
 import { subscriptionService } from "./subscription.service.ts";
@@ -26,7 +26,6 @@ export function buildCheckoutLink(checkoutId: string) {
 }
 
 export async function create(input: CreateCheckoutInput) {
-
   if (input.customerId) {
     await customerService.findById(input.customerId);
   }
@@ -125,7 +124,7 @@ async function findById(id: string) {
   return checkout;
 }
 
-async function complete(id: string) {
+async function complete(id: string, input: CompleteCheckoutInput) {
   const checkout = await findById(id);
 
   if (checkout.status !== "OPEN") {
@@ -140,17 +139,35 @@ async function complete(id: string) {
     throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
   }
 
+  if (
+    !Array.isArray(checkout.allowedMethods) ||
+    !checkout.allowedMethods.includes(input.method)
+  ) {
+    throw new UnprocessableEntityError(
+      `Payment method ${input.method} is not allowed for checkout ${id}.`,
+    );
+  }
+
   if (checkout.subscriptionId) {
     await subscriptionService.activate(checkout.subscriptionId);
   }
 
-  // TODO: Create a PAYMENT, process and approve it.
+  const createdPayment = await paymentService.create({
+    amountInCents: checkout.amountInCents,
+    method: input.method,
+    currency: checkout.currency,
+    customerId: checkout.customerId ?? undefined,
+  });
+
+  await paymentService.changeStatus(createdPayment.id, "PROCESSING");
+  await paymentService.changeStatus(createdPayment.id, "APPROVED");
 
   const completedCheckout = await prismaSingleton.checkout.update({
     where: { id: checkout.id },
     data: {
       status: "COMPLETED",
       completedAt: new Date(),
+      paymentId: createdPayment.id,
     },
   });
 
