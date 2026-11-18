@@ -118,14 +118,15 @@ async function findAll(paginationInput: CheckoutListInput) {
 async function getDetails(id: string) {
   const checkout = await prismaSingleton.checkout.findUnique({
     where: { id },
-    include: { payment: true, subscription: true },
   });
 
   if (!checkout) {
     throw new NotFoundError(`Checkout with ID ${id} was not found.`);
   }
 
-  return checkout;
+  const events = await eventService.findAllByResourceId(checkout.id);
+
+  return { ...checkout, events };
 }
 
 async function findById(id: string) {

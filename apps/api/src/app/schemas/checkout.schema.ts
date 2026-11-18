@@ -1,8 +1,8 @@
 import z from "zod";
-import { paymentSchema } from "./payment.schema.ts";
 import { searchablePaginationSchema } from "../../common/search.schema.ts";
 import {
   CheckoutStatus,
+  EventType,
   PaymentCurrency,
   PaymentMethod,
 } from "../../../generated/prisma/enums.ts";
@@ -69,18 +69,14 @@ export const findAllCheckoutsSchema = checkoutSchema.safeExtend({
   link: z.url(),
 });
 
-export const detailedCheckoutSchema = z.object({
-  id: z.string(),
-  createdAt: z.iso.datetime(),
-  successUrl: z.url(),
-  cancelUrl: z.url(),
-  paymentId: z.string(),
-  subscriptionId: z.string().nullable(),
-  payment: paymentSchema,
-  subscription: z.any().nullable(),
+export const detailedCheckoutSchema = checkoutSchema.safeExtend({
+  events: z.array(
+    z.object({
+      id: z.string(),
+      type: z.enum(EventType),
+      createdAt: z.iso.datetime(),
+    }),
+  ),
 });
 
-export const completeCheckoutResponseSchema = detailedCheckoutSchema.omit({
-  payment: true,
-  subscription: true,
-});
+export const completeCheckoutResponseSchema = checkoutSchema;
