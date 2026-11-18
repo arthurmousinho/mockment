@@ -5,12 +5,14 @@ import {
   DotsThreeIcon,
   EyeIcon,
   LinkSimpleIcon,
+  PlusIcon,
 } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { ListingSearch } from "@/components/listing-search";
 import { Paginator } from "@/components/paginator";
 import { RefetchButton } from "@/components/refetch-button";
 import { CheckoutStatusBadge } from "@/components/checkout-status-badge";
+import { CheckoutFormDialog } from "@/components/checkout-form-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -80,6 +82,9 @@ export function CheckoutsPage() {
         />
         <div className="flex items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          <CheckoutFormDialog>
+            <Button><PlusIcon size={18} />New Checkout</Button>
+          </CheckoutFormDialog>
         </div>
       </header>
 
