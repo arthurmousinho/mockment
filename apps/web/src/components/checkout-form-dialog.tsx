@@ -9,6 +9,7 @@ import {
 } from "@/http/checkout-http";
 import { formatCurrencyFromCents } from "@/lib/formatters";
 import { CustomerPicker } from "./customer-picker";
+import { SubscriptionPicker } from "./subscription-picker";
 import { CheckoutStatusBadge } from "./checkout-status-badge";
 import { PaymentMethodBadge } from "./payment-method-badge";
 import { PaymentCurrencyBadge } from "./payment-currency-badge";
@@ -340,9 +341,9 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                       name="subscriptionId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Subscription ID</FormLabel>
+                          <FormLabel>Subscription</FormLabel>
                           <FormControl>
-                            <Input placeholder="sub_..." {...field} />
+                            <SubscriptionPicker {...field} pendingOnly />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
