@@ -59,16 +59,6 @@ export const createSubscriptionSchema = z.object({
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 
-export const createSubscriptionResponseSchema = subscriptionSchema.safeExtend({
-  checkoutId: z.string(),
-  checkoutLink: z.url(),
-  initPaymentId: z.string(),
-});
-
-export type CreateSubscriptionOutput = z.infer<
-  typeof createSubscriptionResponseSchema
->;
-
 export const updateSubscriptionSchema = z.object({
   intervalCount: z.coerce
     .number({ error: "Interval count must be a number." })

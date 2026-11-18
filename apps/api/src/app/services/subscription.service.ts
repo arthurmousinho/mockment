@@ -107,27 +107,13 @@ async function create(input: CreateSubscriptionInput) {
     },
   });
 
-  // TODO: Replace for checkout creation;
-  const initPayment = await paymentService.create({
-    amountInCents: input.amountInCents,
-    currency: input.currency,
-    method: input.method,
-    customerId: input.customerId,
-    description: input.description,
-  });
-
   await eventService.emit({
     resourceId: pendingSubscription.id,
     type: "SUBSCRIPTION_CREATED",
     payload: pendingSubscription,
   });
 
-  return {
-    ...pendingSubscription,
-    checkoutId: initPayment.checkoutId,
-    checkoutLink: initPayment.checkoutLink,
-    initPaymentId: initPayment.id,
-  };
+  return pendingSubscription;
 }
 
 async function findAll(input: SubscriptionListInput) {
