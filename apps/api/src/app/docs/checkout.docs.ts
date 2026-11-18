@@ -7,6 +7,7 @@ import {
 } from "../../common/openapi.ts";
 import {
   checkoutSchema,
+  checkoutSessionSchema,
   detailedCheckoutSchema,
   findAllCheckoutsSchema,
   createCheckoutSchema,
@@ -15,6 +16,47 @@ import {
 } from "../schemas/checkout.schema.ts";
 
 export const checkoutDocs = {
+  getSession: {
+    summary: "Get a checkout session",
+    description:
+      "Returns an open, unexpired checkout and its subscription, if present.",
+    tags: ["Checkout"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the checkout session is retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(checkoutSessionSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the checkout with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Checkout with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      422: {
+        description: "When the checkout is not open or has expired.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "UNPROCESSABLE_ENTITY",
+              code: 422,
+              message: "Checkout with ID {id} is not open.",
+            }),
+          },
+        },
+      },
+    },
+  },
   create: {
     summary: "Create a checkout",
     description:

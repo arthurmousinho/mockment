@@ -16,6 +16,16 @@ export async function checkoutRoutes(app: FastifyInstance) {
   });
 
   app.get(
+    "/:id/session",
+    { schema: checkoutDocs.getSession },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const checkout = await checkoutService.getSession(id);
+      return reply.status(200).send(checkout);
+    },
+  );
+
+  app.get(
     "/:id",
     { schema: checkoutDocs.getDetails },
     async (request, reply) => {

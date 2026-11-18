@@ -19,7 +19,6 @@ import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 import { customerService } from "./customer.service.ts";
 import { eventService } from "./event.service.ts";
-import { check } from "zod/mini";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
@@ -114,6 +113,28 @@ async function findAll(paginationInput: CheckoutListInput) {
     limit: paginationInput.limit,
     total,
   });
+}
+
+async function getSession(id: string) {
+  const checkout = await prismaSingleton.checkout.findUnique({
+    where: { id },
+    include: { subscription: true },
+  });
+
+  if (!checkout) {
+    throw new NotFoundError(`Checkout with ID ${id} was not found.`);
+  }
+
+  if (checkout.status !== "OPEN") {
+    throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
+  }
+
+  if (checkout.expiresAt && checkout.expiresAt <= new Date()) {
+    await expire(id);
+    throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
+  }
+
+  return checkout;
 }
 
 async function getDetails(id: string) {
@@ -233,6 +254,7 @@ export const checkoutService = {
   create,
   getGeneratedCheckoutByPaymentId,
   findAll,
+  getSession,
   getDetails,
   cancel,
   complete,

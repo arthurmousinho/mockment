@@ -1,5 +1,6 @@
 import z from "zod";
 import { searchablePaginationSchema } from "../../common/search.schema.ts";
+import { subscriptionSchema } from "./subscription.schema.ts";
 import {
   CheckoutStatus,
   EventType,
@@ -67,6 +68,10 @@ export type CompleteCheckoutInput = z.infer<typeof completeCheckoutSchema>;
 
 export const findAllCheckoutsSchema = checkoutSchema.safeExtend({
   link: z.url(),
+});
+
+export const checkoutSessionSchema = checkoutSchema.safeExtend({
+  subscription: subscriptionSchema.nullable(),
 });
 
 export const detailedCheckoutSchema = checkoutSchema.safeExtend({
