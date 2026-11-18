@@ -89,7 +89,6 @@ export function SubscriptionDetailsContent({
               value={subscription.initPaymentId}
             />
           )}
-          <CopyableField label="API key ID" value={subscription.apiKeyId} />
         </div>
         {subscription.events && (
           <>

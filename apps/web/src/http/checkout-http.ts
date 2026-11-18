@@ -13,7 +13,6 @@ export type Checkout = {
   id: string;
   successUrl: string;
   cancelUrl: string;
-  apiKeyId: string;
   paymentId: string;
   subscriptionId: string | null;
   createdAt: string;
@@ -87,7 +86,7 @@ type DetailedCheckout = CheckoutRecord & {
 };
 
 type CheckoutSession = CheckoutRecord & {
-  subscription: Omit<Subscription, "apiKeyId"> | null;
+  subscription: Subscription | null;
 };
 
 export function GetCheckoutSessionRequest(id: string) {

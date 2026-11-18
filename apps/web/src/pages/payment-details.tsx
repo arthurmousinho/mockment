@@ -134,7 +134,6 @@ export function PaymentDetailsPage() {
         </CardHeader>
         <CardContent className="grid min-w-0 gap-x-8 gap-y-2.5 lg:grid-cols-2 [&>div]:min-w-0 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div>span]:break-all">
           <CopyableField label="Payment ID" value={payment.id} />
-          <CopyableField label="API Key ID" value={payment.apiKeyId} />
           {payment.customerId && (
             <CopyableField label="Customer ID" value={payment.customerId} />
           )}

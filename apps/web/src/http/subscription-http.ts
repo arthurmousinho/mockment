@@ -40,7 +40,6 @@ export type Subscription = {
   nextBillingAt: string | null;
   createdAt: string;
   updatedAt: string;
-  apiKeyId: string;
 };
 
 export type DetailedSubscription = Subscription & {

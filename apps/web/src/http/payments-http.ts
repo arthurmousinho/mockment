@@ -20,7 +20,6 @@ export type Payment = {
   description: string | null;
   externalId: string | null;
   idempotencyKey: string | null;
-  apiKeyId: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -38,7 +37,7 @@ export type CreatePaymentRequestData = {
   idempotencyKey?: string;
 };
 
-export type CreatePaymentResponse = Omit<Payment, "apiKeyId"> & {
+export type CreatePaymentResponse = Payment & {
   checkoutId: string | null;
   checkoutLink: string;
 };
