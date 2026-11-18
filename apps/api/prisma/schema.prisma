@@ -115,11 +115,6 @@ model ApiKey {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  payments         Payment[]
-  webhookEndpoints WebhookEndpoint[]
-  checkouts        Checkout[]
-  subscriptions    Subscription[]
-
   @@map("api_keys")
 }
 
@@ -152,18 +147,15 @@ model Payment {
   externalId     String? @map("external_id")
   idempotencyKey String? @map("idempotency_key")
 
-  apiKeyId String @map("api_key_id")
-
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   customer Customer? @relation(fields: [customerId], references: [id])
-  apiKey   ApiKey    @relation(fields: [apiKeyId], references: [id])
   checkout Checkout?
   invoices Invoice[]
 
-  @@unique([apiKeyId, externalId])
-  @@unique([apiKeyId, idempotencyKey])
+  @@unique([externalId])
+  @@unique([idempotencyKey])
   @@map("payments")
 }
 
@@ -207,16 +199,14 @@ model Event {
 model WebhookEndpoint {
   id String @id
 
-  url      String
-  secret   String
-  events   Json // String[] is not supported by MySQL
-  apiKeyId String
-  enabled  Boolean @default(true)
+  url     String
+  secret  String
+  events  Json // String[] is not supported by MySQL
+  enabled Boolean @default(true)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  apiKey            ApiKey            @relation(fields: [apiKeyId], references: [id])
   webhookDeliveries WebhookDelivery[]
 
   @@map("webhook_endpoints")
@@ -255,7 +245,6 @@ model Checkout {
   cancelUrl      String          @map("cancel_url")
   customerId     String?         @map("customer_id")
 
-  apiKeyId       String  @map("api_key_id")
   paymentId      String? @unique @map("payment_id")
   subscriptionId String? @map("subscription_id")
 
@@ -265,10 +254,8 @@ model Checkout {
 
   payment      Payment?      @relation(fields: [paymentId], references: [id])
   customer     Customer?     @relation(fields: [customerId], references: [id])
-  apiKey       ApiKey        @relation(fields: [apiKeyId], references: [id])
   subscription Subscription? @relation(fields: [subscriptionId], references: [id])
 
-  @@index([apiKeyId])
   @@map("checkouts")
 }
 
@@ -289,8 +276,6 @@ model Subscription {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  apiKeyId  String     @map("api_key_id")
-  apiKey    ApiKey     @relation(fields: [apiKeyId], references: [id])
   customer  Customer   @relation(fields: [customerId], references: [id])
   checkouts Checkout[]
 
