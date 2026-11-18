@@ -65,13 +65,7 @@ export const completeCheckoutSchema = z.object({
 });
 export type CompleteCheckoutInput = z.infer<typeof completeCheckoutSchema>;
 
-export const findAllCheckoutsSchema = z.object({
-  id: z.string(),
-  createdAt: z.iso.datetime(),
-  successUrl: z.url(),
-  cancelUrl: z.url(),
-  paymentId: z.string(),
-  subscriptionId: z.string().nullable(),
+export const findAllCheckoutsSchema = checkoutSchema.safeExtend({
   link: z.url(),
 });
 

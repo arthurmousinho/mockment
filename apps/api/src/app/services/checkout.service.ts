@@ -1,5 +1,4 @@
 import {
-  ConflictError,
   NotFoundError,
   UnprocessableEntityError,
 } from "../../common/http-error.ts";
