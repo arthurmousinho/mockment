@@ -146,4 +146,44 @@ export const checkoutDocs = {
       },
     },
   },
+  cancel: {
+    summary: "Cancel a checkout",
+    description: "Cancels an open checkout.",
+    tags: ["Checkout"],
+    params: idParamsSchema,
+    response: {
+      200: {
+        description: "When the checkout is canceled successfully.",
+        content: {
+          "application/json": {
+            schema: openApiSchema(checkoutSchema),
+          },
+        },
+      },
+      404: {
+        description: "When the checkout with the specified ID is not found.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "NOT_FOUND",
+              code: 404,
+              message: "Checkout with ID {id} was not found.",
+            }),
+          },
+        },
+      },
+      422: {
+        description: "When the checkout is completed or expired.",
+        content: {
+          "application/json": {
+            schema: httpErrorSchema({
+              error: "UNPROCESSABLE_ENTITY",
+              code: 422,
+              message: "Checkout with ID {id} is not open.",
+            }),
+          },
+        },
+      },
+    },
+  },
 };

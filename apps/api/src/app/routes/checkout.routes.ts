@@ -50,4 +50,14 @@ export async function checkoutRoutes(app: FastifyInstance) {
       return reply.status(200).send(checkout);
     },
   );
+
+  app.patch(
+    "/:id/cancel",
+    { schema: checkoutDocs.cancel },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const checkout = await checkoutService.cancel(id);
+      return reply.status(200).send(checkout);
+    },
+  );
 }

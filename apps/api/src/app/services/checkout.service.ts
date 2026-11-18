@@ -141,6 +141,26 @@ async function findById(id: string) {
   return checkout;
 }
 
+async function cancel(id: string) {
+  const checkout = await findById(id);
+
+  if (checkout.status !== "OPEN") {
+    throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
+  }
+
+  const canceledCheckout = await prismaSingleton.checkout.update({
+    where: { id: checkout.id },
+    data: { status: "CANCELED" },
+  });
+
+  await eventService.emit({
+    resourceId: canceledCheckout.id,
+    type: "CHECKOUT_CANCELED",
+  });
+
+  return canceledCheckout;
+}
+
 async function complete(id: string, input: CompleteCheckoutInput) {
   const checkout = await findById(id);
 
@@ -202,5 +222,6 @@ export const checkoutService = {
   getGeneratedCheckoutByPaymentId,
   findAll,
   getDetails,
+  cancel,
   complete,
 };
