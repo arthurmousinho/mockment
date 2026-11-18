@@ -20,21 +20,15 @@ import type {
   PaymentListInput,
 } from "../schemas/payment.schema.ts";
 import { customerService } from "./customer.service.ts";
-import { apiKeyService } from "./api-key.service.ts";
 import { buildCheckoutLink, checkoutService } from "./checkout.service.ts";
 import { eventService } from "./event.service.ts";
 import { buildPaymentSearchFilter } from "../filters/payment.filters.ts";
 
-async function create(apiKey: string, input: CreatePaymentInput) {
-  const validatedApiKey = await apiKeyService.validate(apiKey);
-
+async function create(input: CreatePaymentInput) {
   if (input.idempotencyKey) {
     const paymentWithIdempotencyKey = await prismaSingleton.payment.findUnique({
       where: {
-        apiKeyId_idempotencyKey: {
-          apiKeyId: validatedApiKey.id,
-          idempotencyKey: input.idempotencyKey,
-        },
+        idempotencyKey: input.idempotencyKey,
       },
     });
 
@@ -49,10 +43,7 @@ async function create(apiKey: string, input: CreatePaymentInput) {
   if (input.externalId) {
     const paymentWithExternalId = await prismaSingleton.payment.findUnique({
       where: {
-        apiKeyId_externalId: {
-          externalId: input.externalId,
-          apiKeyId: validatedApiKey.id,
-        },
+        externalId: input.externalId,
       },
     });
 
@@ -76,7 +67,6 @@ async function create(apiKey: string, input: CreatePaymentInput) {
       idempotencyKey: input.idempotencyKey ?? null,
       externalId: input.externalId ?? null,
       description: input.description ?? null,
-      apiKeyId: validatedApiKey.id,
       customerId: input.customerId ?? null,
       status: "CREATED",
     },
@@ -277,7 +267,6 @@ async function createRecurringPayment(subscription: Subscription) {
       currency: subscription.currency,
       method: subscription.method,
       description: subscription.description,
-      apiKeyId: subscription.apiKeyId,
       customerId: subscription.customerId,
       status: "CREATED",
     },

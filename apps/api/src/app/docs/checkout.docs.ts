@@ -60,7 +60,7 @@ export const checkoutDocs = {
   findAll: {
     summary: "List checkouts",
     description:
-      "Returns a paginated list of checkouts. Search matches checkout, payment, subscription, and API key IDs.",
+      "Returns a paginated list of checkouts. Search matches checkout, payment, and subscription IDs.",
     tags: ["Checkout"],
     querystring: searchablePaginationParamsSchema,
     response: {

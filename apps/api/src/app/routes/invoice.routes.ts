@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "../../common/http-error.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
 import { invoiceDocs } from "../docs/invoice.docs.ts";
 import {
   createInvoiceSchema,
@@ -42,18 +42,16 @@ export async function invoiceRoutes(app: FastifyInstance) {
     },
   );
 
-  app.post("/", { schema: invoiceDocs.create }, async (request, reply) => {
-    const authorization = request.headers.authorization;
-    if (!authorization?.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Api Key is missing.");
-    }
+  app.post(
+    "/",
+    { schema: invoiceDocs.create, preHandler: authMiddleware },
+    async (request, reply) => {
+      const input = createInvoiceSchema.parse(request.body);
+      const invoice = await invoiceService.create(input);
 
-    const apiKey = authorization.slice("Bearer ".length);
-    const input = createInvoiceSchema.parse(request.body);
-    const invoice = await invoiceService.create(apiKey, input);
-
-    return reply.status(201).send(invoice);
-  });
+      return reply.status(201).send(invoice);
+    },
+  );
 
   app.delete("/:id", { schema: invoiceDocs.remove }, async (request, reply) => {
     const { id } = request.params as { id: string };

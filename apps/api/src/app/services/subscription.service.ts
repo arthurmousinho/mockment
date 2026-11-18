@@ -1,6 +1,5 @@
 import { prismaSingleton } from "../../config/prisma.ts";
 import { customerService } from "./customer.service.ts";
-import { apiKeyService } from "./api-key.service.ts";
 import type {
   CreateSubscriptionInput,
   SubscriptionListInput,
@@ -90,14 +89,12 @@ async function getMetrics(currency: PaymentCurrency) {
   };
 }
 
-async function create(apiKey: string, input: CreateSubscriptionInput) {
-  const validatedApiKey = await apiKeyService.validate(apiKey);
+async function create(input: CreateSubscriptionInput) {
   await customerService.findById(input.customerId);
 
   const pendingSubscription = await prismaSingleton.subscription.create({
     data: {
       id: createPrefixedId("sub"),
-      apiKeyId: validatedApiKey.id,
       customerId: input.customerId,
       amountInCents: input.amountInCents,
       currency: input.currency,
@@ -111,17 +108,13 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
   });
 
   // TODO: Replace for checkout creation;
-  const initPayment = await paymentService.create(
-    apiKey,
-    {
-      amountInCents: input.amountInCents,
-      currency: input.currency,
-      method: input.method,
-      customerId: input.customerId,
-      description: input.description,
-    },
-    pendingSubscription.id,
-  );
+  const initPayment = await paymentService.create({
+    amountInCents: input.amountInCents,
+    currency: input.currency,
+    method: input.method,
+    customerId: input.customerId,
+    description: input.description,
+  });
 
   await eventService.emit({
     resourceId: pendingSubscription.id,

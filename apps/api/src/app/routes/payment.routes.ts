@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "../../common/http-error.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
 import { paymentDocs } from "../docs/payment.docs.ts";
 import {
   createPaymentSchema,
@@ -35,18 +35,16 @@ export async function paymentRoutes(app: FastifyInstance) {
     },
   );
 
-  app.post("/", { schema: paymentDocs.create }, async (request, reply) => {
-    const authorization = request.headers.authorization;
-    if (!authorization?.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Api Key is missing.");
-    }
+  app.post(
+    "/",
+    { schema: paymentDocs.create, preHandler: authMiddleware },
+    async (request, reply) => {
+      const input = createPaymentSchema.parse(request.body);
+      const payment = await paymentService.create(input);
 
-    const apiKey = authorization.slice("Bearer ".length);
-    const input = createPaymentSchema.parse(request.body);
-    const payment = await paymentService.create(apiKey, input);
-
-    return reply.status(201).send(payment);
-  });
+      return reply.status(201).send(payment);
+    },
+  );
 
   app.patch(
     "/:id/approve",

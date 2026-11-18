@@ -13,22 +13,19 @@ import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   CheckoutListInput,
   CheckoutCompletionStatus,
-  GenerateCheckoutLinkInput,
   CreateCheckoutInput,
 } from "../schemas/checkout.schema.ts";
 import { paymentService } from "./payment.service.ts";
 import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 import { customerService } from "./customer.service.ts";
-import { apiKeyService } from "./api-key.service.ts";
 import { eventService } from "./event.service.ts";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
 }
 
-export async function create(apiKey: string, input: CreateCheckoutInput) {
-  const validatedApiKey = await apiKeyService.validate(apiKey);
+export async function create(input: CreateCheckoutInput) {
 
   if (input.customerId) {
     await customerService.findById(input.customerId);
@@ -48,7 +45,6 @@ export async function create(apiKey: string, input: CreateCheckoutInput) {
   const opennedCheckout = await prismaSingleton.checkout.create({
     data: {
       id: createPrefixedId("chk"),
-      apiKeyId: validatedApiKey.id,
       amountInCents: input.amountInCents,
       currency: input.currency,
       allowedMethods: input.allowedMethods,

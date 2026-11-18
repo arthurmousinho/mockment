@@ -16,7 +16,6 @@ export const checkoutSchema = z.object({
   successUrl: z.url(),
   cancelUrl: z.url(),
   customerId: z.string().nullable(),
-  apiKeyId: z.string(),
   paymentId: z.string().nullable(),
   subscriptionId: z.string().nullable(),
   expiresAt: z.iso.datetime().nullable(),
@@ -52,14 +51,6 @@ export const createCheckoutResponseSchema = checkoutSchema.safeExtend({
 export const checkoutListSchema = searchablePaginationSchema;
 export type CheckoutListInput = z.infer<typeof checkoutListSchema>;
 
-export type GenerateCheckoutLinkInput = {
-  apiKeyId: string;
-  paymentId: string;
-  subscriptionId?: string;
-  successUrl?: string;
-  cancelUrl?: string;
-};
-
 export type CheckoutCompletionStatus = "APPROVED" | "DECLINED" | "CANCELED";
 
 const CHECKOUT_COMPLETION_STATUS: readonly CheckoutCompletionStatus[] = [
@@ -74,7 +65,6 @@ export const completeCheckoutSchema = z.object({
 
 export const findAllCheckoutsSchema = z.object({
   id: z.string(),
-  apiKeyId: z.string(),
   createdAt: z.iso.datetime(),
   successUrl: z.url(),
   cancelUrl: z.url(),
@@ -85,7 +75,6 @@ export const findAllCheckoutsSchema = z.object({
 
 export const detailedCheckoutSchema = z.object({
   id: z.string(),
-  apiKeyId: z.string(),
   createdAt: z.iso.datetime(),
   successUrl: z.url(),
   cancelUrl: z.url(),

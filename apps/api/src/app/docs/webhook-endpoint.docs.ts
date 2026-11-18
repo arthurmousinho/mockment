@@ -57,7 +57,7 @@ export const webhookEndpointDocs = {
   findAll: {
     summary: "List webhook endpoints",
     description:
-      "Returns a paginated list of webhook endpoints. Search matches partial endpoint IDs, URLs, and API key IDs.",
+      "Returns a paginated list of webhook endpoints. Search matches partial endpoint IDs and URLs.",
     tags: ["Webhook Endpoints"],
     querystring: searchablePaginationParamsSchema,
     response: {

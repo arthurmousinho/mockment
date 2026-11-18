@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "../../common/http-error.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
 import type { FastifyInstance } from "fastify";
 import {
   createWebhookEndpointSchema,
@@ -43,16 +43,10 @@ export async function webhookEndpointRoutes(app: FastifyInstance) {
 
   app.post(
     "/",
-    { schema: webhookEndpointDocs.create },
+    { schema: webhookEndpointDocs.create, preHandler: authMiddleware },
     async (request, reply) => {
-      const authorization = request.headers.authorization;
-      if (!authorization?.startsWith("Bearer ")) {
-        throw new UnauthorizedError("Api Key is missing.");
-      }
-
-      const apiKey = authorization.slice("Bearer ".length);
       const input = createWebhookEndpointSchema.parse(request.body);
-      const endpoint = await webhookEndpointService.create(apiKey, input);
+      const endpoint = await webhookEndpointService.create(input);
 
       return reply.status(201).send(endpoint);
     },

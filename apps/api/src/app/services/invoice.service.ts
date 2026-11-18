@@ -18,7 +18,6 @@ import type {
   InvoiceListInput,
   UpdateInvoiceInput,
 } from "../schemas/invoice.schema.ts";
-import { apiKeyService } from "./api-key.service.ts";
 import { eventService } from "./event.service.ts";
 import {
   generateInvoicePdf,
@@ -73,9 +72,7 @@ async function validateUniqueInvoice(
   }
 }
 
-async function create(apiKey: string, input: CreateInvoiceInput) {
-  await apiKeyService.validate(apiKey);
-
+async function create(input: CreateInvoiceInput) {
   const { payment, customer } = await validatePaymentAndCustomer(
     input.paymentId,
     input.customerId,
