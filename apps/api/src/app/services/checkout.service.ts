@@ -74,6 +74,7 @@ export async function create(input: CreateCheckoutInput) {
   await eventService.emit({
     resourceId: checkout.id,
     type: "CHECKOUT_CREATED",
+    payload: checkout,
   });
 
   return {
@@ -178,6 +179,7 @@ async function cancel(id: string) {
   await eventService.emit({
     resourceId: canceledCheckout.id,
     type: "CHECKOUT_CANCELED",
+    payload: canceledCheckout,
   });
 
   return canceledCheckout;
@@ -192,6 +194,7 @@ async function expire(id: string) {
   await eventService.emit({
     resourceId: expiredCheckout.id,
     type: "CHECKOUT_EXPIRED",
+    payload: expiredCheckout,
   });
 
   return expiredCheckout;
@@ -245,6 +248,7 @@ async function complete(id: string, input: CompleteCheckoutInput) {
   await eventService.emit({
     resourceId: checkout.id,
     type: "CHECKOUT_COMPLETED",
+    payload: completedCheckout,
   });
 
   return completedCheckout;
