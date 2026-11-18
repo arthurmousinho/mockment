@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { HTTPError } from "ky";
 import {
   CompleteCheckoutRequest,
-  GetCheckoutDetailsRequest,
-  type CheckoutCompletionStatus,
+  GetCheckoutSessionRequest,
+  CancelCheckoutRequest,
+  type CheckoutOutcome,
 } from "@/http/checkout-http";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,23 +22,32 @@ import {
 } from "@phosphor-icons/react";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { DetailRow } from "@/components/ui/detail-row";
-import { PaymentStatusBadge } from "@/components/payment-status-badge";
+import { CheckoutStatusBadge } from "@/components/checkout-status-badge";
+import type { PaymentMethod } from "@/http/payments-http";
 import { Logo } from "@/components/logo";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 
 const paymentMethodTabs = [
-  { label: "Card", icon: CreditCardIcon },
-  { label: "Pix", icon: QrCodeIcon },
-  { label: "Bank Slip", icon: BarcodeIcon },
+  { label: "Card", method: "CARD", icon: CreditCardIcon },
+  { label: "Pix", method: "PIX", icon: QrCodeIcon },
+  { label: "Bank Slip", method: "BANK_SLIP", icon: BarcodeIcon },
 ] as const;
 
 export function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, isPending, isError } = GetCheckoutDetailsRequest(id!);
+
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
+    null,
+  );
+
+  const { data, isPending, isError, error, refetch } =
+    GetCheckoutSessionRequest(id ?? "");
   const { mutate: completeReqeust, isPending: isCompleting } =
     CompleteCheckoutRequest(id ?? "");
+  const { mutate: cancelRequest, isPending: isCanceling } =
+    CancelCheckoutRequest(id ?? "");
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -45,23 +57,49 @@ export function CheckoutPage() {
     return (
       <div className="flex flex-col items-center gap-4 py-10">
         <p className="text-sm text-muted-foreground">
-          This checkout was not found.
+          {error instanceof HTTPError && error.response.status === 404
+            ? "This checkout was not found."
+            : error instanceof HTTPError && error.response.status === 422
+              ? "This checkout is no longer available."
+              : "Could not load this checkout."}
         </p>
+        {!(
+          error instanceof HTTPError &&
+          (error.response.status === 404 || error.response.status === 422)
+        ) && (
+          <Button variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
+        )}
       </div>
     );
   }
 
-  function handleCompleteCheckout(status: CheckoutCompletionStatus) {
-    completeReqeust(status, {
+  const method =
+    selectedMethod && data.allowedMethods.includes(selectedMethod)
+      ? selectedMethod
+      : data.allowedMethods[0];
+
+  function handleCompleteCheckout(outcome: CheckoutOutcome) {
+    if (!data || !method) return;
+    const redirectUrl =
+      outcome === "APPROVED" ? data.successUrl : data.cancelUrl;
+    completeReqeust(
+      { method, outcome },
+      {
+        onSuccess: () => {
+          window.location.href = redirectUrl;
+        },
+      },
+    );
+  }
+
+  function handleCancelCheckout() {
+    if (!data) return;
+    const redirectUrl = data.cancelUrl;
+    cancelRequest(undefined, {
       onSuccess: () => {
-        if (!data) return;
-
-        if (status === "APPROVED") {
-          window.location.href = data.successUrl;
-          return;
-        }
-
-        window.location.href = data.cancelUrl;
+        window.location.href = redirectUrl;
       },
     });
   }
@@ -84,13 +122,10 @@ export function CheckoutPage() {
                     target="_blank"
                   />
                   <p className="mt-10 text-muted-foreground">
-                    {data.payment.description}
+                    {data.subscription?.description ?? "Checkout"}
                   </p>
                   <p className="mt-2 text-4xl font-semibold tracking-tight">
-                    {formatCurrencyFromCents(
-                      data.payment.amountInCents,
-                      data.payment.currency,
-                    )}
+                    {formatCurrencyFromCents(data.amountInCents, data.currency)}
                   </p>
                 </div>
                 <div className="space-y-3 text-sm">
@@ -98,24 +133,22 @@ export function CheckoutPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>
                       {formatCurrencyFromCents(
-                        data.payment.amountInCents,
-                        data.payment.currency,
+                        data.amountInCents,
+                        data.currency,
                       )}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Fees</span>
-                    <span>
-                      {formatCurrencyFromCents(0, data.payment.currency)}
-                    </span>
+                    <span>{formatCurrencyFromCents(0, data.currency)}</span>
                   </div>
                   <Separator className="bg-neutral-700" />
                   <div className="flex items-center justify-between font-medium text-primary">
                     <span>Total due</span>
                     <span>
                       {formatCurrencyFromCents(
-                        data.payment.amountInCents,
-                        data.payment.currency,
+                        data.amountInCents,
+                        data.currency,
                       )}
                     </span>
                   </div>
@@ -123,68 +156,112 @@ export function CheckoutPage() {
               </div>
               <div className="space-y-5 p-8 w-full">
                 <div className="flex gap-2 rounded-lg bg-muted p-1">
-                  {paymentMethodTabs.map(({ label, icon: Icon }, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      disabled
-                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-colors ${
-                        index === 0
-                          ? "bg-background text-foreground shadow-sm"
-                          : "text-muted-foreground"
-                      }`}
+                  {paymentMethodTabs
+                    .filter(({ method }) =>
+                      data.allowedMethods.includes(method),
+                    )
+                    .map(({ label, method, icon: Icon }) => (
+                      <button
+                        key={method}
+                        type="button"
+                        disabled={isCompleting || isCanceling}
+                        onClick={() => setSelectedMethod(method)}
+                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-colors ${
+                          selectedMethod === method ||
+                          (!selectedMethod && data.allowedMethods[0] === method)
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        <Icon size={14} />
+                        {label}
+                      </button>
+                    ))}
+                </div>
+                {(selectedMethod ?? data.allowedMethods[0]) === "CARD" && (
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        Card number
+                      </label>
+                      <div className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
+                        4242 4242 4242 4242
+                        <CreditCardIcon size={16} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Expiry
+                        </label>
+                        <div className="rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
+                          12 / 34
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">
+                          CVV
+                        </label>
+                        <div className="rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
+                          •••
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        Cardholder name
+                      </label>
+                      <div className="rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
+                        Jane Doe
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {method === "PIX" && (
+                  <div className="space-y-3 text-center">
+                    <p className="text-sm font-medium">Scan the Pix QR code</p>
+                    <a
+                      href="https://github.com/arthurmousinho/mockment"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mx-auto block w-fit rounded-md bg-white p-4"
+                      aria-label="Open the Mockment GitHub repository"
                     >
-                      <Icon size={14} />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Card number
-                    </label>
-                    <div className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
-                      4242 4242 4242 4242
-                      <CreditCardIcon size={16} />
-                    </div>
+                      <img
+                        src="/mockment-github-qr.png"
+                        alt="QR code linking to the Mockment GitHub repository"
+                        className="size-40"
+                      />
+                    </a>
+                    <p className="text-xs text-muted-foreground">
+                      This simulation QR code opens the Mockment GitHub
+                      repository.
+                    </p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Expiry
-                      </label>
-                      <div className="rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
-                        12 / 34
-                      </div>
+                )}
+                {method === "BANK_SLIP" && (
+                  <div className="space-y-3 rounded-md border bg-background p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <BarcodeIcon size={20} />
+                      Bank slip
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">
-                        CVV
-                      </label>
-                      <div className="rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
-                        •••
-                      </div>
-                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Sample payment line for this simulation:
+                    </p>
+                    <p className="break-all font-mono text-sm">
+                      00000.00000 00000.000000 00000.000000 0 00000000000000
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      This is a sample and cannot be used to make a payment.
+                    </p>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Cardholder name
-                    </label>
-                    <div className="rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">
-                      Jane Doe
-                    </div>
-                  </div>
-                </div>
+                )}
                 <Button size="lg" className="w-full gap-2" disabled>
                   <LockKeyIcon size={16} />
                   Pay{" "}
-                  {formatCurrencyFromCents(
-                    data.payment.amountInCents,
-                    data.payment.currency,
-                  )}
+                  {formatCurrencyFromCents(data.amountInCents, data.currency)}
                 </Button>
               </div>
             </div>
@@ -196,7 +273,7 @@ export function CheckoutPage() {
                 <p className="text-sm font-medium">Simulation panel</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                Use the buttons below to simulate this checkout's completition.
+                Use the buttons below to simulate this checkout's completion.
               </p>
             </CardHeader>
             <CardContent className="flex flex-col gap-2 justify-between h-full">
@@ -204,7 +281,11 @@ export function CheckoutPage() {
                 size="lg"
                 variant="secondary"
                 className="uppercase text-primary flex-1"
-                disabled={isCompleting}
+                disabled={
+                  isCompleting ||
+                  isCanceling ||
+                  data.allowedMethods.length === 0
+                }
                 onClick={() => handleCompleteCheckout("APPROVED")}
               >
                 <CheckCircleIcon size={16} />
@@ -214,7 +295,11 @@ export function CheckoutPage() {
                 size="lg"
                 variant="secondary"
                 className="uppercase text-destructive flex-1"
-                disabled={isCompleting}
+                disabled={
+                  isCompleting ||
+                  isCanceling ||
+                  data.allowedMethods.length === 0
+                }
                 onClick={() => handleCompleteCheckout("DECLINED")}
               >
                 <XCircleIcon size={16} />
@@ -224,8 +309,8 @@ export function CheckoutPage() {
                 size="lg"
                 variant="secondary"
                 className="uppercase text-destructive flex-1"
-                disabled={isCompleting}
-                onClick={() => handleCompleteCheckout("CANCELED")}
+                disabled={isCompleting || isCanceling}
+                onClick={handleCancelCheckout}
               >
                 <ProhibitIcon />
                 Cancel
@@ -290,15 +375,14 @@ export function CheckoutPage() {
             </div>
             <Separator orientation="vertical" className="mx-4" />
             <div className="w-full space-y-2">
-              <DetailRow label="Payment ID">{data.payment.id}</DetailRow>
-              <DetailRow label="Payment Status">
-                <PaymentStatusBadge status={data.payment.status} />
+              <DetailRow label="Status">
+                <CheckoutStatusBadge status={data.status} />
               </DetailRow>
               <DetailRow label="Payment Method">
-                <PaymentMethodBadge method={data.payment.method} />
+                {method ? <PaymentMethodBadge method={method} /> : "—"}
               </DetailRow>
-              <DetailRow label="Payment Created At">
-                {formatDateTime(data.payment.createdAt)}
+              <DetailRow label="Expires At">
+                {formatDateTime(data.expiresAt)}
               </DetailRow>
             </div>
           </CardContent>

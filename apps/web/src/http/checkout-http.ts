@@ -4,6 +4,7 @@ import { api, apiErrorHandler } from "@/lib/ky";
 import { queryClient } from "@/lib/query-client";
 import { toast } from "sonner";
 import type { EventType } from "./events-http";
+import type { Subscription } from "./subscription-http";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
 
 export type CheckoutStatus = "OPEN" | "COMPLETED" | "CANCELED" | "EXPIRED";
@@ -85,6 +86,22 @@ type DetailedCheckout = CheckoutRecord & {
   events: { id: string; type: EventType; createdAt: string }[];
 };
 
+type CheckoutSession = CheckoutRecord & {
+  subscription: Omit<Subscription, "apiKeyId"> | null;
+};
+
+export function GetCheckoutSessionRequest(id: string) {
+  return useQuery({
+    queryKey: ["checkouts", id, "session"],
+    queryFn: async () => {
+      const response = await api.get(`checkouts/${id}/session`);
+      return response.json<CheckoutSession>();
+    },
+    enabled: Boolean(id),
+    retry: false,
+  });
+}
+
 export function GetCheckoutDetailsRequest(id: string) {
   return useQuery({
     queryKey: ["checkouts", id],
@@ -95,7 +112,7 @@ export function GetCheckoutDetailsRequest(id: string) {
   });
 }
 
-export type CheckoutCompletionStatus = "APPROVED" | "DECLINED" | "CANCELED";
+export type CheckoutOutcome = "APPROVED" | "DECLINED";
 
 export function FindAllCheckoutsRequest(
   paginationData: PaginatedRequest & { search?: string },
@@ -114,11 +131,25 @@ export function FindAllCheckoutsRequest(
 
 export function CompleteCheckoutRequest(id: string) {
   return useMutation({
-    mutationFn: async (status: CheckoutCompletionStatus) => {
+    mutationFn: async (input: {
+      method: PaymentMethod;
+      outcome: CheckoutOutcome;
+    }) => {
       const request = await api.post(`checkouts/${id}/complete`, {
-        json: { status },
+        json: input,
       });
-      return await request.json<Checkout>();
+      return await request.json<CheckoutRecord>();
     },
+    onError: apiErrorHandler,
+  });
+}
+
+export function CancelCheckoutRequest(id: string) {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await api.patch(`checkouts/${id}/cancel`);
+      return response.json<CheckoutRecord>();
+    },
+    onError: apiErrorHandler,
   });
 }
