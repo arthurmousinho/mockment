@@ -17,7 +17,8 @@ import {
 export const checkoutDocs = {
   create: {
     summary: "Create a checkout",
-    description: "Creates an open checkout using a bearer API key.",
+    description:
+      "Creates an open checkout using a bearer API key. Provide amount, currency, and allowed methods for a standalone checkout, or a subscription ID to use the subscription's payment details and customer.",
     tags: ["Checkout"],
     body: openApiSchema(createCheckoutSchema),
     response: {

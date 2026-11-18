@@ -26,29 +26,46 @@ export function buildCheckoutLink(checkoutId: string) {
 }
 
 export async function create(input: CreateCheckoutInput) {
-  if (input.customerId) {
+  const isSubscriptionCheckout = "subscriptionId" in input;
+
+  const subscription = isSubscriptionCheckout
+    ? await subscriptionService.findById(input.subscriptionId)
+    : null;
+
+  if (subscription?.status !== undefined && subscription.status !== "PENDING") {
+    throw new UnprocessableEntityError(
+      "Only PENDING subscriptions can have a checkout.",
+    );
+  }
+
+  if (!isSubscriptionCheckout && input.customerId) {
     await customerService.findById(input.customerId);
   }
 
-  if (input.subscriptionId) {
-    await subscriptionService.findById(input.subscriptionId);
-  }
-
   const expiresAt = input.expiresAt ? new Date(input.expiresAt) : null;
+
   if (expiresAt && expiresAt <= new Date()) {
     throw new UnprocessableEntityError(
       "The expiration date must be in the future.",
     );
   }
 
-  const opennedCheckout = await prismaSingleton.checkout.create({
+  const checkout = await prismaSingleton.checkout.create({
     data: {
       id: createPrefixedId("chk"),
-      amountInCents: input.amountInCents,
-      currency: input.currency,
-      allowedMethods: input.allowedMethods,
-      customerId: input.customerId ?? null,
-      subscriptionId: input.subscriptionId ?? null,
+      amountInCents: isSubscriptionCheckout
+        ? subscription!.amountInCents
+        : input.amountInCents,
+      currency: isSubscriptionCheckout
+        ? subscription!.currency
+        : input.currency,
+      allowedMethods: isSubscriptionCheckout
+        ? [subscription!.method]
+        : input.allowedMethods,
+      customerId: isSubscriptionCheckout
+        ? subscription!.customerId
+        : (input.customerId ?? null),
+      subscriptionId: subscription?.id ?? null,
       successUrl: input.successUrl ?? `${env.WEB_URL}/success-checkout`,
       cancelUrl: input.cancelUrl ?? `${env.WEB_URL}/cancel-checkout`,
       expiresAt,
@@ -56,13 +73,13 @@ export async function create(input: CreateCheckoutInput) {
   });
 
   await eventService.emit({
-    resourceId: opennedCheckout.id,
+    resourceId: checkout.id,
     type: "CHECKOUT_CREATED",
   });
 
   return {
-    ...opennedCheckout,
-    link: buildCheckoutLink(opennedCheckout.id),
+    ...checkout,
+    link: buildCheckoutLink(checkout.id),
   };
 }
 

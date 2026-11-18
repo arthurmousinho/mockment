@@ -23,24 +23,33 @@ export const checkoutSchema = z.object({
   createdAt: z.iso.datetime(),
 });
 
-export const createCheckoutSchema = z.object({
-  amountInCents: z.coerce
-    .number({ message: "Amount must be a number." })
-    .int({ message: "Amount must be an integer." })
-    .positive({ message: "Amount must be greater than zero." })
-    .max(2147483647, { message: "Amount must fit in a 32-bit integer." }),
-  currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
-  allowedMethods: z
-    .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
-    .min(1, { message: "At least one payment method is required." }),
-  customerId: z.string().trim().min(1).max(191).optional(),
-  subscriptionId: z.string().trim().min(1).max(191).optional(),
+const checkoutOptions = {
   successUrl: z.url({ message: "Invalid success URL." }).max(191).optional(),
   cancelUrl: z.url({ message: "Invalid cancel URL." }).max(191).optional(),
   expiresAt: z.iso
     .datetime({ offset: true, message: "Invalid expiration date." })
     .optional(),
-});
+};
+
+export const createCheckoutSchema = z.union([
+  z.strictObject({
+    amountInCents: z.coerce
+      .number({ message: "Amount must be a number." })
+      .int({ message: "Amount must be an integer." })
+      .positive({ message: "Amount must be greater than zero." })
+      .max(2147483647, { message: "Amount must fit in a 32-bit integer." }),
+    currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
+    allowedMethods: z
+      .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
+      .min(1, { message: "At least one payment method is required." }),
+    customerId: z.string().trim().min(1).max(191).optional(),
+    ...checkoutOptions,
+  }),
+  z.strictObject({
+    subscriptionId: z.string().trim().min(1).max(191),
+    ...checkoutOptions,
+  }),
+]);
 
 export type CreateCheckoutInput = z.infer<typeof createCheckoutSchema>;
 

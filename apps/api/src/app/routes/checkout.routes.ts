@@ -27,7 +27,11 @@ export async function checkoutRoutes(app: FastifyInstance) {
 
   app.post(
     "/",
-    { schema: checkoutDocs.create, preHandler: authMiddleware },
+    {
+      schema: checkoutDocs.create,
+      preHandler: authMiddleware,
+      validatorCompiler: () => (value) => ({ value }),
+    },
     async (request, reply) => {
       const input = createCheckoutSchema.parse(request.body);
       const checkout = await checkoutService.create(input);
