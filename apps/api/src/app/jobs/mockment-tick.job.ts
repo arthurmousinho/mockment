@@ -9,7 +9,10 @@ export function registerMockmentTickJob(app: FastifyInstance) {
     async () => {
       const updatedVirtualClock = await virtualClockService.tickOneMinute();
       const processedSubscriptionResult =
-        await subscriptionService.processDueSubscriptions();
+        await subscriptionService.processDueSubscriptions(
+          updatedVirtualClock.currentDateTime,
+        );
+
       console.log(`
         \n
         MOCKMENT TICK JOB COMPLETED ✅!

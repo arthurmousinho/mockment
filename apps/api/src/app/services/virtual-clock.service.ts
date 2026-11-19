@@ -13,6 +13,7 @@ import type {
 } from "../schemas/virtual-clock.schema.ts";
 import { subscriptionService } from "./subscription.service.ts";
 import { eventEmitterSingleton } from "../../config/event-emitter.ts";
+import { checkoutService } from "./checkout.service.ts";
 
 const CLOCK_ID = "default";
 
@@ -57,7 +58,9 @@ async function set(input: CurrentVirtualDateTimeInput) {
   eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
 
   const processedSubscriptions =
-    await subscriptionService.processDueSubscriptions();
+    await subscriptionService.processDueSubscriptions(
+      updatedVirtualClock.currentDateTime,
+    );
 
   return { ...updatedVirtualClock, ...processedSubscriptions };
 }
@@ -87,10 +90,18 @@ async function advance({
 
   eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
 
-  const processedSubscriptions =
-    await subscriptionService.processDueSubscriptions();
+  const [processedSubscriptions, expiredCheckouts] = await Promise.all([
+    subscriptionService.processDueSubscriptions(
+      updatedVirtualClock.currentDateTime,
+    ),
+    checkoutService.expireDueCheckouts(updatedVirtualClock.currentDateTime),
+  ]);
 
-  return { ...updatedVirtualClock, ...processedSubscriptions };
+  return {
+    ...updatedVirtualClock,
+    ...processedSubscriptions,
+    ...expiredCheckouts,
+  };
 }
 
 async function reset(): Promise<Date> {

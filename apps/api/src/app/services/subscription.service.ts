@@ -261,9 +261,7 @@ async function update(id: string, input: UpdateSubscriptionInput) {
   });
 }
 
-async function processDueSubscriptions() {
-  const now = await virtualClockService.now();
-
+async function processDueSubscriptions(now: Date) {
   const dueSubscriptions = await prismaSingleton.subscription.findMany({
     where: {
       status: "ACTIVE",
