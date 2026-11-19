@@ -19,6 +19,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ProhibitIcon,
+  ClockIcon,
 } from "@phosphor-icons/react";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { DetailRow } from "@/components/ui/detail-row";
@@ -29,6 +30,7 @@ import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 import { InvalidCheckout } from "@/components/invalid-checkout";
+import { useVirtualClockEvents } from "@/hooks/use-virtual-clock-events";
 
 const paymentMethodTabs = [
   { label: "Card", method: "CARD", icon: CreditCardIcon },
@@ -49,6 +51,7 @@ export function CheckoutPage() {
     CompleteCheckoutRequest(id ?? "");
   const { mutate: cancelRequest, isPending: isCanceling } =
     CancelCheckoutRequest();
+  const { virtualDateTime, liveVirtualDateTime } = useVirtualClockEvents();
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -73,6 +76,39 @@ export function CheckoutPage() {
       </div>
     );
   }
+
+  const remainingSeconds =
+    data.expiresAt && liveVirtualDateTime
+      ? Math.max(
+          0,
+          Math.ceil(
+            (new Date(data.expiresAt).getTime() -
+              liveVirtualDateTime.getTime()) /
+              1000,
+          ),
+        )
+      : null;
+
+  if (
+    data.expiresAt &&
+    virtualDateTime &&
+    new Date(data.expiresAt).getTime() <= virtualDateTime.getTime()
+  ) {
+    return <InvalidCheckout notFound={false} />;
+  }
+
+  const days =
+    remainingSeconds === null ? 0 : Math.floor(remainingSeconds / 86400);
+  const hours =
+    remainingSeconds === null
+      ? 0
+      : Math.floor((remainingSeconds % 86400) / 3600);
+  const minutes =
+    remainingSeconds === null ? 0 : Math.floor((remainingSeconds % 3600) / 60);
+  const seconds = remainingSeconds === null ? 0 : remainingSeconds % 60;
+  const countdown = [hours, minutes, seconds]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
 
   const method =
     selectedMethod && data.allowedMethods.includes(selectedMethod)
@@ -126,6 +162,14 @@ export function CheckoutPage() {
                   <p className="mt-2 text-4xl font-semibold tracking-tight">
                     {formatCurrencyFromCents(data.amountInCents, data.currency)}
                   </p>
+                  {data.expiresAt && (
+                    <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                      <ClockIcon size={16} aria-hidden="true" />
+                      {remainingSeconds === null
+                        ? "Loading expiration time…"
+                        : `Expires in ${days > 0 ? `${days}d ` : ""}${countdown}`}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between">
