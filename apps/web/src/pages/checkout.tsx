@@ -28,6 +28,7 @@ import { Logo } from "@/components/logo";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
+import { InvalidCheckout } from "@/components/invalid-checkout";
 
 const paymentMethodTabs = [
   { label: "Card", method: "CARD", icon: CreditCardIcon },
@@ -47,30 +48,28 @@ export function CheckoutPage() {
   const { mutate: completeReqeust, isPending: isCompleting } =
     CompleteCheckoutRequest(id ?? "");
   const { mutate: cancelRequest, isPending: isCanceling } =
-    CancelCheckoutRequest(id ?? "");
+    CancelCheckoutRequest();
 
   if (isPending) {
     return <div>Loading...</div>;
   }
 
   if (isError || !data) {
+    if (
+      error instanceof HTTPError &&
+      (error.response.status === 404 || error.response.status === 422)
+    ) {
+      return <InvalidCheckout notFound={error.response.status === 404} />;
+    }
+
     return (
       <div className="flex flex-col items-center gap-4 py-10">
         <p className="text-sm text-muted-foreground">
-          {error instanceof HTTPError && error.response.status === 404
-            ? "This checkout was not found."
-            : error instanceof HTTPError && error.response.status === 422
-              ? "This checkout is no longer available."
-              : "Could not load this checkout."}
+          Could not load this checkout.
         </p>
-        {!(
-          error instanceof HTTPError &&
-          (error.response.status === 404 || error.response.status === 422)
-        ) && (
-          <Button variant="outline" onClick={() => refetch()}>
-            Try again
-          </Button>
-        )}
+        <Button variant="outline" onClick={() => refetch()}>
+          Try again
+        </Button>
       </div>
     );
   }
@@ -97,7 +96,7 @@ export function CheckoutPage() {
   function handleCancelCheckout() {
     if (!data) return;
     const redirectUrl = data.cancelUrl;
-    cancelRequest(undefined, {
+    cancelRequest(data.id, {
       onSuccess: () => {
         window.location.href = redirectUrl;
       },
