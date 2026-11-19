@@ -7,10 +7,14 @@ import type { Step } from "../types.ts";
 export const createSubscriptionStep = {
   id: "subscription.create",
   name: "Create subscription",
-  description:
-    "Create a subscription and generate its initial payment checkout link.",
+  description: "Create a pending subscription.",
   input: [
-    { name: "customerId", label: "Customer ID", type: "string", required: true },
+    {
+      name: "customerId",
+      label: "Customer ID",
+      type: "string",
+      required: true,
+    },
     {
       name: "amountInCents",
       label: "Amount in cents",
@@ -64,10 +68,6 @@ export const createSubscriptionStep = {
     { name: "intervalCount", type: "number" },
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
-    { name: "apiKeyId", type: "string" },
-    { name: "checkoutId", type: "string" },
-    { name: "checkoutLink", type: "string" },
-    { name: "initPaymentId", type: "string" },
   ],
   executor: {
     type: "http",
@@ -101,7 +101,6 @@ export const getSubscriptionStep = {
     { name: "intervalCount", type: "number" },
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
-    { name: "apiKeyId", type: "string" },
   ],
   executor: {
     type: "http",
@@ -174,7 +173,6 @@ export const updateSubscriptionStep = {
     { name: "intervalCount", type: "number" },
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
-    { name: "apiKeyId", type: "string" },
   ],
   executor: {
     type: "http",
@@ -208,7 +206,6 @@ export const cancelSubscriptionStep = {
     { name: "intervalCount", type: "number" },
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
-    { name: "apiKeyId", type: "string" },
   ],
   executor: {
     type: "http",
@@ -242,7 +239,6 @@ export const resumeSubscriptionStep = {
     { name: "intervalCount", type: "number" },
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
-    { name: "apiKeyId", type: "string" },
   ],
   executor: {
     type: "http",
@@ -276,7 +272,6 @@ export const pauseSubscriptionStep = {
     { name: "intervalCount", type: "number" },
     { name: "status", type: "string" },
     { name: "nextBillingAt", type: "string" },
-    { name: "apiKeyId", type: "string" },
   ],
   executor: {
     type: "http",

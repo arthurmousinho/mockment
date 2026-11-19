@@ -135,7 +135,6 @@ export function SubscriptionDetailsPage() {
         <CardContent className="grid min-w-0 gap-x-8 gap-y-2.5 lg:grid-cols-2 [&>div]:min-w-0 [&>div]:flex-wrap [&>div>div]:min-w-0 [&>div>div>span]:break-all">
           <CopyableField label="Subscription ID" value={subscription.id} />
           <CopyableField label="Customer ID" value={subscription.customerId} />
-          <CopyableField label="API key ID" value={subscription.apiKeyId} />
         </CardContent>
       </Card>
       <Card aria-label="Events">

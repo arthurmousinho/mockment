@@ -30,7 +30,6 @@ export type WebhookEndpoint = {
   id: string;
   url: string;
   events: EventType[];
-  apiKeyId: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -61,7 +60,6 @@ export type CreateWebhookEndpointResponseData = {
   url: string;
   secret: string;
   events: EventType[];
-  apiKeyId: string;
   createdAt: string;
   updatedAt: string;
 };

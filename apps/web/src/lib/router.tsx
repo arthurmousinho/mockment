@@ -6,6 +6,7 @@ import { CustomersPage } from "@/pages/customers";
 import { CustomerDetailsPage } from "@/pages/customer-details";
 import { ApiKeysPage } from "@/pages/api-keys";
 import { CheckoutsPage } from "@/pages/checkouts";
+import { CheckoutDetailsPage } from "@/pages/checkout-details";
 import { PaymentsPage } from "@/pages/payments";
 import { PaymentDetailsPage } from "@/pages/payment-details";
 import { InvoicesPage } from "@/pages/invoices";
@@ -101,6 +102,11 @@ export const router = createBrowserRouter([
                 path: "checkouts",
                 handle: { title: "Checkouts" },
                 element: <CheckoutsPage />,
+              },
+              {
+                path: "checkouts/:id",
+                handle: { title: "Checkout Details" },
+                element: <CheckoutDetailsPage />,
               },
               {
                 path: "simulations",

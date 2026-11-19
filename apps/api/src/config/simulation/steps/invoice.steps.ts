@@ -136,20 +136,14 @@ export const issueInvoiceStep = {
 export const updateInvoiceStep = {
   id: "invoice.update",
   name: "Update invoice",
-  description: "Update customer details on a created invoice.",
+  description: "Update the customer on a created invoice.",
   input: [
     { name: "id", label: "Invoice ID", type: "string", required: true },
     {
-      name: "customerName",
-      label: "Customer name",
+      name: "customerId",
+      label: "Customer ID",
       type: "string",
-      required: false,
-    },
-    {
-      name: "customerTaxId",
-      label: "Customer tax ID",
-      type: "string",
-      required: false,
+      required: true,
     },
   ],
   output: [

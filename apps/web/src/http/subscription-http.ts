@@ -40,7 +40,6 @@ export type Subscription = {
   nextBillingAt: string | null;
   createdAt: string;
   updatedAt: string;
-  apiKeyId: string;
 };
 
 export type DetailedSubscription = Subscription & {
@@ -116,6 +115,7 @@ export function UpdateSubscriptionRequest() {
 
 export function FindAllSubscriptionsRequest(
   paginationData: PaginatedRequest & { search?: string },
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ["subscriptions", paginationData],
@@ -126,6 +126,7 @@ export function FindAllSubscriptionsRequest(
       return await request.json<PaginatedAPIResponse<Subscription>>();
     },
     placeholderData: keepPreviousData,
+    enabled: options?.enabled,
   });
 }
 

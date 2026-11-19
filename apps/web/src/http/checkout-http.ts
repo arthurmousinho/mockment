@@ -1,25 +1,105 @@
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import type { Payment } from "./payments-http";
-import { api } from "@/lib/ky";
+import type { PaymentCurrency, PaymentMethod } from "./payments-http";
+import { api, apiErrorHandler } from "@/lib/ky";
+import { queryClient } from "@/lib/query-client";
+import { toast } from "sonner";
+import type { EventType } from "./events-http";
 import type { Subscription } from "./subscription-http";
 import type { PaginatedAPIResponse, PaginatedRequest } from "@/types/http.type";
+
+export type CheckoutStatus = "OPEN" | "COMPLETED" | "CANCELED" | "EXPIRED";
 
 export type Checkout = {
   id: string;
   successUrl: string;
   cancelUrl: string;
-  apiKeyId: string;
   paymentId: string;
   subscriptionId: string | null;
   createdAt: string;
 };
 
-export type CheckoutListItem = Checkout & { link: string };
+type CheckoutRecord = {
+  id: string;
+  status: CheckoutStatus;
+  amountInCents: number;
+  currency: PaymentCurrency;
+  allowedMethods: PaymentMethod[];
+  customerId: string | null;
+  paymentId: string | null;
+  subscriptionId: string | null;
+  expiresAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  successUrl: string;
+  cancelUrl: string;
+};
 
-type DetailedCheckout = Checkout & {
-  payment: Payment;
+export type CheckoutListItem = CheckoutRecord & {
+  link: string;
+};
+
+type CheckoutOptions = {
+  successUrl?: string;
+  cancelUrl?: string;
+  expiresAt?: string;
+};
+
+export type CreateCheckoutRequestData = {
+  apiKey: string;
+} & CheckoutOptions &
+  (
+    | {
+        amountInCents: number;
+        currency: PaymentCurrency;
+        allowedMethods: PaymentMethod[];
+        customerId?: string;
+        subscriptionId?: never;
+      }
+    | {
+        subscriptionId: string;
+        amountInCents?: never;
+        currency?: never;
+        allowedMethods?: never;
+        customerId?: never;
+      }
+  );
+
+export function CreateCheckoutRequest() {
+  return useMutation({
+    mutationFn: async ({ apiKey, ...body }: CreateCheckoutRequestData) => {
+      const response = await api.post("checkouts", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        json: body,
+      });
+      return response.json<CheckoutListItem>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["checkouts"] });
+      toast.success("Checkout created successfully.");
+    },
+    onError: apiErrorHandler,
+  });
+}
+
+type DetailedCheckout = CheckoutRecord & {
+  events: { id: string; type: EventType; createdAt: string }[];
+};
+
+type CheckoutSession = CheckoutRecord & {
   subscription: Subscription | null;
 };
+
+export function GetCheckoutSessionRequest(id: string) {
+  return useQuery({
+    queryKey: ["checkouts", id, "session"],
+    queryFn: async () => {
+      const response = await api.get(`checkouts/${id}/session`);
+      return response.json<CheckoutSession>();
+    },
+    enabled: Boolean(id),
+    retry: false,
+  });
+}
 
 export function GetCheckoutDetailsRequest(id: string) {
   return useQuery({
@@ -31,7 +111,7 @@ export function GetCheckoutDetailsRequest(id: string) {
   });
 }
 
-export type CheckoutCompletionStatus = "APPROVED" | "DECLINED" | "CANCELED";
+export type CheckoutOutcome = "APPROVED" | "DECLINED";
 
 export function FindAllCheckoutsRequest(
   paginationData: PaginatedRequest & { search?: string },
@@ -50,11 +130,25 @@ export function FindAllCheckoutsRequest(
 
 export function CompleteCheckoutRequest(id: string) {
   return useMutation({
-    mutationFn: async (status: CheckoutCompletionStatus) => {
+    mutationFn: async (input: {
+      method: PaymentMethod;
+      outcome: CheckoutOutcome;
+    }) => {
       const request = await api.post(`checkouts/${id}/complete`, {
-        json: { status },
+        json: input,
       });
-      return await request.json<Checkout>();
+      return await request.json<CheckoutRecord>();
     },
+    onError: apiErrorHandler,
+  });
+}
+
+export function CancelCheckoutRequest(id: string) {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await api.patch(`checkouts/${id}/cancel`);
+      return response.json<CheckoutRecord>();
+    },
+    onError: apiErrorHandler,
   });
 }

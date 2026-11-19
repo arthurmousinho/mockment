@@ -63,8 +63,6 @@ export const createPaymentSchema = z.object({
     .optional(),
   currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
   method: z.enum(PaymentMethod, { message: "Invalid payment method." }),
-  successUrl: z.url({ message: "Invalid success URL." }).optional(),
-  cancelUrl: z.url({ message: "Invalid cancel URL." }).optional(),
   description: z
     .string({ message: "Description must be a string." })
     .trim()
@@ -87,13 +85,6 @@ export const createPaymentSchema = z.object({
 });
 
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
-
-export const createPaymentResponseSchema = paymentSchema.safeExtend({
-  checkoutId: z.string().nullable(),
-  checkoutLink: z.url(),
-});
-
-export type CreatePaymentOutput = z.infer<typeof createPaymentResponseSchema>;
 
 export const detailedPaymentSchema = paymentSchema.safeExtend({
   checkoutId: z.string().nullable(),

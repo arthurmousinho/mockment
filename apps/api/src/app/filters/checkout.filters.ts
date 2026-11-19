@@ -6,6 +6,5 @@ export function buildCheckoutSearchFilter(search?: string): CheckoutWhereInput {
     (term) => ({ id: { contains: term } }),
     (term) => ({ paymentId: { contains: term } }),
     (term) => ({ subscriptionId: { contains: term } }),
-    (term) => ({ apiKeyId: { contains: term } }),
   ]);
 }

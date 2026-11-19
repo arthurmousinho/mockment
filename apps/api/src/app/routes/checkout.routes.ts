@@ -1,6 +1,10 @@
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
 import type { FastifyInstance } from "fastify";
 import { checkoutService } from "../services/checkout.service.ts";
-import { completeCheckoutSchema } from "../schemas/checkout.schema.ts";
+import {
+  completeCheckoutSchema,
+  createCheckoutSchema,
+} from "../schemas/checkout.schema.ts";
 import { checkoutListSchema } from "../schemas/checkout.schema.ts";
 import { checkoutDocs } from "../docs/checkout.docs.ts";
 
@@ -10,6 +14,16 @@ export async function checkoutRoutes(app: FastifyInstance) {
     const checkouts = await checkoutService.findAll(paginationInput);
     return reply.status(200).send(checkouts);
   });
+
+  app.get(
+    "/:id/session",
+    { schema: checkoutDocs.getSession },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const checkout = await checkoutService.getSession(id);
+      return reply.status(200).send(checkout);
+    },
+  );
 
   app.get(
     "/:id",
@@ -22,12 +36,37 @@ export async function checkoutRoutes(app: FastifyInstance) {
   );
 
   app.post(
+    "/",
+    {
+      schema: checkoutDocs.create,
+      preHandler: authMiddleware,
+      validatorCompiler: () => (value) => ({ value }),
+    },
+    async (request, reply) => {
+      const input = createCheckoutSchema.parse(request.body);
+      const checkout = await checkoutService.create(input);
+
+      return reply.status(201).send(checkout);
+    },
+  );
+
+  app.post(
     "/:id/complete",
     { schema: checkoutDocs.complete },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const { status } = completeCheckoutSchema.parse(request.body);
-      const checkout = await checkoutService.complete(id, status);
+      const input = completeCheckoutSchema.parse(request.body);
+      const checkout = await checkoutService.complete(id, input);
+      return reply.status(200).send(checkout);
+    },
+  );
+
+  app.patch(
+    "/:id/cancel",
+    { schema: checkoutDocs.cancel },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const checkout = await checkoutService.cancel(id);
       return reply.status(200).send(checkout);
     },
   );

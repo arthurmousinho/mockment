@@ -1,6 +1,5 @@
 import { prismaSingleton } from "../../config/prisma.ts";
 import { customerService } from "./customer.service.ts";
-import { apiKeyService } from "./api-key.service.ts";
 import type {
   CreateSubscriptionInput,
   SubscriptionListInput,
@@ -90,14 +89,12 @@ async function getMetrics(currency: PaymentCurrency) {
   };
 }
 
-async function create(apiKey: string, input: CreateSubscriptionInput) {
-  const validatedApiKey = await apiKeyService.validate(apiKey);
+async function create(input: CreateSubscriptionInput) {
   await customerService.findById(input.customerId);
 
   const pendingSubscription = await prismaSingleton.subscription.create({
     data: {
       id: createPrefixedId("sub"),
-      apiKeyId: validatedApiKey.id,
       customerId: input.customerId,
       amountInCents: input.amountInCents,
       currency: input.currency,
@@ -110,30 +107,13 @@ async function create(apiKey: string, input: CreateSubscriptionInput) {
     },
   });
 
-  const initPayment = await paymentService.create(
-    apiKey,
-    {
-      amountInCents: input.amountInCents,
-      currency: input.currency,
-      method: input.method,
-      customerId: input.customerId,
-      description: input.description,
-    },
-    pendingSubscription.id,
-  );
-
   await eventService.emit({
-    subscriptionId: pendingSubscription.id,
+    resourceId: pendingSubscription.id,
     type: "SUBSCRIPTION_CREATED",
     payload: pendingSubscription,
   });
 
-  return {
-    ...pendingSubscription,
-    checkoutId: initPayment.checkoutId,
-    checkoutLink: initPayment.checkoutLink,
-    initPaymentId: initPayment.id,
-  };
+  return pendingSubscription;
 }
 
 async function findAll(input: SubscriptionListInput) {
@@ -171,25 +151,15 @@ async function findById(id: string) {
 async function getDetails(id: string) {
   const subscription = await prismaSingleton.subscription.findUnique({
     where: { id },
-    include: {
-      events: {
-        select: {
-          id: true,
-          type: true,
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-    },
   });
 
   if (!subscription) {
     throw new NotFoundError(`Subscription with ID ${id} was not found.`);
   }
 
-  return subscription;
+  const events = await eventService.findAllByResourceId(subscription.id);
+
+  return { ...subscription, events };
 }
 
 function validateStatusTransition(
@@ -223,7 +193,7 @@ async function changeStatus(
   });
 
   await eventService.emit({
-    subscriptionId: subscription.id,
+    resourceId: subscription.id,
     type: `SUBSCRIPTION_${newStatus === "ACTIVE" ? "RESUMED" : newStatus}`,
     payload: updatedSubscription,
   });
@@ -258,7 +228,7 @@ async function activate(id: string) {
   });
 
   await eventService.emit({
-    subscriptionId: activatedSubscription.id,
+    resourceId: activatedSubscription.id,
     type: "SUBSCRIPTION_ACTIVATED",
     payload: activatedSubscription,
   });
@@ -291,9 +261,7 @@ async function update(id: string, input: UpdateSubscriptionInput) {
   });
 }
 
-async function processDueSubscriptions() {
-  const now = await virtualClockService.now();
-
+async function processDueSubscriptions(now: Date) {
   const dueSubscriptions = await prismaSingleton.subscription.findMany({
     where: {
       status: "ACTIVE",
@@ -332,6 +300,7 @@ export const subscriptionService = {
   getMetrics,
   create,
   findAll,
+  findById,
   changeStatus,
   update,
   activate,

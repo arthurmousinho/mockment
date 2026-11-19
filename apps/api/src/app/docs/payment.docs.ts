@@ -6,7 +6,6 @@ import {
   searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
-  createPaymentResponseSchema,
   createPaymentSchema,
   detailedPaymentSchema,
   paymentSchema,
@@ -87,7 +86,7 @@ export const paymentDocs = {
         description: "When the payment is created successfully.",
         content: {
           "application/json": {
-            schema: openApiSchema(createPaymentResponseSchema),
+            schema: openApiSchema(paymentSchema),
           },
         },
       },

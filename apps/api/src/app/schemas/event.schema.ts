@@ -7,9 +7,7 @@ export type EventListInput = z.infer<typeof eventListSchema>;
 
 export const emitEventSchema = z.object({
   type: z.enum(EventType),
-  paymentId: z.string().optional(),
-  subscriptionId: z.string().optional(),
-  invoiceId: z.string().optional(),
+  resourceId: z.string().optional(),
   payload: z.any().optional(),
 });
 
@@ -18,8 +16,7 @@ export type EmitEventInput = z.infer<typeof emitEventSchema>;
 export const findAllEventsSchema = z.object({
   id: z.string(),
   type: z.enum(EventType),
-  paymentId: z.string().nullable(),
-  subscriptionId: z.string().nullable(),
+  resourceId: z.string().optional(),
   payload: z.any().nullable(),
   createdAt: z.iso.datetime(),
 });

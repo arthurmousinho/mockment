@@ -153,8 +153,8 @@ export function WebhooksPage() {
             setPage(1);
           }}
           label="Search webhook endpoints"
-          inputLabel="Endpoint ID, URL, or API key ID"
-          placeholder="Search by endpoint ID, URL, or API key ID..."
+          inputLabel="Endpoint ID or URL"
+          placeholder="Search by endpoint ID or URL..."
           status={
             isFetching
               ? "Updating endpoints..."

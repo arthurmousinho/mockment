@@ -16,6 +16,9 @@ import {
 } from "@/http/subscription-http";
 import { ReplayEventRequest } from "@/http/events-http";
 import { TestWebhookEndpointRequest } from "@/http/webhooks-http";
+import { CancelCheckoutRequest } from "@/http/checkout-http";
+import { queryClient } from "@/lib/query-client";
+import { toast } from "sonner";
 import {
   ArrowClockwiseIcon,
   ArrowUUpLeftIcon,
@@ -44,7 +47,7 @@ const ENTITY_ROUTES: Record<string, { label: string; path: string }> = {
   evt: { label: "event", path: "/events" },
   scn: { label: "scenario", path: "/simulations" },
   run: { label: "simulation run", path: "/simulations/runs" },
-  chk: { label: "checkout", path: "/checkout" },
+  chk: { label: "checkout", path: "/checkouts" },
 };
 
 export function getEntityPageLabel(path: string) {
@@ -179,6 +182,7 @@ export function useSearchEntityActions(search: string) {
   const subscriptionActions = useSubscriptionActions();
   const eventActions = useEventActions();
   const webhookActions = useWebhookActions();
+  const cancelCheckout = CancelCheckoutRequest(search.trim());
 
   const entities: Record<
     string,
@@ -189,6 +193,24 @@ export function useSearchEntityActions(search: string) {
     inv: { ...ENTITY_ROUTES.inv, actions: invoiceActions },
     sub: { ...ENTITY_ROUTES.sub, actions: subscriptionActions },
     evt: { ...ENTITY_ROUTES.evt, actions: eventActions },
+    chk: {
+      ...ENTITY_ROUTES.chk,
+      actions: [
+        {
+          label: "Cancel",
+          icon: XIcon,
+          execute: () =>
+            cancelCheckout.mutate(undefined, {
+              onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["checkouts"] });
+                queryClient.invalidateQueries({ queryKey: ["events"] });
+                toast.success("Checkout canceled successfully.");
+              },
+            }),
+          isPending: cancelCheckout.isPending,
+        },
+      ],
+    },
     whk: { label: "webhook", actions: webhookActions },
   };
 

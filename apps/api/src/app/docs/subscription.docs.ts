@@ -6,7 +6,6 @@ import {
   searchablePaginationParamsSchema,
 } from "../../common/openapi.ts";
 import {
-  createSubscriptionResponseSchema,
   createSubscriptionSchema,
   detailedSubscriptionSchema,
   subscriptionSchema,
@@ -102,7 +101,7 @@ export const subscriptionDocs = {
         description: "When the subscription is created successfully.",
         content: {
           "application/json": {
-            schema: openApiSchema(createSubscriptionResponseSchema),
+            schema: openApiSchema(subscriptionSchema),
           },
         },
       },

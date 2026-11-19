@@ -7,6 +7,5 @@ export function buildWebhookEndpointSearchFilter(
   return buildSearchFilter<WebhookEndpointWhereInput>(search, [
     (term) => ({ id: { contains: term } }),
     (term) => ({ url: { contains: term } }),
-    (term) => ({ apiKeyId: { contains: term } }),
   ]);
 }

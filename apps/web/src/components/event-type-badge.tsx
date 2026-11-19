@@ -7,6 +7,18 @@ type EventTypeBadgeProps = {
 };
 
 const EVENT_TYPE_CONFIG: Record<EventType, { className: string }> = {
+  CHECKOUT_CREATED: {
+    className: "text-slate-800 dark:text-slate-300",
+  },
+  CHECKOUT_COMPLETED: {
+    className: "text-green-800 dark:text-green-300",
+  },
+  CHECKOUT_CANCELED: {
+    className: "text-zinc-600 dark:text-zinc-400",
+  },
+  CHECKOUT_EXPIRED: {
+    className: "text-amber-800 dark:text-amber-300",
+  },
   PAYMENT_CREATED: {
     className: "text-slate-800 dark:text-slate-300",
   },

@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "../../common/http-error.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
 import {
   createSubscriptionSchema,
   subscriptionListSchema,
@@ -38,18 +38,16 @@ export async function subcriptionRoutes(app: FastifyInstance) {
     },
   );
 
-  app.post("/", { schema: subscriptionDocs.create }, async (request, reply) => {
-    const authorization = request.headers.authorization;
-    if (!authorization?.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Api Key is missing.");
-    }
+  app.post(
+    "/",
+    { schema: subscriptionDocs.create, preHandler: authMiddleware },
+    async (request, reply) => {
+      const input = createSubscriptionSchema.parse(request.body);
+      const subscription = await subscriptionService.create(input);
 
-    const apiKey = authorization.slice("Bearer ".length);
-    const input = createSubscriptionSchema.parse(request.body);
-    const subscription = await subscriptionService.create(apiKey, input);
-
-    return reply.status(201).send(subscription);
-  });
+      return reply.status(201).send(subscription);
+    },
+  );
 
   app.patch(
     "/:id",

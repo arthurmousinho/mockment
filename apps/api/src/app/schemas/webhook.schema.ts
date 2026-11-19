@@ -93,7 +93,6 @@ export const webhookEndpointSchema = z.object({
   enabled: z.boolean(),
   id: z.string(),
   url: z.url(),
-  apiKeyId: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

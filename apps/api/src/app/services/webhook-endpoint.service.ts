@@ -5,7 +5,6 @@ import type {
   UpdateWebhookEndpointInput,
 } from "../schemas/webhook.schema.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
-import { apiKeyService } from "./api-key.service.ts";
 import {
   BadRequestError,
   NotFoundError,
@@ -81,15 +80,13 @@ async function test(id: string) {
   }
 }
 
-async function create(apiKey: string, input: CreateWebhookEndpointInput) {
-  const validatedApiKey = await apiKeyService.validate(apiKey);
+async function create(input: CreateWebhookEndpointInput) {
   return await prismaSingleton.webhookEndpoint.create({
     data: {
       id: createPrefixedId("whk"),
       url: input.url,
       events: input.events,
       secret: generateSecret(),
-      apiKeyId: validatedApiKey.id,
     },
   });
 }

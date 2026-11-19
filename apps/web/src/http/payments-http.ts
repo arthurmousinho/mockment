@@ -20,7 +20,6 @@ export type Payment = {
   description: string | null;
   externalId: string | null;
   idempotencyKey: string | null;
-  apiKeyId: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -31,17 +30,12 @@ export type CreatePaymentRequestData = {
   currency: PaymentCurrency;
   method: PaymentMethod;
   customerId?: string;
-  successUrl?: string;
-  cancelUrl?: string;
   description?: string;
   externalId?: string;
   idempotencyKey?: string;
 };
 
-export type CreatePaymentResponse = Omit<Payment, "apiKeyId"> & {
-  checkoutId: string | null;
-  checkoutLink: string;
-};
+export type CreatePaymentResponse = Payment;
 
 export function CreatePaymentRequest() {
   return useMutation({

@@ -1,4 +1,7 @@
-import { ConflictError, NotFoundError } from "../../common/http-error.ts";
+import {
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../../common/http-error.ts";
 import {
   buildPaginatedResponse,
   buildPrismaPaginationParams,
@@ -8,50 +11,77 @@ import { env } from "../../config/env.ts";
 import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   CheckoutListInput,
-  CheckoutCompletionStatus,
-  GenerateCheckoutLinkInput,
+  CreateCheckoutInput,
+  CompleteCheckoutInput,
 } from "../schemas/checkout.schema.ts";
 import { paymentService } from "./payment.service.ts";
 import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
+import { customerService } from "./customer.service.ts";
+import { eventService } from "./event.service.ts";
+import { virtualClockService } from "./virtual-clock.service.ts";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
 }
 
-async function generateLink(input: GenerateCheckoutLinkInput) {
-  const payment = await paymentService.findById(input.paymentId);
-  if (payment.status !== "CREATED") {
-    throw new Error("Only payment in CREATED state can be checked out.");
+export async function create(input: CreateCheckoutInput) {
+  const isSubscriptionCheckout = "subscriptionId" in input;
+
+  const subscription = isSubscriptionCheckout
+    ? await subscriptionService.findById(input.subscriptionId)
+    : null;
+
+  if (subscription?.status !== undefined && subscription.status !== "PENDING") {
+    throw new UnprocessableEntityError(
+      "Only PENDING subscriptions can have a checkout.",
+    );
   }
 
-  const defaultSuccessLink = `${env.WEB_URL}/success-checkout`;
-  const defaultCancelLink = `${env.WEB_URL}/cancel-checkout`;
+  if (!isSubscriptionCheckout && input.customerId) {
+    await customerService.findById(input.customerId);
+  }
+
+  const now = await virtualClockService.now();
+  const expiresAt = input.expiresAt ? new Date(input.expiresAt) : null;
+
+  if (expiresAt && expiresAt <= now) {
+    throw new UnprocessableEntityError(
+      "The expiration date must be in the future.",
+    );
+  }
 
   const checkout = await prismaSingleton.checkout.create({
     data: {
       id: createPrefixedId("chk"),
-      apiKeyId: input.apiKeyId,
-      paymentId: input.paymentId,
-      successUrl: input.successUrl ?? defaultSuccessLink,
-      cancelUrl: input.cancelUrl ?? defaultCancelLink,
-      subscriptionId: input.subscriptionId ?? null,
+      amountInCents: isSubscriptionCheckout
+        ? subscription!.amountInCents
+        : input.amountInCents,
+      currency: isSubscriptionCheckout
+        ? subscription!.currency
+        : input.currency,
+      allowedMethods: isSubscriptionCheckout
+        ? [subscription!.method]
+        : input.allowedMethods,
+      customerId: isSubscriptionCheckout
+        ? subscription!.customerId
+        : (input.customerId ?? null),
+      subscriptionId: subscription?.id ?? null,
+      successUrl: input.successUrl ?? `${env.WEB_URL}/success-checkout`,
+      cancelUrl: input.cancelUrl ?? `${env.WEB_URL}/cancel-checkout`,
+      expiresAt,
     },
   });
 
-  return {
-    checkoutId: checkout.id,
-    checkoutLink: buildCheckoutLink(checkout.id),
-  };
-}
-
-async function getGeneratedCheckoutByPaymentId(paymentId: string) {
-  const checkout = await prismaSingleton.checkout.findUnique({
-    where: { paymentId },
+  await eventService.emit({
+    resourceId: checkout.id,
+    type: "CHECKOUT_CREATED",
+    payload: checkout,
   });
+
   return {
-    checkoutId: checkout?.id ?? null,
-    checkoutLink: checkout ? buildCheckoutLink(checkout.id) : null,
+    ...checkout,
+    link: buildCheckoutLink(checkout.id),
   };
 }
 
@@ -78,17 +108,41 @@ async function findAll(paginationInput: CheckoutListInput) {
   });
 }
 
-async function getDetails(id: string) {
+async function getSession(id: string) {
   const checkout = await prismaSingleton.checkout.findUnique({
     where: { id },
-    include: { payment: true, subscription: true },
+    include: { subscription: true },
   });
 
   if (!checkout) {
     throw new NotFoundError(`Checkout with ID ${id} was not found.`);
   }
 
+  if (checkout.status !== "OPEN") {
+    throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
+  }
+
+  const now = await virtualClockService.now();
+  if (checkout.expiresAt && checkout.expiresAt <= now) {
+    await expire(id);
+    throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
+  }
+
   return checkout;
+}
+
+async function getDetails(id: string) {
+  const checkout = await prismaSingleton.checkout.findUnique({
+    where: { id },
+  });
+
+  if (!checkout) {
+    throw new NotFoundError(`Checkout with ID ${id} was not found.`);
+  }
+
+  const events = await eventService.findAllByResourceId(checkout.id);
+
+  return { ...checkout, events };
 }
 
 async function findById(id: string) {
@@ -103,40 +157,146 @@ async function findById(id: string) {
   return checkout;
 }
 
-async function complete(id: string, status: CheckoutCompletionStatus) {
+async function cancel(id: string) {
   const checkout = await findById(id);
-  const payment = await paymentService.findById(checkout.paymentId);
 
-  if (payment.status !== "CREATED") {
-    throw new ConflictError(
-      `Payment with ID ${checkout.paymentId} is not in a valid state for completion. Payment status must be "CREATED" but is "${payment.status}".`,
+  if (checkout.status !== "OPEN") {
+    throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
+  }
+
+  const canceledCheckout = await prismaSingleton.checkout.update({
+    where: { id: checkout.id },
+    data: { status: "CANCELED" },
+  });
+
+  await eventService.emit({
+    resourceId: canceledCheckout.id,
+    type: "CHECKOUT_CANCELED",
+    payload: canceledCheckout,
+  });
+
+  return canceledCheckout;
+}
+
+async function expire(id: string) {
+  const expiredCheckout = await prismaSingleton.checkout.update({
+    where: { id },
+    data: { status: "EXPIRED" },
+  });
+
+  await eventService.emit({
+    resourceId: expiredCheckout.id,
+    type: "CHECKOUT_EXPIRED",
+    payload: expiredCheckout,
+  });
+
+  return expiredCheckout;
+}
+
+async function expireDueCheckouts(now: Date) {
+  const dueCheckouts = await prismaSingleton.checkout.findMany({
+    where: {
+      status: "OPEN",
+      expiresAt: { lte: now },
+    },
+  });
+
+  if (dueCheckouts.length === 0) {
+    return { expiredCheckoutsCount: 0 };
+  }
+
+  const result = await prismaSingleton.checkout.updateMany({
+    where: {
+      id: {
+        in: dueCheckouts.map((checkout) => checkout.id),
+      },
+      status: "OPEN",
+      expiresAt: { lte: now },
+    },
+    data: {
+      status: "EXPIRED",
+    },
+  });
+
+  await Promise.all(
+    dueCheckouts.map((checkout) =>
+      eventService.emit({
+        type: "CHECKOUT_EXPIRED",
+        resourceId: checkout.id,
+        payload: {
+          ...checkout,
+          status: "EXPIRED",
+        },
+      }),
+    ),
+  );
+
+  return {
+    expiredCheckoutsCount: result.count,
+  };
+}
+
+async function complete(id: string, input: CompleteCheckoutInput) {
+  const checkout = await findById(id);
+
+  if (checkout.status !== "OPEN") {
+    throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
+  }
+
+  const now = await virtualClockService.now();
+  if (checkout.expiresAt && new Date(checkout.expiresAt) <= now) {
+    await expire(id);
+    throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
+  }
+
+  if (
+    !Array.isArray(checkout.allowedMethods) ||
+    !checkout.allowedMethods.includes(input.method)
+  ) {
+    throw new UnprocessableEntityError(
+      `Payment method ${input.method} is not allowed for checkout ${id}.`,
     );
   }
 
-  switch (status) {
-    case "APPROVED":
-      await paymentService.changeStatus(checkout.paymentId, "PROCESSING");
-      await paymentService.changeStatus(checkout.paymentId, "APPROVED");
-      if (checkout.subscriptionId) {
-        await subscriptionService.activate(checkout.subscriptionId);
-      }
-      break;
-    case "DECLINED":
-      await paymentService.changeStatus(checkout.paymentId, "PROCESSING");
-      await paymentService.changeStatus(checkout.paymentId, "DECLINED");
-      break;
-    case "CANCELED":
-      await paymentService.changeStatus(checkout.paymentId, "CANCELED");
-      break;
+  const createdPayment = await paymentService.create({
+    amountInCents: checkout.amountInCents,
+    method: input.method,
+    currency: checkout.currency,
+    customerId: checkout.customerId ?? undefined,
+  });
+
+  await paymentService.changeStatus(createdPayment.id, "PROCESSING");
+  await paymentService.changeStatus(createdPayment.id, input.outcome);
+
+  // FIXME: This doesn't ensure atomicity, becouse the activation can fail.
+  if (input.outcome === "APPROVED" && checkout.subscriptionId) {
+    await subscriptionService.activate(checkout.subscriptionId);
   }
 
-  return checkout;
+  const completedCheckout = await prismaSingleton.checkout.update({
+    where: { id: checkout.id },
+    data: {
+      status: "COMPLETED",
+      completedAt: new Date(),
+      paymentId: createdPayment.id,
+    },
+  });
+
+  await eventService.emit({
+    resourceId: checkout.id,
+    type: "CHECKOUT_COMPLETED",
+    payload: completedCheckout,
+  });
+
+  return completedCheckout;
 }
 
 export const checkoutService = {
-  generateLink,
-  getGeneratedCheckoutByPaymentId,
+  create,
+  expireDueCheckouts,
   findAll,
+  getSession,
   getDetails,
+  cancel,
   complete,
 };
