@@ -37,6 +37,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+const CHECKOUT_EVENT_TYPES: EventType[] = [
+  "CHECKOUT_CREATED",
+  "CHECKOUT_COMPLETED",
+  "CHECKOUT_CANCELED",
+  "CHECKOUT_EXPIRED",
+];
+
 const PAYMENT_EVENT_TYPES: EventType[] = [
   "PAYMENT_CREATED",
   "PAYMENT_PROCESSING",
@@ -64,6 +71,7 @@ const INVOICE_EVENT_TYPES: EventType[] = [
 ];
 
 const EVENT_GROUPS = [
+  { label: "Checkout Events", value: "checkouts", types: CHECKOUT_EVENT_TYPES },
   { label: "Payment Events", value: "payments", types: PAYMENT_EVENT_TYPES },
   {
     label: "Subscription Events",
