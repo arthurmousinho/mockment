@@ -212,7 +212,7 @@ async function expireDueCheckouts(now: Date) {
   });
 
   if (dueCheckouts.length === 0) {
-    return { expiredCount: 0 };
+    return { expiredCheckoutsCount: 0 };
   }
 
   const result = await prismaSingleton.checkout.updateMany({
@@ -242,7 +242,7 @@ async function expireDueCheckouts(now: Date) {
   );
 
   return {
-    expiredCount: result.count,
+    expiredCheckoutsCount: result.count,
   };
 }
 

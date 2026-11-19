@@ -17,6 +17,15 @@ import { checkoutService } from "./checkout.service.ts";
 
 const CLOCK_ID = "default";
 
+async function processDueTasks(now: Date) {
+  const [processedSubscriptions, expiredCheckouts] = await Promise.all([
+    subscriptionService.processDueSubscriptions(now),
+    checkoutService.expireDueCheckouts(now),
+  ]);
+
+  return { ...processedSubscriptions, ...expiredCheckouts };
+}
+
 async function initialize() {
   await prismaSingleton.virtualClock.upsert({
     where: { id: CLOCK_ID },
@@ -39,7 +48,11 @@ async function tickOneMinute() {
 
   eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
 
-  return updatedVirtualClock;
+  const processedTasks = await processDueTasks(
+    updatedVirtualClock.currentDateTime,
+  );
+
+  return { ...updatedVirtualClock, ...processedTasks };
 }
 
 async function now(): Promise<Date> {
@@ -57,12 +70,11 @@ async function set(input: CurrentVirtualDateTimeInput) {
 
   eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
 
-  const processedSubscriptions =
-    await subscriptionService.processDueSubscriptions(
-      updatedVirtualClock.currentDateTime,
-    );
+  const { processedSubscriptions, paymentsCreated } = await processDueTasks(
+    updatedVirtualClock.currentDateTime,
+  );
 
-  return { ...updatedVirtualClock, ...processedSubscriptions };
+  return { ...updatedVirtualClock, processedSubscriptions, paymentsCreated };
 }
 
 async function advance({
@@ -90,17 +102,13 @@ async function advance({
 
   eventEmitterSingleton.emit("clock-tick", updatedVirtualClock.currentDateTime);
 
-  const [processedSubscriptions, expiredCheckouts] = await Promise.all([
-    subscriptionService.processDueSubscriptions(
-      updatedVirtualClock.currentDateTime,
-    ),
-    checkoutService.expireDueCheckouts(updatedVirtualClock.currentDateTime),
-  ]);
+  const processedTasks = await processDueTasks(
+    updatedVirtualClock.currentDateTime,
+  );
 
   return {
     ...updatedVirtualClock,
-    ...processedSubscriptions,
-    ...expiredCheckouts,
+    ...processedTasks,
   };
 }
 
