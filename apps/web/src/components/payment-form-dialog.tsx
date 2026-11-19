@@ -4,13 +4,11 @@ import { z } from "zod";
 import { NumericFormat } from "react-number-format";
 import {
   CreatePaymentRequest,
-  type CreatePaymentResponse,
   type PaymentCurrency,
   type PaymentMethod,
 } from "@/http/payments-http";
 import { PaymentCurrencyBadge } from "./payment-currency-badge";
 import { PaymentMethodBadge } from "./payment-method-badge";
-import { PaymentCreatedContent } from "./payment-created-content";
 import { CustomerPicker } from "./customer-picker";
 import { Textarea } from "./ui/textarea";
 import {
@@ -62,8 +60,6 @@ const paymentFormSchema = z.object({
     .string()
     .trim()
     .max(191, "Customer ID must be at most 191 characters long."),
-  successUrl: z.union([z.url(), z.literal("")]),
-  cancelUrl: z.union([z.url(), z.literal("")]),
   description: z
     .string()
     .trim()
@@ -81,8 +77,6 @@ type PaymentFormData = z.infer<typeof paymentFormSchema>;
 
 export function PaymentFormDialog({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [createdPayment, setCreatedPayment] =
-    useState<CreatePaymentResponse | null>(null);
 
   const { mutate: createPayment, isPending: isSubmitting } =
     CreatePaymentRequest();
@@ -95,8 +89,6 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
       method: "PIX",
       apiKey: "",
       customerId: "",
-      successUrl: "",
-      cancelUrl: "",
       description: "",
       externalId: "",
       idempotencyKey: "",
@@ -107,7 +99,6 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
     if (isSubmitting) return;
     if (nextOpen) {
       form.reset();
-      setCreatedPayment(null);
     }
     setOpen(nextOpen);
   }
@@ -118,13 +109,11 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
       {
         ...data,
         customerId: data.customerId || undefined,
-        successUrl: data.successUrl || undefined,
-        cancelUrl: data.cancelUrl || undefined,
         description: data.description || undefined,
         externalId: data.externalId || undefined,
         idempotencyKey: data.idempotencyKey || undefined,
       },
-      { onSuccess: setCreatedPayment },
+      { onSuccess: () => setOpen(false) },
     );
   }
 
@@ -132,239 +121,184 @@ export function PaymentFormDialog({ children }: { children: ReactNode }) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        {createdPayment ? (
-          <PaymentCreatedContent payment={createdPayment} />
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>New payment</DialogTitle>
-              <DialogDescription>
-                Fill in the form to create a new payment.
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="amountInCents"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
+        <DialogHeader>
+          <DialogTitle>New payment</DialogTitle>
+          <DialogDescription>
+            Fill in the form to create a new payment.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="amountInCents"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <NumericFormat
+                      customInput={Input}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      decimalScale={2}
+                      fixedDecimalScale
+                      allowNegative={false}
+                      value={field.value / 100}
+                      onValueChange={({ floatValue }) => {
+                        field.onChange(Math.round((floatValue ?? 0) * 100));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Currency</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
-                        <NumericFormat
-                          customInput={Input}
-                          thousandSeparator="."
-                          decimalSeparator=","
-                          decimalScale={2}
-                          fixedDecimalScale
-                          allowNegative={false}
-                          value={field.value / 100}
-                          onValueChange={({ floatValue }) => {
-                            field.onChange(Math.round((floatValue ?? 0) * 100));
-                          }}
-                        />
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a currency" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="currency"
-                    render={({ field }) => (
-                      <FormItem className="min-w-0">
-                        <FormLabel>Currency</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a currency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PaymentCurrencyValues.map((currency, index) => (
-                              <SelectItem key={index} value={currency}>
-                                <PaymentCurrencyBadge currency={currency} />
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="method"
-                    render={({ field }) => (
-                      <FormItem className="min-w-0">
-                        <FormLabel>Payment Method</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a payment method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PaymentMethodValues.map((method, index) => (
-                              <SelectItem key={index} value={method}>
-                                <PaymentMethodBadge method={method} />
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="apiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>API Key</FormLabel>
+                      <SelectContent>
+                        {PaymentCurrencyValues.map((currency, index) => (
+                          <SelectItem key={index} value={currency}>
+                            <PaymentCurrencyBadge currency={currency} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="method"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Payment Method</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
-                        <Input
-                          placeholder="mk_test_..."
-                          autoComplete="off"
-                          type="password"
-                          {...field}
-                        />
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a payment method" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Accordion type="single" collapsible className="border px-2">
-                  <AccordionItem value="optional-fields">
-                    <AccordionTrigger className="text-xs font-medium">
-                      Optional details
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pt-2">
-                        <FormField
-                          control={form.control}
-                          name="customerId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Customer</FormLabel>
-                              <FormControl>
-                                <CustomerPicker {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                          <FormField
-                            control={form.control}
-                            name="successUrl"
-                            render={({ field }) => (
-                              <FormItem className="min-w-0">
-                                <FormLabel>Success URL</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="url"
-                                    placeholder="https://example.com/payment/success"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="cancelUrl"
-                            render={({ field }) => (
-                              <FormItem className="min-w-0">
-                                <FormLabel>Cancel URL</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="url"
-                                    placeholder="https://example.com/payment/cancel"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <FormField
-                          control={form.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder="e.g. One-time payment"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="externalId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>External ID</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="idempotencyKey"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Idempotency key</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={isSubmitting}
-                    >
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={isSubmitting}>
-                    Save
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </>
-        )}
+                      <SelectContent>
+                        {PaymentMethodValues.map((method, index) => (
+                          <SelectItem key={index} value={method}>
+                            <PaymentMethodBadge method={method} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="apiKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>API Key</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="mk_test_..."
+                      autoComplete="off"
+                      type="password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Accordion type="single" collapsible className="border px-2">
+              <AccordionItem value="optional-fields">
+                <AccordionTrigger className="text-xs font-medium">
+                  Optional details
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 pt-2">
+                    <FormField
+                      control={form.control}
+                      name="customerId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Customer</FormLabel>
+                          <FormControl>
+                            <CustomerPicker {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="e.g. One-time payment"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="externalId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>External ID</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="idempotencyKey"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Idempotency key</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -30,17 +30,12 @@ export type CreatePaymentRequestData = {
   currency: PaymentCurrency;
   method: PaymentMethod;
   customerId?: string;
-  successUrl?: string;
-  cancelUrl?: string;
   description?: string;
   externalId?: string;
   idempotencyKey?: string;
 };
 
-export type CreatePaymentResponse = Payment & {
-  checkoutId: string | null;
-  checkoutLink: string;
-};
+export type CreatePaymentResponse = Payment;
 
 export function CreatePaymentRequest() {
   return useMutation({
