@@ -203,6 +203,49 @@ async function expire(id: string) {
   return expiredCheckout;
 }
 
+async function expireDueCheckouts(now: Date) {
+  const dueCheckouts = await prismaSingleton.checkout.findMany({
+    where: {
+      status: "OPEN",
+      expiresAt: { lte: now },
+    },
+  });
+
+  if (dueCheckouts.length === 0) {
+    return { expiredCount: 0 };
+  }
+
+  const result = await prismaSingleton.checkout.updateMany({
+    where: {
+      id: {
+        in: dueCheckouts.map((checkout) => checkout.id),
+      },
+      status: "OPEN",
+      expiresAt: { lte: now },
+    },
+    data: {
+      status: "EXPIRED",
+    },
+  });
+
+  await Promise.all(
+    dueCheckouts.map((checkout) =>
+      eventService.emit({
+        type: "CHECKOUT_EXPIRED",
+        resourceId: checkout.id,
+        payload: {
+          ...checkout,
+          status: "EXPIRED",
+        },
+      }),
+    ),
+  );
+
+  return {
+    expiredCount: result.count,
+  };
+}
+
 async function complete(id: string, input: CompleteCheckoutInput) {
   const checkout = await findById(id);
 
@@ -261,6 +304,7 @@ async function complete(id: string, input: CompleteCheckoutInput) {
 export const checkoutService = {
   create,
   getGeneratedCheckoutByPaymentId,
+  expireDueCheckouts,
   findAll,
   getSession,
   getDetails,
