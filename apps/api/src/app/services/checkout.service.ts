@@ -19,6 +19,7 @@ import { subscriptionService } from "./subscription.service.ts";
 import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 import { customerService } from "./customer.service.ts";
 import { eventService } from "./event.service.ts";
+import { virtualClockService } from "./virtual-clock.service.ts";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
@@ -41,9 +42,10 @@ export async function create(input: CreateCheckoutInput) {
     await customerService.findById(input.customerId);
   }
 
+  const now = await virtualClockService.now();
   const expiresAt = input.expiresAt ? new Date(input.expiresAt) : null;
 
-  if (expiresAt && expiresAt <= new Date()) {
+  if (expiresAt && expiresAt <= now) {
     throw new UnprocessableEntityError(
       "The expiration date must be in the future.",
     );
@@ -130,7 +132,8 @@ async function getSession(id: string) {
     throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
   }
 
-  if (checkout.expiresAt && checkout.expiresAt <= new Date()) {
+  const now = await virtualClockService.now();
+  if (checkout.expiresAt && checkout.expiresAt <= now) {
     await expire(id);
     throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
   }
@@ -207,7 +210,8 @@ async function complete(id: string, input: CompleteCheckoutInput) {
     throw new UnprocessableEntityError(`Checkout with ID ${id} is not open.`);
   }
 
-  if (checkout.expiresAt && new Date(checkout.expiresAt) <= new Date()) {
+  const now = await virtualClockService.now();
+  if (checkout.expiresAt && new Date(checkout.expiresAt) <= now) {
     await expire(id);
     throw new UnprocessableEntityError(`Checkout with ID ${id} has expired.`);
   }
