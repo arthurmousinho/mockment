@@ -201,6 +201,21 @@ export function SpotlightSearch({
                   </CommandItem>
                 </CommandGroup>
               )}
+              {entity?.label === "checkout" && (
+                <CommandGroup heading="Checkout session">
+                  <CommandItem
+                    value={`Open checkout session ${entity.id}`}
+                    onSelect={() => {
+                      setOpen(false);
+                      setSearch("");
+                      navigate(`/checkout/${entity.id}`);
+                    }}
+                  >
+                    <ArrowUpRightIcon size={16} />
+                    Open checkout session {entity.id}
+                  </CommandItem>
+                </CommandGroup>
+              )}
               {entity && entity.actions.length > 0 && (
                 <CommandGroup
                   heading={`${entity.label[0].toUpperCase()}${entity.label.slice(1)} actions`}
