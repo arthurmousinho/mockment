@@ -143,11 +143,15 @@ export function CompleteCheckoutRequest(id: string) {
   });
 }
 
-export function CancelCheckoutRequest(id: string) {
+export function CancelCheckoutRequest() {
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (id: string) => {
       const response = await api.patch(`checkouts/${id}/cancel`);
       return response.json<CheckoutRecord>();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["checkouts"] });
+      toast.success("Checkout cancaled successfully.");
     },
     onError: apiErrorHandler,
   });

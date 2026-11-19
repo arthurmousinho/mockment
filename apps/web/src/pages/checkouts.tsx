@@ -6,6 +6,7 @@ import {
   EyeIcon,
   LinkSimpleIcon,
   PlusIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { ListingSearch } from "@/components/listing-search";
@@ -28,7 +29,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FindAllCheckoutsRequest } from "@/http/checkout-http";
+import {
+  CancelCheckoutRequest,
+  FindAllCheckoutsRequest,
+} from "@/http/checkout-http";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 
 export function CheckoutsPage() {
@@ -39,6 +43,8 @@ export function CheckoutsPage() {
 
   const { data, isPending, isFetching, isError, refetch } =
     FindAllCheckoutsRequest({ page, limit, search });
+  const { mutate: cancelCheckout, isPending: isCanceling } =
+    CancelCheckoutRequest();
 
   if (isPending) return <ListingPageSkeleton columns={6} rows={limit} />;
 
@@ -51,6 +57,11 @@ export function CheckoutsPage() {
         <Button onClick={() => refetch()}>Try again</Button>
       </div>
     );
+  }
+
+  function handleCancel(id: string) {
+    if (isCanceling) return;
+    cancelCheckout(id);
   }
 
   return (
@@ -83,7 +94,10 @@ export function CheckoutsPage() {
         <div className="flex items-center gap-2 lg:ml-auto">
           <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
           <CheckoutFormDialog>
-            <Button><PlusIcon size={18} />New Checkout</Button>
+            <Button>
+              <PlusIcon size={18} />
+              New Checkout
+            </Button>
           </CheckoutFormDialog>
         </div>
       </header>
@@ -154,6 +168,13 @@ export function CheckoutsPage() {
                           <ArrowSquareOutIcon size={16} />
                           Open Session
                         </a>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={checkout.status !== "OPEN" || isCanceling}
+                        onClick={() => handleCancel(checkout.id)}
+                      >
+                        <XIcon size={16} />
+                        Cancel
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
