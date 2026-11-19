@@ -1,10 +1,53 @@
 import { completeCheckoutSchema } from "../../../app/schemas/checkout.schema.ts";
 import type { Step } from "../types.ts";
 
+export const createSubscriptionCheckoutStep = {
+  id: "checkout.createSubscription",
+  name: "Create subscription checkout",
+  description: "Create a checkout for a pending subscription.",
+  input: [
+    {
+      name: "subscriptionId",
+      label: "Subscription ID",
+      type: "string",
+      required: true,
+    },
+    {
+      name: "successUrl",
+      label: "Success URL",
+      type: "string",
+      required: false,
+    },
+    { name: "cancelUrl", label: "Cancel URL", type: "string", required: false },
+    {
+      name: "expiresAt",
+      label: "Expiration date",
+      type: "string",
+      required: false,
+    },
+  ],
+  output: [
+    { name: "id", type: "string" },
+    { name: "status", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "customerId", type: "string" },
+    { name: "paymentId", type: "string" },
+    { name: "subscriptionId", type: "string" },
+    { name: "successUrl", type: "string" },
+    { name: "cancelUrl", type: "string" },
+    { name: "expiresAt", type: "string" },
+    { name: "completedAt", type: "string" },
+    { name: "createdAt", type: "string" },
+    { name: "link", type: "string" },
+  ],
+  executor: { type: "http", method: "POST", endpoint: "/checkouts" },
+} satisfies Step;
+
 export const getCheckoutStep = {
   id: "checkout.get",
   name: "Get checkout",
-  description: "Get an existing checkout and its payment and subscription IDs.",
+  description: "Get an existing checkout by its ID.",
   input: [
     {
       name: "id",
@@ -15,7 +58,12 @@ export const getCheckoutStep = {
   ],
   output: [
     { name: "id", type: "string" },
-    { name: "apiKeyId", type: "string" },
+    { name: "status", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "customerId", type: "string" },
+    { name: "expiresAt", type: "string" },
+    { name: "completedAt", type: "string" },
     { name: "createdAt", type: "string" },
     { name: "successUrl", type: "string" },
     { name: "cancelUrl", type: "string" },
@@ -58,7 +106,12 @@ export const completeCheckoutStep = {
   ],
   output: [
     { name: "id", type: "string" },
-    { name: "apiKeyId", type: "string" },
+    { name: "status", type: "string" },
+    { name: "amountInCents", type: "number" },
+    { name: "currency", type: "string" },
+    { name: "customerId", type: "string" },
+    { name: "expiresAt", type: "string" },
+    { name: "completedAt", type: "string" },
     { name: "createdAt", type: "string" },
     { name: "successUrl", type: "string" },
     { name: "cancelUrl", type: "string" },
@@ -72,4 +125,22 @@ export const completeCheckoutStep = {
   },
 } satisfies Step;
 
-export const CHECKOUT_STEPS = [getCheckoutStep, completeCheckoutStep] as const;
+export const cancelCheckoutStep = {
+  id: "checkout.cancel",
+  name: "Cancel checkout",
+  description: "Cancel an open checkout.",
+  input: [{ name: "id", label: "Checkout ID", type: "string", required: true }],
+  output: getCheckoutStep.output,
+  executor: {
+    type: "http",
+    method: "PATCH",
+    endpoint: "/checkouts/:id/cancel",
+  },
+} satisfies Step;
+
+export const CHECKOUT_STEPS = [
+  createSubscriptionCheckoutStep,
+  getCheckoutStep,
+  completeCheckoutStep,
+  cancelCheckoutStep,
+] as const;
