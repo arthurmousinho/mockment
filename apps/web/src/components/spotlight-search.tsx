@@ -186,8 +186,8 @@ export function SpotlightSearch({
                   })}
                 </CommandGroup>
               )}
-              {entity?.href && (
-                <CommandGroup heading="Details">
+              <CommandGroup heading="Pages">
+                {entity?.href && (
                   <CommandItem
                     value={`Go to ${entity.label} ${entity.id}`}
                     onSelect={() => {
@@ -199,10 +199,8 @@ export function SpotlightSearch({
                     <ArrowUpRightIcon size={16} />
                     Go to {entity.label} {entity.id}
                   </CommandItem>
-                </CommandGroup>
-              )}
-              {entity?.label === "checkout" && (
-                <CommandGroup heading="Checkout session">
+                )}
+                {entity?.label === "checkout" && (
                   <CommandItem
                     value={`Open checkout session ${entity.id}`}
                     onSelect={() => {
@@ -214,12 +212,28 @@ export function SpotlightSearch({
                     <ArrowUpRightIcon size={16} />
                     Open checkout session {entity.id}
                   </CommandItem>
-                </CommandGroup>
-              )}
+                )}
+                {!entity &&
+                  navigationlinks.map((link) => {
+                    const PageIcon = link.icon;
+                    return (
+                      <CommandItem
+                        key={link.href}
+                        value={link.label}
+                        keywords={[link.href]}
+                        onSelect={() => selectLink(link)}
+                      >
+                        <PageIcon size={16} />
+                        {link.label}
+                        <CommandShortcut className="opacity-0 transition-opacity group-hover/command-item:opacity-100">
+                          <ArrowUpRightIcon size={16} aria-hidden="true" />
+                        </CommandShortcut>
+                      </CommandItem>
+                    );
+                  })}
+              </CommandGroup>
               {entity && entity.actions.length > 0 && (
-                <CommandGroup
-                  heading={`${entity.label[0].toUpperCase()}${entity.label.slice(1)} actions`}
-                >
+                <CommandGroup heading="Actions">
                   {entity.actions.map((action) => {
                     const { label, icon: ActionIcon } = action;
                     return (
@@ -240,44 +254,27 @@ export function SpotlightSearch({
                   })}
                 </CommandGroup>
               )}
-              <CommandGroup heading="Pages">
-                {navigationlinks.map((link) => {
-                  const PageIcon = link.icon;
-                  return (
-                    <CommandItem
-                      key={link.href}
-                      value={link.label}
-                      keywords={[link.href]}
-                      onSelect={() => selectLink(link)}
-                    >
-                      <PageIcon size={16} />
-                      {link.label}
-                      <CommandShortcut className="opacity-0 transition-opacity group-hover/command-item:opacity-100">
-                        <ArrowUpRightIcon size={16} aria-hidden="true" />
-                      </CommandShortcut>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-              <CommandGroup heading="API Docs">
-                {apiDocLinks.map((doc) => {
-                  const DocIcon = doc.icon;
-                  return (
-                    <CommandItem
-                      key={doc.href}
-                      value={`API Docs ${doc.label}`}
-                      keywords={[doc.href, "API documentation"]}
-                      onSelect={() => selectLink(doc)}
-                    >
-                      <DocIcon size={16} />
-                      {doc.label}
-                      <CommandShortcut className="opacity-0 transition-opacity group-hover/command-item:opacity-100">
-                        <ArrowUpRightIcon size={16} aria-hidden="true" />
-                      </CommandShortcut>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
+              {!entity && (
+                <CommandGroup heading="API Docs">
+                  {apiDocLinks.map((doc) => {
+                    const DocIcon = doc.icon;
+                    return (
+                      <CommandItem
+                        key={doc.href}
+                        value={`API Docs ${doc.label}`}
+                        keywords={[doc.href, "API documentation"]}
+                        onSelect={() => selectLink(doc)}
+                      >
+                        <DocIcon size={16} />
+                        {doc.label}
+                        <CommandShortcut className="opacity-0 transition-opacity group-hover/command-item:opacity-100">
+                          <ArrowUpRightIcon size={16} aria-hidden="true" />
+                        </CommandShortcut>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </DialogContent>
