@@ -202,7 +202,7 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Open checkout
+                  Open Session
                 </a>
               </Button>
             </DialogFooter>
@@ -459,7 +459,7 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                     </Button>
                   </DialogClose>
                   <Button type="submit" disabled={isPending}>
-                    Create checkout
+                    Save
                   </Button>
                 </DialogFooter>
               </form>
