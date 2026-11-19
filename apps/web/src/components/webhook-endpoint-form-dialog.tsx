@@ -249,6 +249,7 @@ export function WebhookEndpointFormDialog({
                       <Accordion
                         type="single"
                         collapsible
+                        defaultValue={EVENT_GROUPS[0].value}
                         className="border px-2"
                       >
                         {EVENT_GROUPS.map((group) => (
@@ -289,6 +290,31 @@ export function WebhookEndpointFormDialog({
                                     }}
                                   />
                                 ))}
+                              </div>
+                              <div className="mt-2 flex justify-end">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="xs"
+                                  onClick={() => {
+                                    const selected = form.getValues("events");
+                                    form.setValue(
+                                      "events",
+                                      [
+                                        ...new Set([
+                                          ...selected,
+                                          ...group.types,
+                                        ]),
+                                      ],
+                                      {
+                                        shouldDirty: true,
+                                        shouldValidate: true,
+                                      },
+                                    );
+                                  }}
+                                >
+                                  Select all
+                                </Button>
                               </div>
                             </AccordionContent>
                           </AccordionItem>
