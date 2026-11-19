@@ -1,5 +1,4 @@
 import { CustomerPicker } from "./customer-picker";
-import { SubscriptionDetailsContent } from "./subscription-details-content";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +33,6 @@ import { z } from "zod";
 import { useState, type ReactNode } from "react";
 import {
   type Subscription,
-  type CreateSubscriptionResponse,
   type SubscriptionInterval,
   CreateSubscriptionRequest,
   UpdateSubscriptionRequest,
@@ -99,8 +97,6 @@ export function SubscriptionFormDialog({
   const isEditing = Boolean(subscription);
 
   const [open, setOpen] = useState(false);
-  const [createdSubscription, setCreatedSubscription] =
-    useState<CreateSubscriptionResponse | null>(null);
 
   const { mutate: createRequest, isPending: isCreating } =
     CreateSubscriptionRequest();
@@ -152,14 +148,13 @@ export function SubscriptionFormDialog({
 
     createRequest(
       { ...data, apiKey: data.apiKey ?? "" },
-      { onSuccess: (response) => setCreatedSubscription(response) },
+      { onSuccess: () => handleOpenChange(false) },
     );
   }
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
     if (nextOpen) {
-      setCreatedSubscription(null);
       form.reset({
         customerId: subscription?.customerId ?? "",
         amountInCents: subscription?.amountInCents ?? 0,
@@ -180,269 +175,239 @@ export function SubscriptionFormDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        {createdSubscription ? (
-          <SubscriptionDetailsContent
-            subscription={createdSubscription}
-            created
-          />
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>
-                {isEditing ? "Edit subscription" : "New subscription"}
-              </DialogTitle>
-              <DialogDescription>
-                {isEditing
-                  ? "Update the subscription details."
-                  : "Fill in the form to create a new subscription."}
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? "Edit subscription" : "New subscription"}
+          </DialogTitle>
+          <DialogDescription>
+            {isEditing
+              ? "Update the subscription details."
+              : "Fill in the form to create a new subscription."}
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="customerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Customer</FormLabel>
+                  <FormControl>
+                    <CustomerPicker {...field} disabled={isEditing} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amountInCents"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <NumericFormat
+                      customInput={Input}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      decimalScale={2}
+                      fixedDecimalScale
+                      allowNegative={false}
+                      value={field.value / 100}
+                      onValueChange={({ floatValue }) => {
+                        field.onChange(Math.round((floatValue ?? 0) * 100));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Currency</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {PaymentCurrencyValues.map((currency, index) => (
+                          <SelectItem key={index} value={currency}>
+                            <PaymentCurrencyBadge currency={currency} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="method"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Payment Method</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a payment method" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {PaymentMethodValues.map((method, index) => (
+                          <SelectItem key={index} value={method}>
+                            <PaymentMethodBadge method={method} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex flex-row items-center gap-2">
                 <FormField
                   control={form.control}
-                  name="customerId"
+                  name="interval"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Customer</FormLabel>
-                      <FormControl>
-                        <CustomerPicker
-                          {...field}
-                          disabled={isEditing}
-                        />
-                      </FormControl>
+                    <FormItem className="w-full">
+                      <FormLabel>Billing Interval</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a billing interval" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SubscriptionIntervalValues.map((interval, index) => (
+                            <SelectItem key={index} value={interval}>
+                              <SubscriptionIntervalBadge interval={interval} />
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="amountInCents"
+                  name="intervalCount"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <NumericFormat
-                          customInput={Input}
-                          thousandSeparator="."
-                          decimalSeparator=","
-                          decimalScale={2}
-                          fixedDecimalScale
-                          allowNegative={false}
-                          value={field.value / 100}
-                          onValueChange={({ floatValue }) => {
-                            field.onChange(Math.round((floatValue ?? 0) * 100));
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="currency"
-                    render={({ field }) => (
-                      <FormItem className="min-w-0">
-                        <FormLabel>Currency</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
+                    <FormItem className="w-full">
+                      <FormLabel>Interval Count</FormLabel>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          aria-label="Decrease interval count"
+                          disabled={!validIntervalCount || field.value <= 1}
+                          onClick={() =>
+                            field.onChange(Math.max(1, field.value - 1))
+                          }
                         >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a currency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PaymentCurrencyValues.map((currency, index) => (
-                              <SelectItem key={index} value={currency}>
-                                <PaymentCurrencyBadge currency={currency} />
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="method"
-                    render={({ field }) => (
-                      <FormItem className="min-w-0">
-                        <FormLabel>Payment Method</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a payment method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PaymentMethodValues.map((method, index) => (
-                              <SelectItem key={index} value={method}>
-                                <PaymentMethodBadge method={method} />
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex flex-row items-center gap-2">
-                    <FormField
-                      control={form.control}
-                      name="interval"
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Billing Interval</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a billing interval" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {SubscriptionIntervalValues.map(
-                                (interval, index) => (
-                                  <SelectItem key={index} value={interval}>
-                                    <SubscriptionIntervalBadge
-                                      interval={interval}
-                                    />
-                                  </SelectItem>
-                                ),
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="intervalCount"
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Interval Count</FormLabel>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              aria-label="Decrease interval count"
-                              disabled={!validIntervalCount || field.value <= 1}
-                              onClick={() =>
-                                field.onChange(Math.max(1, field.value - 1))
-                              }
-                            >
-                              <MinusIcon aria-hidden="true" />
-                            </Button>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={1}
-                                step={1}
-                                className="min-w-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                {...field}
-                                value={
-                                  Number.isNaN(field.value) ? "" : field.value
-                                }
-                                onChange={(event) =>
-                                  field.onChange(event.target.valueAsNumber)
-                                }
-                              />
-                            </FormControl>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              aria-label="Increase interval count"
-                              onClick={() =>
-                                field.onChange(
-                                  validIntervalCount ? field.value + 1 : 1,
-                                )
-                              }
-                            >
-                              <PlusIcon aria-hidden="true" />
-                            </Button>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <p
-                    className="text-muted-foreground text-xs"
-                    aria-live="polite"
-                  >
-                    {validIntervalCount
-                      ? `This subscription bills every ${intervalCount} ${cycleUnit}${intervalCount === 1 ? "" : "s"}.`
-                      : "Enter a positive whole number to set the billing cycle."}
-                  </p>
-                </div>
-                {!isEditing && (
-                  <FormField
-                    control={form.control}
-                    name="apiKey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>API Key</FormLabel>
+                          <MinusIcon aria-hidden="true" />
+                        </Button>
                         <FormControl>
                           <Input
-                            placeholder="mk_test_..."
-                            autoComplete="off"
-                            type="password"
+                            type="number"
+                            min={1}
+                            step={1}
+                            className="min-w-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                             {...field}
+                            value={Number.isNaN(field.value) ? "" : field.value}
+                            onChange={(event) =>
+                              field.onChange(event.target.valueAsNumber)
+                            }
                           />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Ex: premium subscription"
-                          {...field}
-                        />
-                      </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          aria-label="Increase interval count"
+                          onClick={() =>
+                            field.onChange(
+                              validIntervalCount ? field.value + 1 : 1,
+                            )
+                          }
+                        >
+                          <PlusIcon aria-hidden="true" />
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline">
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={isSubmitting}>
-                    Save
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </>
-        )}
+              </div>
+              <p className="text-muted-foreground text-xs" aria-live="polite">
+                {validIntervalCount
+                  ? `This subscription bills every ${intervalCount} ${cycleUnit}${intervalCount === 1 ? "" : "s"}.`
+                  : "Enter a positive whole number to set the billing cycle."}
+              </p>
+            </div>
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="apiKey"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API Key</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="mk_test_..."
+                        autoComplete="off"
+                        type="password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Ex: premium subscription"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
