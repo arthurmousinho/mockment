@@ -51,6 +51,14 @@ import {
 } from "./ui/select";
 
 const methods = ["CARD", "PIX", "BANK_SLIP"] as const;
+const expirationOptions = [
+  { label: "10 min", minutes: 10 },
+  { label: "15 min", minutes: 15 },
+  { label: "30 min", minutes: 30 },
+  { label: "1 hour", minutes: 60 },
+  { label: "24 hours", minutes: 1440 },
+];
+
 const formSchema = z
   .object({
     type: z.enum(["standalone", "subscription"]),
@@ -440,6 +448,30 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                               <FormControl>
                                 <Input type="datetime-local" {...field} />
                               </FormControl>
+                              <div className="flex flex-wrap gap-2">
+                                {expirationOptions.map((option) => (
+                                  <Button
+                                    key={option.minutes}
+                                    type="button"
+                                    variant="outline"
+                                    size="xs"
+                                    onClick={() => {
+                                      const date = new Date(
+                                        Date.now() + option.minutes * 60_000,
+                                      );
+                                      const localDate = new Date(
+                                        date.getTime() -
+                                          date.getTimezoneOffset() * 60_000,
+                                      );
+                                      field.onChange(
+                                        localDate.toISOString().slice(0, 16),
+                                      );
+                                    }}
+                                  >
+                                    {option.label}
+                                  </Button>
+                                ))}
+                              </div>
                               <FormMessage />
                             </FormItem>
                           )}
