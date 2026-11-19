@@ -85,16 +85,6 @@ export async function create(input: CreateCheckoutInput) {
   };
 }
 
-async function getGeneratedCheckoutByPaymentId(paymentId: string) {
-  const checkout = await prismaSingleton.checkout.findUnique({
-    where: { paymentId },
-  });
-  return {
-    checkoutId: checkout?.id ?? null,
-    checkoutLink: checkout ? buildCheckoutLink(checkout.id) : null,
-  };
-}
-
 async function findAll(paginationInput: CheckoutListInput) {
   const { skip, take } = buildPrismaPaginationParams(paginationInput);
   const where = buildCheckoutSearchFilter(paginationInput.search);
@@ -303,7 +293,6 @@ async function complete(id: string, input: CompleteCheckoutInput) {
 
 export const checkoutService = {
   create,
-  getGeneratedCheckoutByPaymentId,
   expireDueCheckouts,
   findAll,
   getSession,

@@ -33,10 +33,7 @@ async function create(input: CreatePaymentInput) {
     });
 
     if (paymentWithIdempotencyKey) {
-      const checkout = await checkoutService.getGeneratedCheckoutByPaymentId(
-        paymentWithIdempotencyKey.id,
-      );
-      return { ...paymentWithIdempotencyKey, ...checkout };
+      return paymentWithIdempotencyKey;
     }
   }
 

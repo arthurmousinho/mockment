@@ -33,18 +33,6 @@ export const createPaymentStep = {
       required: false,
     },
     {
-      name: "successUrl",
-      label: "Success URL",
-      type: "string",
-      required: false,
-    },
-    {
-      name: "cancelUrl",
-      label: "Cancel URL",
-      type: "string",
-      required: false,
-    },
-    {
       name: "description",
       label: "Description",
       type: "string",
