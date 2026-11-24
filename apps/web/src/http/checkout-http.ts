@@ -56,6 +56,11 @@ export type CreateCheckoutRequestData = {
         subscriptionId?: never;
       }
     | {
+        products: { productId: string; quantity: number }[];
+        allowedMethods: PaymentMethod[];
+        customerId?: string;
+      }
+    | {
         subscriptionId: string;
         amountInCents?: never;
         currency?: never;
