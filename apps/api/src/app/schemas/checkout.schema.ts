@@ -102,16 +102,17 @@ export const findAllCheckoutsSchema = checkoutSchema.safeExtend({
   link: z.url(),
 });
 
-export const checkoutSessionSchema = checkoutSchema.safeExtend({
-  subscription: subscriptionSchema.nullable(),
-});
-
 export const checkoutItemSchema = z.object({
   id: z.string(),
   checkoutId: z.string(),
   productId: z.string(),
   quantity: z.number().int(),
   unitAmountInCents: z.number().int(),
+});
+
+export const checkoutSessionSchema = checkoutSchema.safeExtend({
+  subscription: subscriptionSchema.nullable(),
+  items: z.array(checkoutItemSchema),
 });
 
 export const detailedCheckoutSchema = checkoutSchema.safeExtend({
