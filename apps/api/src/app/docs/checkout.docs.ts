@@ -60,7 +60,7 @@ export const checkoutDocs = {
   create: {
     summary: "Create a checkout",
     description:
-      "Creates an open checkout using a bearer API key. Provide amount, currency, and allowed methods for a standalone checkout, or a subscription ID to use the subscription's payment details and customer.",
+      "Creates an open checkout using a bearer API key. Provide a pending subscription ID to use its payment details and customer; amount, currency, and allowed methods for a standalone checkout; or a non-empty products array and allowed methods for a product-based checkout. Product prices and currency are derived from enabled products, which must share a currency. Standalone and product-based checkouts may include a customer ID. These request types cannot be combined.",
     tags: ["Checkout"],
     body: openApiSchema(createCheckoutSchema),
     response: {
@@ -85,7 +85,8 @@ export const checkoutDocs = {
         },
       },
       404: {
-        description: "When the customer or subscription is not found.",
+        description:
+          "When the customer, subscription, or a product is not found.",
         content: {
           "application/json": {
             schema: httpErrorSchema({
@@ -97,7 +98,8 @@ export const checkoutDocs = {
         },
       },
       422: {
-        description: "When the expiration date is not in the future.",
+        description:
+          "When the expiration date is not in the future, the subscription is not pending, a product is disabled, product currencies differ, or the total exceeds the supported amount.",
       },
     },
   },

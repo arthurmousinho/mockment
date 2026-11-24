@@ -50,6 +50,21 @@ export const createCheckoutSchema = z.union([
     subscriptionId: z.string().trim().min(1).max(191),
     ...checkoutOptions,
   }),
+  z.strictObject({
+    products: z
+      .array(
+        z.strictObject({
+          productId: z.string().trim().min(1).max(191),
+          quantity: z.number().int().positive().max(2147483647),
+        }),
+      )
+      .min(1),
+    allowedMethods: z
+      .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
+      .min(1, { message: "At least one payment method is required." }),
+    customerId: z.string().trim().min(1).max(191).optional(),
+    ...checkoutOptions,
+  }),
 ]);
 
 export type CreateCheckoutInput = z.infer<typeof createCheckoutSchema>;
