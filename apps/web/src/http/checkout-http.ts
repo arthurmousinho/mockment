@@ -86,7 +86,16 @@ export function CreateCheckoutRequest() {
   });
 }
 
+type CheckoutItem = {
+  id: string;
+  checkoutId: string;
+  productId: string;
+  quantity: number;
+  unitAmountInCents: number;
+};
+
 type DetailedCheckout = CheckoutRecord & {
+  items: CheckoutItem[];
   events: { id: string; type: EventType; createdAt: string }[];
 };
 
