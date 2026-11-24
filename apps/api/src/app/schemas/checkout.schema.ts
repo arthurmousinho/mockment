@@ -32,40 +32,56 @@ const checkoutOptions = {
     .optional(),
 };
 
+export const createStandaloneCheckoutSchema = z.strictObject({
+  amountInCents: z.coerce
+    .number({ message: "Amount must be a number." })
+    .int({ message: "Amount must be an integer." })
+    .positive({ message: "Amount must be greater than zero." })
+    .max(2147483647, { message: "Amount must fit in a 32-bit integer." }),
+  currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
+  allowedMethods: z
+    .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
+    .min(1, { message: "At least one payment method is required." }),
+  customerId: z.string().trim().min(1).max(191).optional(),
+  ...checkoutOptions,
+});
+
+export const createSubscriptionCheckoutSchema = z.strictObject({
+  subscriptionId: z.string().trim().min(1).max(191),
+  ...checkoutOptions,
+});
+
+export const createProductsCheckoutSchema = z.strictObject({
+  products: z
+    .array(
+      z.strictObject({
+        productId: z.string().trim().min(1).max(191),
+        quantity: z.number().int().positive().max(2147483647),
+      }),
+    )
+    .min(1),
+  allowedMethods: z
+    .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
+    .min(1, { message: "At least one payment method is required." }),
+  customerId: z.string().trim().min(1).max(191).optional(),
+  ...checkoutOptions,
+});
+
 export const createCheckoutSchema = z.union([
-  z.strictObject({
-    amountInCents: z.coerce
-      .number({ message: "Amount must be a number." })
-      .int({ message: "Amount must be an integer." })
-      .positive({ message: "Amount must be greater than zero." })
-      .max(2147483647, { message: "Amount must fit in a 32-bit integer." }),
-    currency: z.enum(PaymentCurrency, { message: "Invalid currency." }),
-    allowedMethods: z
-      .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
-      .min(1, { message: "At least one payment method is required." }),
-    customerId: z.string().trim().min(1).max(191).optional(),
-    ...checkoutOptions,
-  }),
-  z.strictObject({
-    subscriptionId: z.string().trim().min(1).max(191),
-    ...checkoutOptions,
-  }),
-  z.strictObject({
-    products: z
-      .array(
-        z.strictObject({
-          productId: z.string().trim().min(1).max(191),
-          quantity: z.number().int().positive().max(2147483647),
-        }),
-      )
-      .min(1),
-    allowedMethods: z
-      .array(z.enum(PaymentMethod, { message: "Invalid payment method." }))
-      .min(1, { message: "At least one payment method is required." }),
-    customerId: z.string().trim().min(1).max(191).optional(),
-    ...checkoutOptions,
-  }),
+  createStandaloneCheckoutSchema.meta({ title: "Standalone checkout" }),
+  createSubscriptionCheckoutSchema.meta({ title: "Subscription checkout" }),
+  createProductsCheckoutSchema.meta({ title: "Products checkout" }),
 ]);
+
+export type CreateStandaloneCheckoutInput = z.infer<
+  typeof createStandaloneCheckoutSchema
+>;
+export type CreateSubscriptionCheckoutInput = z.infer<
+  typeof createSubscriptionCheckoutSchema
+>;
+export type CreateProductsCheckoutInput = z.infer<
+  typeof createProductsCheckoutSchema
+>;
 
 export type CreateCheckoutInput = z.infer<typeof createCheckoutSchema>;
 

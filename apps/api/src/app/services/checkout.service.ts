@@ -12,6 +12,9 @@ import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   CheckoutListInput,
   CreateCheckoutInput,
+  CreateStandaloneCheckoutInput,
+  CreateSubscriptionCheckoutInput,
+  CreateProductsCheckoutInput,
   CompleteCheckoutInput,
 } from "../schemas/checkout.schema.ts";
 import { paymentService } from "./payment.service.ts";
@@ -27,7 +30,7 @@ export function buildCheckoutLink(checkoutId: string) {
 }
 
 async function prepareSubscriptionCheckout(
-  input: Extract<CreateCheckoutInput, { subscriptionId: string }>,
+  input: CreateSubscriptionCheckoutInput,
 ) {
   const subscription = await subscriptionService.findById(input.subscriptionId);
 
@@ -46,9 +49,7 @@ async function prepareSubscriptionCheckout(
   };
 }
 
-async function prepareStandaloneCheckout(
-  input: Extract<CreateCheckoutInput, { amountInCents: number }>,
-) {
+async function prepareStandaloneCheckout(input: CreateStandaloneCheckoutInput) {
   if (input.customerId) {
     await customerService.findById(input.customerId);
   }
@@ -61,9 +62,7 @@ async function prepareStandaloneCheckout(
   };
 }
 
-async function prepareProductsCheckout(
-  input: Extract<CreateCheckoutInput, { products: unknown }>,
-) {
+async function prepareProductsCheckout(input: CreateProductsCheckoutInput) {
   if (input.customerId) {
     await customerService.findById(input.customerId);
   }
@@ -117,12 +116,18 @@ async function prepareProductsCheckout(
 }
 
 export async function create(input: CreateCheckoutInput) {
-  const checkoutData =
-    "subscriptionId" in input
-      ? await prepareSubscriptionCheckout(input)
-      : "products" in input
-        ? await prepareProductsCheckout(input)
-        : await prepareStandaloneCheckout(input);
+  let checkoutData;
+
+  const isSubscriptionCheckout = "subscriptionId" in input;
+  const isProductCheckout = "products" in input;
+
+  if (isSubscriptionCheckout) {
+    checkoutData = await prepareSubscriptionCheckout(input);
+  } else if (isProductCheckout) {
+    checkoutData = await prepareProductsCheckout(input);
+  } else {
+    checkoutData = await prepareStandaloneCheckout(input);
+  }
 
   const now = await virtualClockService.now();
   const expiresAt = input.expiresAt ? new Date(input.expiresAt) : null;
