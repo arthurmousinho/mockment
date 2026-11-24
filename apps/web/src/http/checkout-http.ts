@@ -101,6 +101,7 @@ type DetailedCheckout = CheckoutRecord & {
 
 type CheckoutSession = CheckoutRecord & {
   subscription: Subscription | null;
+  items: (CheckoutItem & { product: { name: string } })[];
 };
 
 export function GetCheckoutSessionRequest(id: string) {
