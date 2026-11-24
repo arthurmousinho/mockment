@@ -112,7 +112,11 @@ export const checkoutItemSchema = z.object({
 
 export const checkoutSessionSchema = checkoutSchema.safeExtend({
   subscription: subscriptionSchema.nullable(),
-  items: z.array(checkoutItemSchema),
+  items: z.array(
+    checkoutItemSchema.safeExtend({
+      product: z.object({ name: z.string() }),
+    }),
+  ),
 });
 
 export const detailedCheckoutSchema = checkoutSchema.safeExtend({

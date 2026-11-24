@@ -186,7 +186,14 @@ async function findAll(paginationInput: CheckoutListInput) {
 async function getSession(id: string) {
   const checkout = await prismaSingleton.checkout.findUnique({
     where: { id },
-    include: { subscription: true, items: true },
+    include: {
+      subscription: true,
+      items: {
+        include: {
+          product: { select: { name: true } },
+        },
+      },
+    },
   });
 
   if (!checkout) {
