@@ -128,8 +128,9 @@ model Product {
   enabled      Boolean         @default(true)
   externalId   String          @unique @map("external_id")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  checkoutItems CheckoutItem[]
 
   @@map("products")
 }
@@ -252,11 +253,29 @@ model Checkout {
   completedAt DateTime? @map("completed_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  payment      Payment?      @relation(fields: [paymentId], references: [id])
-  customer     Customer?     @relation(fields: [customerId], references: [id])
-  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  payment      Payment?       @relation(fields: [paymentId], references: [id])
+  customer     Customer?      @relation(fields: [customerId], references: [id])
+  subscription Subscription?  @relation(fields: [subscriptionId], references: [id])
+  items        CheckoutItem[]
 
   @@map("checkouts")
+}
+
+model CheckoutItem {
+  id String @id
+
+  checkoutId String @map("checkout_id")
+  productId  String @map("product_id")
+
+  quantity          Int @default(1)
+  unitAmountInCents Int @map("unit_amount_in_cents")
+
+  checkout Checkout @relation(fields: [checkoutId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@index([checkoutId])
+  @@index([productId])
+  @@map("checkout_items")
 }
 
 model Subscription {
