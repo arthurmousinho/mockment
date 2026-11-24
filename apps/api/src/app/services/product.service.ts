@@ -68,6 +68,10 @@ async function findById(id: string) {
   return product;
 }
 
+async function findByIds(ids: string[]) {
+  return await Promise.all(ids.map((id) => productService.findById(id)));
+}
+
 async function toggle(id: string, enabled: boolean) {
   const product = await findById(id);
   return prismaSingleton.product.update({
@@ -115,6 +119,7 @@ export const productService = {
   create,
   findAll,
   findById,
+  findByIds,
   update,
   toggle,
   remove,

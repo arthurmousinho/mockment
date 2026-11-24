@@ -12,6 +12,9 @@ import { prismaSingleton } from "../../config/prisma.ts";
 import type {
   CheckoutListInput,
   CreateCheckoutInput,
+  CreateStandaloneCheckoutInput,
+  CreateSubscriptionCheckoutInput,
+  CreateProductsCheckoutInput,
   CompleteCheckoutInput,
 } from "../schemas/checkout.schema.ts";
 import { paymentService } from "./payment.service.ts";
@@ -20,26 +23,110 @@ import { buildCheckoutSearchFilter } from "../filters/checkout.filters.ts";
 import { customerService } from "./customer.service.ts";
 import { eventService } from "./event.service.ts";
 import { virtualClockService } from "./virtual-clock.service.ts";
+import { productService } from "./product.service.ts";
 
 export function buildCheckoutLink(checkoutId: string) {
   return `${env.WEB_URL}/checkout/${checkoutId}`;
 }
 
-export async function create(input: CreateCheckoutInput) {
-  const isSubscriptionCheckout = "subscriptionId" in input;
+async function prepareSubscriptionCheckout(
+  input: CreateSubscriptionCheckoutInput,
+) {
+  const subscription = await subscriptionService.findById(input.subscriptionId);
 
-  const subscription = isSubscriptionCheckout
-    ? await subscriptionService.findById(input.subscriptionId)
-    : null;
-
-  if (subscription?.status !== undefined && subscription.status !== "PENDING") {
+  if (subscription.status !== "PENDING") {
     throw new UnprocessableEntityError(
       "Only PENDING subscriptions can have a checkout.",
     );
   }
 
-  if (!isSubscriptionCheckout && input.customerId) {
+  return {
+    amountInCents: subscription.amountInCents,
+    currency: subscription.currency,
+    allowedMethods: [subscription.method],
+    customerId: subscription.customerId,
+    subscriptionId: subscription.id,
+  };
+}
+
+async function prepareStandaloneCheckout(input: CreateStandaloneCheckoutInput) {
+  if (input.customerId) {
     await customerService.findById(input.customerId);
+  }
+  return {
+    amountInCents: input.amountInCents,
+    currency: input.currency,
+    allowedMethods: input.allowedMethods,
+    customerId: input.customerId ?? null,
+    subscriptionId: null,
+  };
+}
+
+async function prepareProductsCheckout(input: CreateProductsCheckoutInput) {
+  if (input.customerId) {
+    await customerService.findById(input.customerId);
+  }
+
+  const products = await productService.findByIds(
+    input.products.map((item) => item.productId),
+  );
+
+  const currency = products[0]!.currency;
+  const hasProductWithDifferentCurrency = products.some(
+    (product) => product.currency !== currency || !product.enabled,
+  );
+
+  if (hasProductWithDifferentCurrency) {
+    throw new UnprocessableEntityError(
+      "Products must be enabled and use the same currency.",
+    );
+  }
+
+  const totalAmountInCents = products.reduce(
+    (total, product, index) =>
+      total + product.priceInCents * input.products[index]!.quantity,
+    0,
+  );
+
+  if (
+    !Number.isSafeInteger(totalAmountInCents) ||
+    totalAmountInCents <= 0 ||
+    totalAmountInCents > 2147483647
+  ) {
+    throw new UnprocessableEntityError(
+      "The product total must be greater than zero and fit in a 32-bit integer.",
+    );
+  }
+
+  return {
+    amountInCents: totalAmountInCents,
+    currency,
+    allowedMethods: input.allowedMethods,
+    customerId: input.customerId ?? null,
+    subscriptionId: null,
+    items: {
+      create: products.map((product, index) => ({
+        id: createPrefixedId("cki"),
+        productId: product.id,
+        quantity: input.products[index]!.quantity,
+        unitAmountInCents: product.priceInCents,
+      })),
+    },
+  };
+}
+
+export async function create(input: CreateCheckoutInput) {
+  let checkoutData;
+
+  const isSubscriptionCheckout = "subscriptionId" in input;
+  const isProductCheckout = "products" in input;
+
+  if (isSubscriptionCheckout) {
+    checkoutData = await prepareSubscriptionCheckout(input);
+  } else if (isProductCheckout) {
+    checkoutData = await prepareProductsCheckout(input);
+  } else {
+    checkoutData = await prepareStandaloneCheckout(input);
   }
 
   const now = await virtualClockService.now();
@@ -54,19 +141,7 @@ export async function create(input: CreateCheckoutInput) {
   const checkout = await prismaSingleton.checkout.create({
     data: {
       id: createPrefixedId("chk"),
-      amountInCents: isSubscriptionCheckout
-        ? subscription!.amountInCents
-        : input.amountInCents,
-      currency: isSubscriptionCheckout
-        ? subscription!.currency
-        : input.currency,
-      allowedMethods: isSubscriptionCheckout
-        ? [subscription!.method]
-        : input.allowedMethods,
-      customerId: isSubscriptionCheckout
-        ? subscription!.customerId
-        : (input.customerId ?? null),
-      subscriptionId: subscription?.id ?? null,
+      ...checkoutData,
       successUrl: input.successUrl ?? `${env.WEB_URL}/success-checkout`,
       cancelUrl: input.cancelUrl ?? `${env.WEB_URL}/cancel-checkout`,
       expiresAt,
@@ -111,7 +186,14 @@ async function findAll(paginationInput: CheckoutListInput) {
 async function getSession(id: string) {
   const checkout = await prismaSingleton.checkout.findUnique({
     where: { id },
-    include: { subscription: true },
+    include: {
+      subscription: true,
+      items: {
+        include: {
+          product: { select: { name: true } },
+        },
+      },
+    },
   });
 
   if (!checkout) {
@@ -134,6 +216,7 @@ async function getSession(id: string) {
 async function getDetails(id: string) {
   const checkout = await prismaSingleton.checkout.findUnique({
     where: { id },
+    include: { items: true },
   });
 
   if (!checkout) {

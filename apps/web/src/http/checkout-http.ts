@@ -56,6 +56,11 @@ export type CreateCheckoutRequestData = {
         subscriptionId?: never;
       }
     | {
+        products: { productId: string; quantity: number }[];
+        allowedMethods: PaymentMethod[];
+        customerId?: string;
+      }
+    | {
         subscriptionId: string;
         amountInCents?: never;
         currency?: never;
@@ -81,12 +86,22 @@ export function CreateCheckoutRequest() {
   });
 }
 
+type CheckoutItem = {
+  id: string;
+  checkoutId: string;
+  productId: string;
+  quantity: number;
+  unitAmountInCents: number;
+};
+
 type DetailedCheckout = CheckoutRecord & {
+  items: CheckoutItem[];
   events: { id: string; type: EventType; createdAt: string }[];
 };
 
 type CheckoutSession = CheckoutRecord & {
   subscription: Subscription | null;
+  items: (CheckoutItem & { product: { name: string } })[];
 };
 
 export function GetCheckoutSessionRequest(id: string) {

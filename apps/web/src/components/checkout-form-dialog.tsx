@@ -9,6 +9,7 @@ import {
 } from "@/http/checkout-http";
 import { formatCurrencyFromCents } from "@/lib/formatters";
 import { CustomerPicker } from "./customer-picker";
+import { ProductsPicker } from "./products-picker";
 import { SubscriptionPicker } from "./subscription-picker";
 import { CheckoutStatusBadge } from "./checkout-status-badge";
 import { PaymentMethodBadge } from "./payment-method-badge";
@@ -61,7 +62,13 @@ const expirationOptions = [
 
 const formSchema = z
   .object({
-    type: z.enum(["standalone", "subscription"]),
+    type: z.enum(["standalone", "subscription", "products"]),
+    products: z.array(
+      z.object({
+        productId: z.string(),
+        quantity: z.number().int().positive().max(2147483647),
+      }),
+    ),
     apiKey: z.string().trim().min(1, "API key is required."),
     amountInCents: z.number().int().min(0).max(2147483647),
     currency: z.enum(["BRL", "USD", "EUR"]),
@@ -80,6 +87,15 @@ const formSchema = z
           path: ["amountInCents"],
           message: "Amount must be greater than zero.",
         });
+    }
+    if (data.type === "products" && data.products.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["products"],
+        message: "Select at least one product.",
+      });
+    }
+    if (data.type !== "subscription") {
       if (data.allowedMethods.length === 0)
         ctx.addIssue({
           code: "custom",
@@ -118,6 +134,7 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: "standalone",
+      products: [],
       apiKey: "",
       amountInCents: 0,
       currency: "BRL",
@@ -154,6 +171,17 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
         {
           apiKey: data.apiKey,
           subscriptionId: data.subscriptionId,
+          ...options,
+        },
+        { onSuccess: setCreated },
+      );
+    } else if (data.type === "products") {
+      createCheckout(
+        {
+          apiKey: data.apiKey,
+          products: data.products,
+          allowedMethods: data.allowedMethods,
+          ...(data.customerId && { customerId: data.customerId }),
           ...options,
         },
         { onSuccess: setCreated },
@@ -220,7 +248,7 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
             <DialogHeader>
               <DialogTitle>New checkout</DialogTitle>
               <DialogDescription>
-                Create a standalone checkout or use a pending subscription.
+                Create a standalone, subscription, or product checkout.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -244,11 +272,12 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                   }
                 >
                   <TabsList
-                    className="grid w-full grid-cols-2"
+                    className="grid w-full grid-cols-3"
                     aria-label="Checkout type"
                   >
                     <TabsTrigger value="standalone">Standalone</TabsTrigger>
                     <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                    <TabsTrigger value="products">Products</TabsTrigger>
                   </TabsList>
                   <TabsContent value="standalone" className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
@@ -310,35 +339,26 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                         )}
                       />
                     </div>
+                  </TabsContent>
+                  <TabsContent value="products">
                     <FormField
                       control={form.control}
-                      name="allowedMethods"
-                      render={({ field }) => (
+                      name="products"
+                      render={({ field, fieldState }) => (
                         <FormItem>
-                          <FormLabel>Allowed payment methods</FormLabel>
-                          <div className="flex flex-wrap gap-4">
-                            {methods.map((method) => (
-                              <label
-                                key={method}
-                                className="flex items-center gap-2 text-sm"
-                              >
-                                <Checkbox
-                                  checked={field.value.includes(method)}
-                                  onCheckedChange={(checked) =>
-                                    field.onChange(
-                                      checked === true
-                                        ? [...field.value, method]
-                                        : field.value.filter(
-                                            (item) => item !== method,
-                                          ),
-                                    )
-                                  }
-                                />
-                                <PaymentMethodBadge method={method} />
-                              </label>
-                            ))}
-                          </div>
-                          <FormMessage />
+                          <FormLabel>Products</FormLabel>
+                          <FormControl>
+                            <ProductsPicker
+                              value={field.value}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          {fieldState.error && (
+                            <p className="text-sm text-destructive">
+                              {fieldState.error.message ??
+                                "Enter a valid quantity for each product."}
+                            </p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -359,6 +379,40 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                     />
                   </TabsContent>
                 </Tabs>
+                {type !== "subscription" && (
+                  <FormField
+                    control={form.control}
+                    name="allowedMethods"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Allowed payment methods</FormLabel>
+                        <div className="flex flex-wrap gap-4">
+                          {methods.map((method) => (
+                            <label
+                              key={method}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <Checkbox
+                                checked={field.value.includes(method)}
+                                onCheckedChange={(checked) =>
+                                  field.onChange(
+                                    checked === true
+                                      ? [...field.value, method]
+                                      : field.value.filter(
+                                          (item) => item !== method,
+                                        ),
+                                  )
+                                }
+                              />
+                              <PaymentMethodBadge method={method} />
+                            </label>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <FormField
                   control={form.control}
                   name="apiKey"
@@ -390,7 +444,7 @@ export function CheckoutFormDialog({ children }: { children: ReactNode }) {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-3 pt-2">
-                        {type === "standalone" && (
+                        {type !== "subscription" && (
                           <FormField
                             control={form.control}
                             name="customerId"

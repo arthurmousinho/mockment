@@ -7,11 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CopyableField } from "@/components/ui/copyable-field";
 import { DetailRow } from "@/components/ui/detail-row";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { GetCheckoutDetailsRequest } from "@/http/checkout-http";
 import { formatCurrencyFromCents, formatDateTime } from "@/lib/formatters";
 import {
   ArrowLeftIcon,
   ArrowSquareOutIcon,
+  EyeIcon,
   LinkSimpleIcon,
 } from "@phosphor-icons/react";
 import { HTTPError } from "ky";
@@ -29,6 +38,7 @@ export function CheckoutDetailsPage() {
   } = GetCheckoutDetailsRequest(id);
 
   if (isPending) return <div role="status">Loading...</div>;
+
   if (
     error instanceof HTTPError &&
     error.response.status === 404 &&
@@ -36,6 +46,7 @@ export function CheckoutDetailsPage() {
   ) {
     return <Navigate to="/404" replace />;
   }
+
   if (isError && !checkout) {
     return (
       <div role="alert" className="flex flex-col items-center gap-4 py-10">
@@ -48,6 +59,7 @@ export function CheckoutDetailsPage() {
       </div>
     );
   }
+
   if (!checkout) return <Navigate to="/404" replace />;
 
   return (
@@ -60,7 +72,7 @@ export function CheckoutDetailsPage() {
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Review this checkout, its references, and events.
+          Review this checkout, its products, references, and events.
         </p>
       </header>
       <div className="flex flex-wrap justify-end gap-2">
@@ -146,6 +158,58 @@ export function CheckoutDetailsPage() {
           <CopyableField label="Cancel URL" value={checkout.cancelUrl} />
         </CardContent>
       </Card>
+      {checkout.items.length > 0 && (
+        <Card aria-label="Products">
+          <CardHeader>
+            <h2 className="text-sm font-medium">Products</h2>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product ID</TableHead>
+                  <TableHead className="text-right">Quantity</TableHead>
+                  <TableHead className="text-right">Unit price</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {checkout.items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="break-all">
+                      {item.productId}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.quantity}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrencyFromCents(
+                        item.unitAmountInCents,
+                        checkout.currency,
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrencyFromCents(
+                        item.unitAmountInCents * item.quantity,
+                        checkout.currency,
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild variant="outline" size="sm">
+                        <Link to={`/products/${item.productId}`}>
+                          <EyeIcon />
+                          Details
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
       <Card aria-label="Events">
         <CardHeader>
           <h2 className="text-sm font-medium">Events</h2>

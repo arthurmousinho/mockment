@@ -172,20 +172,38 @@ export function CheckoutPage() {
                   )}
                 </div>
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>
-                      {formatCurrencyFromCents(
-                        data.amountInCents,
-                        data.currency,
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Fees</span>
-                    <span>{formatCurrencyFromCents(0, data.currency)}</span>
-                  </div>
-                  <Separator className="bg-neutral-700" />
+                  {data.items.length > 0 && (
+                    <section className="space-y-3">
+                      <ul className="max-h-32 space-y-3 overflow-y-auto">
+                        {data.items.map((item) => (
+                          <li
+                            key={item.id}
+                            className="flex justify-between gap-4"
+                          >
+                            <div className="min-w-0">
+                              <p className="wrap-break-wor">
+                                {item.product.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {item.quantity} ×{" "}
+                                {formatCurrencyFromCents(
+                                  item.unitAmountInCents,
+                                  data.currency,
+                                )}
+                              </p>
+                            </div>
+                            <span className="shrink-0 tabular-nums">
+                              {formatCurrencyFromCents(
+                                item.unitAmountInCents * item.quantity,
+                                data.currency,
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Separator />
+                    </section>
+                  )}
                   <div className="flex items-center justify-between font-medium text-primary">
                     <span>Total due</span>
                     <span>
