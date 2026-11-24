@@ -106,7 +106,16 @@ export const checkoutSessionSchema = checkoutSchema.safeExtend({
   subscription: subscriptionSchema.nullable(),
 });
 
+export const checkoutItemSchema = z.object({
+  id: z.string(),
+  checkoutId: z.string(),
+  productId: z.string(),
+  quantity: z.number().int(),
+  unitAmountInCents: z.number().int(),
+});
+
 export const detailedCheckoutSchema = checkoutSchema.safeExtend({
+  items: z.array(checkoutItemSchema),
   events: z.array(
     z.object({
       id: z.string(),

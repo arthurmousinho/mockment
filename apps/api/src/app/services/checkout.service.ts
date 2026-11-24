@@ -209,6 +209,7 @@ async function getSession(id: string) {
 async function getDetails(id: string) {
   const checkout = await prismaSingleton.checkout.findUnique({
     where: { id },
+    include: { items: true },
   });
 
   if (!checkout) {
