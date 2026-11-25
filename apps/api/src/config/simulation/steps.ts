@@ -3,6 +3,7 @@ import { SUBSCRIPTION_STEPS } from "./steps/subscription.steps.ts";
 import { CHECKOUT_STEPS } from "./steps/checkout.steps.ts";
 import { CUSTOMER_STEPS } from "./steps/customer.steps.ts";
 import { INVOICE_STEPS } from "./steps/invoice.steps.ts";
+import { PRODUCT_STEPS } from "./steps/product.steps.ts";
 
 export const STEPS = {
   payments: PAYMENT_STEPS,
@@ -10,4 +11,5 @@ export const STEPS = {
   checkouts: CHECKOUT_STEPS,
   invoices: INVOICE_STEPS,
   customers: CUSTOMER_STEPS,
+  products: PRODUCT_STEPS,
 } as const;

@@ -172,7 +172,7 @@ export const simulationDocs = {
   availableSteps: {
     summary: "List available simulation steps",
     description:
-      "Returns step definitions grouped by payments, subscriptions, checkouts, invoices, and customers for building simulation forms.",
+      "Returns step definitions grouped by payments, subscriptions, checkouts, invoices, customers, and products for building simulation forms.",
     tags: ["Simulations"],
     response: {
       200: {
