@@ -26,4 +26,13 @@ export const createProductStep = {
   executor: { type: "http", method: "POST", endpoint: "/products" },
 } satisfies Step;
 
-export const PRODUCT_STEPS = [createProductStep] as const;
+export const getProductStep = {
+  id: "product.get",
+  name: "Get product",
+  description: "Get an existing product by its ID.",
+  input: [{ name: "id", label: "Product ID", type: "string", required: true }],
+  output: createProductStep.output,
+  executor: { type: "http", method: "GET", endpoint: "/products/:id" },
+} satisfies Step;
+
+export const PRODUCT_STEPS = [createProductStep, getProductStep] as const;
