@@ -51,4 +51,16 @@ export const updateProductStep = {
   executor: { type: "http", method: "PATCH", endpoint: "/products/:id" },
 } satisfies Step;
 
-export const PRODUCT_STEPS = [createProductStep, getProductStep, updateProductStep] as const;
+export const toggleProductStep = {
+  id: "product.toggle",
+  name: "Toggle product",
+  description: "Enable or disable an existing product.",
+  input: [
+    { name: "id", label: "Product ID", type: "string", required: true },
+    { name: "enabled", label: "Enabled", type: "boolean", required: true },
+  ],
+  output: createProductStep.output,
+  executor: { type: "http", method: "PATCH", endpoint: "/products/:id/toggle" },
+} satisfies Step;
+
+export const PRODUCT_STEPS = [createProductStep, getProductStep, updateProductStep, toggleProductStep] as const;
