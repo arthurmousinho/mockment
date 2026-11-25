@@ -35,4 +35,20 @@ export const getProductStep = {
   executor: { type: "http", method: "GET", endpoint: "/products/:id" },
 } satisfies Step;
 
-export const PRODUCT_STEPS = [createProductStep, getProductStep] as const;
+export const updateProductStep = {
+  id: "product.update",
+  name: "Update product",
+  description: "Update an existing product.",
+  input: [
+    { name: "id", label: "Product ID", type: "string", required: true },
+    { name: "name", label: "Name", type: "string", required: false },
+    { name: "description", label: "Description", type: "string", required: false },
+    { name: "externalId", label: "External ID", type: "string", required: false },
+    { name: "priceInCents", label: "Price in cents", type: "number", required: false },
+    { name: "currency", label: "Currency", type: "select", required: false, options: createProductSchema.shape.currency.options },
+  ],
+  output: createProductStep.output,
+  executor: { type: "http", method: "PATCH", endpoint: "/products/:id" },
+} satisfies Step;
+
+export const PRODUCT_STEPS = [createProductStep, getProductStep, updateProductStep] as const;
