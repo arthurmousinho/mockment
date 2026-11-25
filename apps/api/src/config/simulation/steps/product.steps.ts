@@ -63,4 +63,19 @@ export const toggleProductStep = {
   executor: { type: "http", method: "PATCH", endpoint: "/products/:id/toggle" },
 } satisfies Step;
 
-export const PRODUCT_STEPS = [createProductStep, getProductStep, updateProductStep, toggleProductStep] as const;
+export const deleteProductStep = {
+  id: "product.delete",
+  name: "Delete product",
+  description: "Delete an existing product.",
+  input: [{ name: "id", label: "Product ID", type: "string", required: true }],
+  output: [],
+  executor: { type: "http", method: "DELETE", endpoint: "/products/:id" },
+} satisfies Step;
+
+export const PRODUCT_STEPS = [
+  createProductStep,
+  getProductStep,
+  updateProductStep,
+  toggleProductStep,
+  deleteProductStep,
+] as const;
