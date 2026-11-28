@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ export function ProductDetailsPage() {
     refetch,
   } = GetProductDetailsRequest(id);
 
-  if (isPending) return <div role="status">Loading...</div>;
+  if (isPending) return <DetailPageSkeleton label="product details" sections={2} />;
 
   if (error instanceof HTTPError && error.response.status === 404 && !product) {
     return <Navigate to="/404" replace />;

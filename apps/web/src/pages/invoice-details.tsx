@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { RefetchButton } from "@/components/refetch-button";
@@ -38,7 +39,7 @@ export function InvoiceDetailsPage() {
   const { mutate: downloadInvoicePdf, isPending: isDownloading } =
     DownloadInvoicePdfRequest();
 
-  if (isPending) return <div role="status">Loading...</div>;
+  if (isPending) return <DetailPageSkeleton label="invoice details" />;
 
   if (error instanceof HTTPError && error.response.status === 404 && !invoice) {
     return <Navigate to="/404" replace />;

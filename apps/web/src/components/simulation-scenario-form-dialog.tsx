@@ -140,6 +140,7 @@ function ScenarioEditor({
 }) {
   const [name, setName] = useState(scenario?.name ?? "");
   const [description, setDescription] = useState(scenario?.description ?? "");
+  const [stepSearch, setStepSearch] = useState("");
   const [interval, setInterval] = useState(
     scenario?.stepIntervalMs == null ? "" : String(scenario.stepIntervalMs),
   );
@@ -153,6 +154,20 @@ function ScenarioEditor({
   const createScenario = CreateSimulationScenarioRequest();
   const updateScenario = UpdateSimulationScenarioRequest();
   const saving = createScenario.isPending || updateScenario.isPending;
+  const search = stepSearch.trim().toLowerCase();
+  const filteredGroups = Object.entries(groups).map(
+    ([category, steps]) =>
+      [
+        category,
+        search
+          ? steps.filter((step) =>
+              [step.name, step.id, step.desc].some((value) =>
+                value?.toLowerCase().includes(search),
+              ),
+            )
+          : steps,
+      ] as const,
+  );
 
   function addStep(step: AvailableStep) {
     if (getNodes().length >= 100) {
@@ -281,35 +296,49 @@ function ScenarioEditor({
       >
         <aside className="max-h-32 space-y-2 overflow-y-auto bg-muted/30 p-3 lg:max-h-none lg:border-r">
           <h2 className="text-xs font-medium">Available steps</h2>
-          {Object.entries(groups).map(([category, steps]) => (
-            <section
-              key={category}
-              aria-label={`${stepGroupLabels[category]} steps`}
-              className="space-y-2 pt-3"
-            >
-              <h3 className="text-xs font-medium text-muted-foreground">
-                {stepGroupLabels[category]}
-              </h3>
-              {!steps.length && (
-                <p className="text-xs text-muted-foreground">
-                  No steps available yet.
-                </p>
-              )}
-              {steps.map((step) => (
-                <Button
-                  type="button"
-                  key={step.id}
-                  variant="outline"
-                  className="h-auto w-full justify-start whitespace-normal py-2 text-left"
-                  disabled={nodes.length >= 100 || saving}
-                  onClick={() => addStep(step)}
-                >
-                  <PlusIcon className="shrink-0" />
-                  <span>{step.name}</span>
-                </Button>
-              ))}
-            </section>
-          ))}
+          <Input
+            aria-label="Search available steps"
+            placeholder="Search steps..."
+            type="search"
+            value={stepSearch}
+            onChange={(event) => setStepSearch(event.target.value)}
+          />
+          {search && filteredGroups.every(([, steps]) => !steps.length) && (
+            <p role="status" className="text-xs text-muted-foreground">
+              No steps found.
+            </p>
+          )}
+          {filteredGroups
+            .filter(([, steps]) => !search || steps.length)
+            .map(([category, steps]) => (
+              <section
+                key={category}
+                aria-label={`${stepGroupLabels[category]} steps`}
+                className="space-y-2 pt-3"
+              >
+                <h3 className="text-xs font-medium text-muted-foreground">
+                  {stepGroupLabels[category]}
+                </h3>
+                {!steps.length && (
+                  <p className="text-xs text-muted-foreground">
+                    No steps available yet.
+                  </p>
+                )}
+                {steps.map((step) => (
+                  <Button
+                    type="button"
+                    key={step.id}
+                    variant="outline"
+                    className="h-auto w-full justify-start whitespace-normal py-2 text-left"
+                    disabled={nodes.length >= 100 || saving}
+                    onClick={() => addStep(step)}
+                  >
+                    <PlusIcon className="shrink-0" />
+                    <span>{step.name}</span>
+                  </Button>
+                ))}
+              </section>
+            ))}
         </aside>
         <div
           className="relative min-h-0"

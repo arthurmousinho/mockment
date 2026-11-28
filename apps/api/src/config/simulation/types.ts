@@ -1,9 +1,12 @@
 export type StepInputField = {
   name: string;
   label: string;
-  type: "string" | "number" | "boolean" | "select";
+  type: "string" | "string[]" | "object[]" | "number" | "boolean" | "select";
   required: boolean;
   options?: string[];
+  fields?: (Omit<StepInputField, "type" | "fields"> & {
+    type: "string" | "number" | "boolean" | "select";
+  })[];
 };
 
 export type StepOuputField = {
@@ -21,6 +24,13 @@ export type StepWaitExecutor = {
   type: "wait";
 };
 
+export type StepConnection = {
+  source: string;
+  sourceHandle: string;
+  target: string;
+  targetHandle: string;
+};
+
 export type Step = {
   id: string;
   name: string;
@@ -28,4 +38,8 @@ export type Step = {
   input: StepInputField[];
   output: StepOuputField[];
   executor: StepHTTPExecutor | StepWaitExecutor;
+  migrateInput?: (input: Record<string, unknown>, connections: StepConnection[]) => {
+    input: Record<string, unknown>;
+    connections: StepConnection[];
+  };
 };

@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { SimulationRunStatusBadge } from "@/components/simulation-run-status-badge";
 import { RefetchButton } from "@/components/refetch-button";
 import {
@@ -45,7 +46,7 @@ export function SimulationRunPage() {
   } = FindSimulationRunRequest(id);
 
   if (isPending) {
-    return <div role="status">Loading...</div>;
+    return <DetailPageSkeleton label="simulation run" sections={2} />;
   }
 
   if (error instanceof HTTPError && error.response.status === 404) {

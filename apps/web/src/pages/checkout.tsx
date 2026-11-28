@@ -1,3 +1,4 @@
+import { CheckoutPageSkeleton } from "@/components/checkout-page-skeleton";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { HTTPError } from "ky";
@@ -54,7 +55,7 @@ export function CheckoutPage() {
   const { virtualDateTime, liveVirtualDateTime } = useVirtualClockEvents();
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <CheckoutPageSkeleton />;
   }
 
   if (isError || !data) {

@@ -5,9 +5,27 @@ import type { SimulationScenarioStep } from "@/http/simulations-http";
 const inputFieldSchema = z.object({
   name: z.string(),
   label: z.string(),
-  type: z.enum(["string", "number", "boolean", "select"]),
+  type: z.enum([
+    "string",
+    "string[]",
+    "object[]",
+    "number",
+    "boolean",
+    "select",
+  ]),
   required: z.boolean(),
   options: z.array(z.string()).optional(),
+  fields: z
+    .array(
+      z.object({
+        name: z.string(),
+        label: z.string(),
+        type: z.enum(["string", "number", "boolean", "select"]),
+        required: z.boolean(),
+        options: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(),
 });
 const outputFieldSchema = z.object({
   name: z.string(),
@@ -74,12 +92,40 @@ export function connectionError(
   const output = source?.data.step?.output.fields.find(
     (field) => `output:${field.name}` === connection.sourceHandle,
   );
-  const input = target?.data.step?.input.fields.find(
-    (field) => `input:${field.name}` === connection.targetHandle,
+  const objectHandle = /^input:([^:]+):(0|[1-9]\d*):([^:]+)$/.exec(
+    connection.targetHandle ?? "",
   );
+  const objectField =
+    objectHandle &&
+    target?.data.step?.input.fields.find(
+      (field) => field.name === objectHandle[1] && field.type === "object[]",
+    );
+  const objectItems = objectField && target?.data.input[objectField.name];
+  const nestedInput =
+    objectField &&
+    Array.isArray(objectItems) &&
+    Number(objectHandle![2]) < objectItems.length &&
+    objectField.fields?.find((field) => field.name === objectHandle![3]);
+  const input =
+    nestedInput ||
+    target?.data.step?.input.fields.find((field) =>
+      field.type === "string[]"
+        ? new RegExp(`^input:${field.name}:(0|[1-9]\\d*)$`).test(
+            connection.targetHandle ?? "",
+          ) &&
+          Array.isArray(target?.data.input[field.name]) &&
+          Number(connection.targetHandle!.split(":").at(-1)) <
+            (target.data.input[field.name] as unknown[]).length
+        : `input:${field.name}` === connection.targetHandle,
+    );
   if (!output || !input)
     return "Connect an output to an input of an available step.";
-  if (output.type !== (input.type === "select" ? "string" : input.type))
+  if (
+    output.type !==
+    (input.type === "select" || input.type === "string[]"
+      ? "string"
+      : input.type)
+  )
     return "The output and input types must match.";
   if (
     edges.some(
@@ -114,6 +160,58 @@ export function restoreGraph(
     const { __editor, ...input } = saved.input ?? {};
     const metadata =
       __editor === undefined ? undefined : editorMetadataSchema.parse(__editor);
+    if (
+      (saved.action === "checkout.createProducts" ||
+        saved.action === "checkout.createStandalone") &&
+      input.allowedMethods === undefined &&
+      (input.method !== undefined ||
+        metadata?.connections.some(
+          (connection) => connection.targetHandle === "input:method",
+        ))
+    ) {
+      input.allowedMethods = [input.method ?? ""];
+      delete input.method;
+      for (const connection of metadata?.connections ?? []) {
+        if (connection.targetHandle === "input:method")
+          connection.targetHandle = "input:allowedMethods:0";
+      }
+    }
+    if (
+      saved.action === "checkout.createProducts" &&
+      input.products === undefined &&
+      (Array.isArray(input.productId) ||
+        typeof input.productId === "string" ||
+        metadata?.connections.some(
+          (connection) => connection.targetHandle === "input:productId",
+        ))
+    ) {
+      const ids = Array.isArray(input.productId)
+        ? input.productId
+        : [input.productId];
+      input.products = ids.map((productId) => ({
+        productId,
+        quantity: input.quantity,
+      }));
+      delete input.productId;
+      delete input.quantity;
+      for (const connection of metadata?.connections ?? []) {
+        connection.targetHandle = connection.targetHandle.replace(
+          /^input:productId:(\d+)$/,
+          "input:products:$1:productId",
+        );
+        if (connection.targetHandle === "input:productId")
+          connection.targetHandle = "input:products:0:productId";
+      }
+      if (metadata)
+        metadata.connections = metadata.connections.flatMap((connection) =>
+          connection.targetHandle === "input:quantity"
+            ? ids.map((_, index) => ({
+                ...connection,
+                targetHandle: `input:products:${index}:quantity`,
+              }))
+            : [connection],
+        );
+    }
     if (metadata)
       edges.push(
         ...metadata.connections.map((edge, i) => ({
@@ -173,6 +271,62 @@ export function serializeGraph(
       )
         continue;
       const value = node.data.input[field.name];
+      if (field.type === "object[]" && Array.isArray(value)) {
+        if ((field.required && !value.length) || !field.fields)
+          throw new Error(`${node.data.step.name}: invalid ${field.label}.`);
+        for (const [index, item] of value.entries()) {
+          if (!item || typeof item !== "object" || Array.isArray(item))
+            throw new Error(`${node.data.step.name}: invalid ${field.label}.`);
+          for (const nested of field.fields) {
+            if (
+              edges.some(
+                (edge) =>
+                  edge.target === node.id &&
+                  edge.targetHandle ===
+                    `input:${field.name}:${index}:${nested.name}`,
+              )
+            )
+              continue;
+            const nestedValue = (item as Record<string, unknown>)[nested.name];
+            if (nestedValue === undefined || nestedValue === "") {
+              if (nested.required)
+                throw new Error(
+                  `${node.data.step.name}: ${nested.label} is required.`,
+                );
+              continue;
+            }
+            const type = nested.type === "select" ? "string" : nested.type;
+            if (
+              typeof nestedValue !== type ||
+              (type === "number" && !Number.isFinite(nestedValue)) ||
+              (nested.type === "select" &&
+                !nested.options?.includes(String(nestedValue)))
+            )
+              throw new Error(
+                `${node.data.step.name}: invalid ${nested.label}.`,
+              );
+          }
+        }
+        continue;
+      }
+      if (field.type === "string[]" && Array.isArray(value)) {
+        if (
+          (field.required && !value.length) ||
+          value.some(
+            (item, index) =>
+              !edges.some(
+                (edge) =>
+                  edge.target === node.id &&
+                  edge.targetHandle === `input:${field.name}:${index}`,
+              ) &&
+              (typeof item !== "string" ||
+                !item.trim() ||
+                (field.options !== undefined && !field.options.includes(item))),
+          )
+        )
+          throw new Error(`${node.data.step.name}: invalid ${field.label}.`);
+        continue;
+      }
       if (value === undefined || value === "") {
         if (field.required)
           throw new Error(
@@ -182,7 +336,11 @@ export function serializeGraph(
       }
       const type = field.type === "select" ? "string" : field.type;
       if (
-        typeof value !== type ||
+        (type === "string[]"
+          ? !Array.isArray(value) ||
+            value.length === 0 ||
+            value.some((item) => typeof item !== "string" || !item.trim())
+          : typeof value !== type) ||
         (type === "number" && !Number.isFinite(value))
       )
         throw new Error(`${node.data.step.name}: invalid ${field.label}.`);
@@ -211,8 +369,26 @@ export function serializeGraph(
   return ordered.map((node) => {
     const incoming = edges.filter((edge) => edge.target === node.id);
     const input = { ...node.data.input };
-    for (const edge of incoming)
-      delete input[edge.targetHandle!.slice("input:".length)];
+    for (const edge of incoming) {
+      const handle = edge.targetHandle!.slice("input:".length);
+      const objectMatch = /^([^:]+):(0|[1-9]\d*):([^:]+)$/.exec(handle);
+      if (objectMatch && Array.isArray(input[objectMatch[1]])) {
+        const values = [
+          ...(input[objectMatch[1]] as Record<string, unknown>[]),
+        ];
+        const item = { ...values[Number(objectMatch[2])] };
+        delete item[objectMatch[3]];
+        values[Number(objectMatch[2])] = item;
+        input[objectMatch[1]] = values;
+        continue;
+      }
+      const match = /^(.*):(0|[1-9]\d*)$/.exec(handle);
+      if (match && Array.isArray(input[match[1]])) {
+        const values = [...(input[match[1]] as unknown[])];
+        values[Number(match[2])] = "";
+        input[match[1]] = values;
+      } else delete input[handle];
+    }
     for (const key of Object.keys(input))
       if (input[key] === "" || input[key] === undefined) delete input[key];
     return {
