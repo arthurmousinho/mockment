@@ -3,8 +3,10 @@ import {
   Position,
   useNodeConnections,
   useReactFlow,
+  useUpdateNodeInternals,
   type NodeProps,
 } from "@xyflow/react";
+import { useEffect } from "react";
 import { TrashIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,9 +23,15 @@ import type { StepFlowNode } from "@/lib/simulation-editor";
 import { cn } from "@/lib/utils";
 
 export function StepNode({ id, data, selected }: NodeProps<StepFlowNode>) {
-  const { updateNodeData, deleteElements } = useReactFlow<StepFlowNode>();
+  const { updateNodeData, deleteElements, setEdges } =
+    useReactFlow<StepFlowNode>();
+  const updateNodeInternals = useUpdateNodeInternals();
   const connections = useNodeConnections({ handleType: "target" });
   const step = data.step;
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, data.input, updateNodeInternals]);
 
   function changeInput(name: string, value: unknown) {
     updateNodeData(id, (node) => ({
@@ -68,14 +76,16 @@ export function StepNode({ id, data, selected }: NodeProps<StepFlowNode>) {
           const fieldId = `${id}-${field.name}`;
           return (
             <div key={field.name} className="relative space-y-1.5 px-4 py-2">
-              <Handle
-                type="target"
-                position={Position.Left}
-                id={`input:${field.name}`}
-                isConnectable={!connected}
-                aria-label={`${field.label} input (${field.type})`}
-                className="!size-3 !border-background !bg-primary"
-              />
+              {field.type !== "string[]" && field.type !== "object[]" && (
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id={`input:${field.name}`}
+                  isConnectable={!connected}
+                  aria-label={`${field.label} input (${field.type})`}
+                  className="!size-3 !border-background !bg-primary"
+                />
+              )}
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor={fieldId} className="text-xs">
                   {field.label}
@@ -86,7 +96,323 @@ export function StepNode({ id, data, selected }: NodeProps<StepFlowNode>) {
                 </span>
               </div>
               <div className="nodrag nowheel">
-                {field.type === "select" ? (
+                {field.type === "object[]" ? (
+                  <div className="space-y-3">
+                    {(Array.isArray(value) ? value : []).map((item, index) => (
+                      <div key={index} className="space-y-2 border p-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span>
+                            {field.label} {index + 1}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Remove ${field.label} ${index + 1}`}
+                            onClick={() => {
+                              setEdges((edges) =>
+                                edges.flatMap((edge) => {
+                                  const prefix = `input:${field.name}:`;
+                                  if (
+                                    edge.target !== id ||
+                                    !edge.targetHandle?.startsWith(prefix)
+                                  )
+                                    return [edge];
+                                  const match = /^(\d+):(.+)$/.exec(
+                                    edge.targetHandle.slice(prefix.length),
+                                  );
+                                  if (!match) return [edge];
+                                  const edgeIndex = Number(match[1]);
+                                  if (edgeIndex === index) return [];
+                                  return [
+                                    {
+                                      ...edge,
+                                      targetHandle:
+                                        edgeIndex > index
+                                          ? `${prefix}${edgeIndex - 1}:${match[2]}`
+                                          : edge.targetHandle,
+                                    },
+                                  ];
+                                }),
+                              );
+                              changeInput(
+                                field.name,
+                                (value as unknown[]).filter(
+                                  (_, i) => i !== index,
+                                ),
+                              );
+                            }}
+                          >
+                            <TrashIcon />
+                          </Button>
+                        </div>
+                        {field.fields?.map((nested) => {
+                          const handleId = `input:${field.name}:${index}:${nested.name}`;
+                          const itemConnected = connections.some(
+                            (connection) =>
+                              connection.targetHandle === handleId,
+                          );
+                          const connectable = !(
+                            data.stepId === "checkout.createProducts" &&
+                            field.name === "products" &&
+                            nested.name === "quantity"
+                          );
+                          const nestedValue =
+                            item && typeof item === "object"
+                              ? (item as Record<string, unknown>)[nested.name]
+                              : undefined;
+                          const update = (nextValue: unknown) => {
+                            const next = [
+                              ...(value as Record<string, unknown>[]),
+                            ];
+                            next[index] = {
+                              ...next[index],
+                              [nested.name]: nextValue,
+                            };
+                            changeInput(field.name, next);
+                          };
+                          return (
+                            <div
+                              key={nested.name}
+                              className="relative space-y-1"
+                            >
+                              {(connectable || itemConnected) && (
+                                <Handle
+                                  type="target"
+                                  position={Position.Left}
+                                  id={handleId}
+                                  isConnectable={connectable && !itemConnected}
+                                  aria-label={`${nested.label} ${index + 1} input (${nested.type})`}
+                                  className="!left-[-24px] !size-3 !border-background !bg-primary"
+                                />
+                              )}
+                              <Label
+                                htmlFor={`${fieldId}-${index}-${nested.name}`}
+                                className="text-xs"
+                              >
+                                {nested.label}
+                                {nested.required && " *"}
+                              </Label>
+                              {nested.type === "boolean" ? (
+                                <Checkbox
+                                  id={`${fieldId}-${index}-${nested.name}`}
+                                  checked={nestedValue === true}
+                                  disabled={itemConnected}
+                                  onCheckedChange={(checked) =>
+                                    update(checked === true)
+                                  }
+                                />
+                              ) : nested.type === "select" ? (
+                                <Select
+                                  value={
+                                    typeof nestedValue === "string" &&
+                                    nestedValue
+                                      ? nestedValue
+                                      : "__unset"
+                                  }
+                                  disabled={itemConnected}
+                                  onValueChange={(next) =>
+                                    update(
+                                      next === "__unset" ? undefined : next,
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger
+                                    id={`${fieldId}-${index}-${nested.name}`}
+                                  >
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="__unset">
+                                      Select an option
+                                    </SelectItem>
+                                    {nested.options?.map((option) => (
+                                      <SelectItem key={option} value={option}>
+                                        {option}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Input
+                                  id={`${fieldId}-${index}-${nested.name}`}
+                                  type={
+                                    nested.type === "number" ? "number" : "text"
+                                  }
+                                  value={
+                                    typeof nestedValue === "string" ||
+                                    typeof nestedValue === "number"
+                                      ? nestedValue
+                                      : ""
+                                  }
+                                  disabled={itemConnected}
+                                  placeholder={
+                                    itemConnected
+                                      ? "From connected output"
+                                      : nested.label
+                                  }
+                                  onChange={(event) =>
+                                    update(
+                                      nested.type === "number"
+                                        ? event.target.value === ""
+                                          ? undefined
+                                          : event.target.valueAsNumber
+                                        : event.target.value,
+                                    )
+                                  }
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        changeInput(field.name, [
+                          ...(Array.isArray(value) ? value : []),
+                          {},
+                        ])
+                      }
+                    >
+                      Add {field.label}
+                    </Button>
+                  </div>
+                ) : field.type === "string[]" ? (
+                  <div className="space-y-2">
+                    {(Array.isArray(value) ? value : []).map((item, index) => {
+                      const handleId = `input:${field.name}:${index}`;
+                      const itemConnected = connections.some(
+                        (connection) => connection.targetHandle === handleId,
+                      );
+                      return (
+                        <div key={index} className="relative flex gap-2">
+                          <Handle
+                            type="target"
+                            position={Position.Left}
+                            id={handleId}
+                            isConnectable={!itemConnected}
+                            aria-label={`${field.label} ${index + 1} input (string)`}
+                            className="!left-[-16px] !size-3 !border-background !bg-primary"
+                          />
+                          {field.options ? (
+                            <Select
+                              value={
+                                typeof item === "string" && item
+                                  ? item
+                                  : "__unset"
+                              }
+                              disabled={itemConnected}
+                              onValueChange={(nextValue) => {
+                                const next = [...(value as string[])];
+                                next[index] =
+                                  nextValue === "__unset" ? "" : nextValue;
+                                changeInput(field.name, next);
+                              }}
+                            >
+                              <SelectTrigger
+                                aria-label={`${field.label} ${index + 1}`}
+                                className="w-full"
+                              >
+                                <SelectValue
+                                  placeholder={
+                                    itemConnected
+                                      ? "From connected output"
+                                      : "Select an option"
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__unset">
+                                  Select an option
+                                </SelectItem>
+                                {field.options.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              aria-label={`${field.label} ${index + 1}`}
+                              value={typeof item === "string" ? item : ""}
+                              disabled={itemConnected}
+                              placeholder={
+                                itemConnected
+                                  ? "From connected output"
+                                  : field.label
+                              }
+                              onChange={(event) => {
+                                const next = [...(value as string[])];
+                                next[index] = event.target.value;
+                                changeInput(field.name, next);
+                              }}
+                            />
+                          )}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-sm"
+                            aria-label={`Remove ${field.label} ${index + 1}`}
+                            onClick={() => {
+                              setEdges((edges) =>
+                                edges.flatMap((edge) => {
+                                  if (
+                                    edge.target !== id ||
+                                    !edge.targetHandle?.startsWith(
+                                      `input:${field.name}:`,
+                                    )
+                                  )
+                                    return [edge];
+                                  const edgeIndex = Number(
+                                    edge.targetHandle.slice(
+                                      `input:${field.name}:`.length,
+                                    ),
+                                  );
+                                  if (edgeIndex === index) return [];
+                                  return [
+                                    {
+                                      ...edge,
+                                      targetHandle:
+                                        edgeIndex > index
+                                          ? `input:${field.name}:${edgeIndex - 1}`
+                                          : edge.targetHandle,
+                                    },
+                                  ];
+                                }),
+                              );
+                              changeInput(
+                                field.name,
+                                (value as string[]).filter(
+                                  (_, i) => i !== index,
+                                ),
+                              );
+                            }}
+                          >
+                            <TrashIcon />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        changeInput(field.name, [
+                          ...(Array.isArray(value) ? value : []),
+                          "",
+                        ])
+                      }
+                    >
+                      Add {field.label}
+                    </Button>
+                  </div>
+                ) : field.type === "select" ? (
                   <Select
                     value={
                       typeof value === "string" && value ? value : "__unset"
