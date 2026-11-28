@@ -13,9 +13,27 @@ export const availableSimulationStepSchema = z.object({
     z.object({
       name: z.string(),
       label: z.string(),
-      type: z.enum(["string", "number", "boolean", "select"]),
+      type: z.enum([
+        "string",
+        "string[]",
+        "object[]",
+        "number",
+        "boolean",
+        "select",
+      ]),
       required: z.boolean(),
       options: z.array(z.string()).optional(),
+      fields: z
+        .array(
+          z.object({
+            name: z.string(),
+            label: z.string(),
+            type: z.enum(["string", "number", "boolean", "select"]),
+            required: z.boolean(),
+            options: z.array(z.string()).optional(),
+          }),
+        )
+        .optional(),
     }),
   ),
   output: z.array(

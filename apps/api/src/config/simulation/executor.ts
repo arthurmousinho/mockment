@@ -49,11 +49,15 @@ function resolveInput(
   definition: Step,
   context: ExecutionContext,
 ) {
-  const { __editor, ...input } = saved.input ?? {};
+  const { __editor, ...savedInput } = saved.input ?? {};
   const metadata =
     __editor === undefined ? undefined : metadataSchema.parse(__editor);
+  const { input, connections } = definition.migrateInput?.(
+    savedInput,
+    metadata?.connections ?? [],
+  ) ?? { input: savedInput, connections: metadata?.connections ?? [] };
 
-  for (const connection of metadata?.connections ?? []) {
+  for (const connection of connections) {
     if (connection.target !== metadata?.nodeId) {
       throw new Error("Invalid connection target.");
     }
@@ -63,6 +67,49 @@ function resolveInput(
       throw new Error(`Connected output ${name} is unavailable.`);
     }
     const field = connection.targetHandle.slice("input:".length);
+    const arrayHandle = /^([^:]+):(0|[1-9]\d*)$/.exec(field);
+    if (arrayHandle) {
+      const arrayField = arrayHandle[1]!;
+      const values = input[arrayField];
+      const index = Number(arrayHandle[2]);
+      if (
+        definition.input.find((candidate) => candidate.name === arrayField)
+          ?.type !== "string[]" ||
+        !Array.isArray(values) ||
+        index >= values.length
+      )
+        throw new Error(`Unknown input: ${field}`);
+      const updated = [...values];
+      updated[index] = output[name];
+      input[arrayField] = updated;
+      continue;
+    }
+    const objectHandle = /^([^:]+):(0|[1-9]\d*):([^:]+)$/.exec(field);
+    if (objectHandle) {
+      const arrayField = objectHandle[1]!;
+      const nestedField = objectHandle[3]!;
+      const definitionField = definition.input.find(
+        (candidate) => candidate.name === arrayField,
+      );
+      const values = input[arrayField];
+      const index = Number(objectHandle[2]);
+      const item = Array.isArray(values) ? values[index] : undefined;
+      if (
+        definitionField?.type !== "object[]" ||
+        !definitionField.fields?.some(
+          (candidate) => candidate.name === nestedField,
+        ) ||
+        !item ||
+        typeof item !== "object" ||
+        Array.isArray(item)
+      ) {
+        throw new Error(`Unknown input: ${field}`);
+      }
+      const updated = [...(values as unknown[])];
+      updated[index] = { ...item, [nestedField]: output[name] };
+      input[arrayField] = updated;
+      continue;
+    }
     if (!definition.input.some((candidate) => candidate.name === field)) {
       throw new Error(`Unknown input: ${field}`);
     }
@@ -73,24 +120,55 @@ function resolveInput(
 }
 
 function validateInput(input: StepInput, definition: Step) {
-  for (const field of definition.input) {
-    const value = input[field.name];
-    if (value === undefined || value === "") {
-      if (field.required) {
-        throw new Error(`Missing input: ${field.name}`);
+  function validateFields(input: StepInput, fields: Step["input"]) {
+    for (const field of fields) {
+      const value = input[field.name];
+      if (value === undefined || value === "") {
+        if (field.required) {
+          throw new Error(`Missing input: ${field.name}`);
+        }
+        continue;
       }
-      continue;
-    }
 
-    const expectedType = field.type === "select" ? "string" : field.type;
-    const invalidType = typeof value !== expectedType;
-    const invalidNumber = field.type === "number" && !Number.isFinite(value);
-    const invalidOption =
-      field.type === "select" && !field.options?.includes(value as string);
-    if (invalidType || invalidNumber || invalidOption) {
-      throw new Error(`Invalid input: ${field.name}`);
+      if (field.type === "object[]") {
+        if (
+          !Array.isArray(value) ||
+          (field.required && !value.length) ||
+          !field.fields
+        )
+          throw new Error(`Invalid input: ${field.name}`);
+        for (const item of value) {
+          if (!item || typeof item !== "object" || Array.isArray(item))
+            throw new Error(`Invalid input: ${field.name}`);
+          validateFields(item, field.fields);
+        }
+        continue;
+      }
+      if (field.type === "string[]") {
+        if (
+          !Array.isArray(value) ||
+          (field.required && !value.length) ||
+          value.some(
+            (item) =>
+              typeof item !== "string" ||
+              !item.trim() ||
+              (field.options && !field.options.includes(item)),
+          )
+        )
+          throw new Error(`Invalid input: ${field.name}`);
+        continue;
+      }
+      const expectedType = field.type === "select" ? "string" : field.type;
+      const invalidType = typeof value !== expectedType;
+      const invalidNumber = field.type === "number" && !Number.isFinite(value);
+      const invalidOption =
+        field.type === "select" && !field.options?.includes(value as string);
+      if (invalidType || invalidNumber || invalidOption) {
+        throw new Error(`Invalid input: ${field.name}`);
+      }
     }
   }
+  validateFields(input, definition.input);
 }
 
 function buildRequest(executor: StepHTTPExecutor, input: StepInput) {
@@ -114,7 +192,10 @@ async function ensureAuthorization(context: ExecutionContext, action: string) {
   const requiresKey =
     action === "payment.create" ||
     action === "subscription.create" ||
-    action === "invoice.create";
+    action === "invoice.create" ||
+    action === "checkout.createStandalone" ||
+    action === "checkout.createSubscription" ||
+    action === "checkout.createProducts";
   if (context.authorization || !requiresKey) {
     return;
   }
