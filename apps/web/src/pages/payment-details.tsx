@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
@@ -28,7 +29,7 @@ export function PaymentDetailsPage() {
     refetch,
   } = GetPaymentDetailsRequest(id);
 
-  if (isPending) return <div role="status">Loading...</div>;
+  if (isPending) return <DetailPageSkeleton label="payment details" />;
 
   if (error instanceof HTTPError && error.response.status === 404 && !payment) {
     return <Navigate to="/404" replace />;
