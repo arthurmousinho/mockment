@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -20,7 +21,7 @@ export function CustomerDetailsPage() {
     refetch,
   } = GetCustomerDetailsRequest(id);
 
-  if (isPending) return <div role="status">Loading...</div>;
+  if (isPending) return <DetailPageSkeleton label="customer details" sections={2} />;
 
   if (
     error instanceof HTTPError &&
