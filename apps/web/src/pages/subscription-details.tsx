@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { PaymentMethodBadge } from "@/components/payment-method-badge";
 import { SubscriptionIntervalBadge } from "@/components/subscription-interval-badge";
@@ -24,7 +25,7 @@ export function SubscriptionDetailsPage() {
     refetch,
   } = GetSubscriptionDetailsRequest(id);
 
-  if (isPending) return <div role="status">Loading...</div>;
+  if (isPending) return <DetailPageSkeleton label="subscription details" />;
 
   if (
     error instanceof HTTPError &&
