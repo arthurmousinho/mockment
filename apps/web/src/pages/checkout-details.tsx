@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
 import { CheckoutStatusBadge } from "@/components/checkout-status-badge";
 import { EventTypeBadge } from "@/components/event-type-badge";
 import { PaymentCurrencyBadge } from "@/components/payment-currency-badge";
@@ -37,7 +38,7 @@ export function CheckoutDetailsPage() {
     refetch,
   } = GetCheckoutDetailsRequest(id);
 
-  if (isPending) return <div role="status">Loading...</div>;
+  if (isPending) return <DetailPageSkeleton label="checkout details" />;
 
   if (
     error instanceof HTTPError &&
